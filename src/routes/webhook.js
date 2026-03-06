@@ -6,8 +6,8 @@ import log from '../utils/logger.js';
 
 const router = express.Router();
 
-// GET /webhook — Meta verification
-router.get('/webhook', (req, res) => {
+// GET / — Meta verification (mounted at /webhook in server.js)
+router.get('/', (req, res) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
@@ -21,8 +21,8 @@ router.get('/webhook', (req, res) => {
   }
 });
 
-// POST /webhook — receive WhatsApp messages
-router.post('/webhook', async (req, res) => {
+// POST / — receive WhatsApp messages (mounted at /webhook in server.js)
+router.post('/', async (req, res) => {
   // Respond to Meta immediately (< 5 seconds)
   res.sendStatus(200);
 
