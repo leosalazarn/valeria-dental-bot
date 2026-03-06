@@ -40,10 +40,9 @@ const log = {
     console.log(`🚫 Ignoring group message from ${phone}`);
   },
 
-  supplierResponse: (phone) => {
-    console.log(`🏢 Supplier response sent to ${phone}`);
+  supplierIgnored: (phone) => {
+    console.log(`⚠️ Supplier message ignored: ${phone}`);
   },
 };
 
 export default log;
-

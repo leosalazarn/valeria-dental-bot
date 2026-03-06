@@ -29,9 +29,7 @@ export async function processMessage(phone, text, chatType) {
 
     if (classification.action === 'SUPPLIER') {
       upsertPatient({ phone, status: 'SUPPLIER', source: classification.source, trigger_message: classification.trigger_message });
-      const supplierResponse = 'Gracias por contactarnos. Este canal es exclusivamente para pacientes. Para asuntos administrativos, por favor contacta al consultorio por email.';
-      await sendMessage(phone, supplierResponse);
-      log.supplierResponse(phone);
+      log.supplierIgnored(phone);
       return;
     }
 
@@ -40,7 +38,7 @@ export async function processMessage(phone, text, chatType) {
 
     // Handle conversion flow for new leads
     if (classification.action === 'WARM_LEAD' || classification.action === 'ORGANIC_LEAD') {
-      const conversionResponse = handleConversionFlow(phone, session, text);
+      const conversionResponse = handleConversionFlow(phone, session);
       if (conversionResponse) {
         addMessageToHistory(phone, 'assistant', conversionResponse);
         await sendMessage(phone, conversionResponse);
@@ -86,7 +84,7 @@ export async function processMessage(phone, text, chatType) {
 }
 
 // Conversion flow phases
-function handleConversionFlow(phone, session, userMessage) {
+function handleConversionFlow(phone, session) {
   const phase = session.phase || 'START';
 
   // Phase A: Data extraction
@@ -117,4 +115,3 @@ function handleConversionFlow(phone, session, userMessage) {
 
   return null; // Let AI handle
 }
-
