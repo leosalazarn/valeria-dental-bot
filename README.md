@@ -1,8 +1,10 @@
 # 🦷 Valeria — AI Advisor for Aesthetic Dentistry
 
-A production-ready WhatsApp Business AI chatbot that captures patient inquiries through Meta ads and qualifies leads for consultation scheduling.
+A production-ready WhatsApp Business AI chatbot that captures patient inquiries through Meta ads and qualifies leads for
+consultation scheduling.
 
 **Key Features:**
+
 - 24/7 AI-powered WhatsApp assistant
 - Lead capture from Meta Click-to-WhatsApp ads
 - Intelligent message classification pre-processing
@@ -22,23 +24,28 @@ A production-ready WhatsApp Business AI chatbot that captures patient inquiries 
 ## Core Features
 
 ### Lead Capture
+
 - Detects trigger messages from Meta Click-to-WhatsApp ads
 - Classifies messages before AI processing (suppliers, returning patients, warm leads)
 - Routes to appropriate conversation flow
 
 ### Intelligent Routing
+
 - **Warm Leads** (from ads): High-energy engagement flow
 - **Organic Leads**: Standard discovery flow
 - **Returning Patients**: Patient care flow
 - **Suppliers**: Administrative redirect
 
 ### Conversion Flow
+
 - **Phase A**: Extract patient information (name, aesthetic goals)
 - **Phase B**: Present consultation hook
 - **Phase C**: Re-engagement automation (30-minute follow-up)
 
 ### Intent Analysis
+
 Extracts intent from each interaction:
+
 - Schedule request
 - Information request
 - Price objection
@@ -77,6 +84,7 @@ valeria-dental-bot/
 ## Setup
 
 ### Prerequisites
+
 - Node.js 18+
 - Meta WhatsApp Business Account with API access
 - Anthropic API key
@@ -140,8 +148,8 @@ See `.env.example` for full template.
 2. Create new Web Service on Render.com
 3. Connect your repository
 4. Configure build & start commands:
-   - **Build**: `npm install`
-   - **Start**: `npm start`
+    - **Build**: `npm install`
+    - **Start**: `npm start`
 5. Add environment variables in Render dashboard
 6. Deploy — get production URL
 7. Configure webhook in Meta for Developers: `https://your-app.onrender.com/webhook`
@@ -150,13 +158,13 @@ See `.env.example` for full template.
 
 ## API Endpoints
 
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/` | Health check |
-| GET | `/webhook` | Meta verification |
-| POST | `/webhook` | Receive WhatsApp messages |
-| GET | `/leads` | List all leads (debug) |
-| GET | `/stats` | Summary statistics |
+| Method | Endpoint   | Purpose                   |
+|--------|------------|---------------------------|
+| GET    | `/`        | Health check              |
+| GET    | `/webhook` | Meta verification         |
+| POST   | `/webhook` | Receive WhatsApp messages |
+| GET    | `/leads`   | List all leads (debug)    |
+| GET    | `/stats`   | Summary statistics        |
 
 ---
 
@@ -166,13 +174,13 @@ The application is organized into **14 focused, independent modules** following 
 
 ### Module Organization
 
-| Layer | Modules | Responsibility |
-|-------|---------|-----------------|
-| **Core** | config, logger, time | Configuration, logging, utilities |
-| **Storage** | crm, session | Patient data, conversation state |
-| **Logic** | classifier, prompt, ai, intent | Message processing, AI integration |
-| **Flow** | flow | Conversation orchestration |
-| **API** | routes/webhook, routes/debug | HTTP handlers |
+| Layer       | Modules                        | Responsibility                     |
+|-------------|--------------------------------|------------------------------------|
+| **Core**    | config, logger, time           | Configuration, logging, utilities  |
+| **Storage** | crm, session                   | Patient data, conversation state   |
+| **Logic**   | classifier, prompt, ai, intent | Message processing, AI integration |
+| **Flow**    | flow                           | Conversation orchestration         |
+| **API**     | routes/webhook, routes/debug   | HTTP handlers                      |
 
 ### Design Principles
 
@@ -181,7 +189,7 @@ The application is organized into **14 focused, independent modules** following 
 ✅ **Resilient**: try/catch on all async operations  
 ✅ **Efficient**: Auto-cleanup of inactive sessions, sliding window history  
 ✅ **Extensible**: CRM interface ready for Supabase upgrade  
-✅ **Documented**: Clear function signatures and data contracts  
+✅ **Documented**: Clear function signatures and data contracts
 
 ---
 

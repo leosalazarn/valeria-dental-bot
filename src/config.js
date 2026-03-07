@@ -4,9 +4,9 @@ import 'dotenv/config';
 // ── Validate required env vars at startup
 const requiredEnvVars = ['ANTHROPIC_API_KEY', 'WA_ACCESS_TOKEN', 'WA_PHONE_NUMBER_ID', 'VERIFY_TOKEN'];
 for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    throw new Error(`❌ Missing required environment variable: ${envVar}`);
-  }
+    if (!process.env[envVar]) {
+        throw new Error(`❌ Missing required environment variable: ${envVar}`);
+    }
 }
 
 // ── API Configuration
@@ -28,22 +28,25 @@ export const REENGAGEMENT_DELAY_MINUTES = 30;
 
 // ── Trigger Messages (pre-filled from Meta ads)
 export const TRIGGERS = [
-  "Quiero mi valoración",
-  "Quiero mejorar mi sonrisa",
-  "Me interesa el blanqueamiento",
-  "Quiero información",
-  "Hola, vi tu anuncio",
-  "Vi el video",
-  "Quiero agendar",
-  "Información sobre tratamientos",
-  "Quiero saber más"
+    "Quiero mejorar mi sonrisa",
+    "Quiero información",
+    "Quiero más información",
+    "Me gustaría agendar",
+    "Hola, me recomendaron contigo",
+    "Quiero agendar",
+    "Quiero agendar una cita",
+    "Estoy interesado en una consulta",
+    "Precio?",
+    "Precio de un diseño de sonrisa?",
+    "Que costo tiene?",
+    "Que precio tiene?"
 ];
 
 // ── Supplier Detection Keywords
 export const SUPPLIER_KEYWORDS = [
-  'invoice', 'supplies', 'order', 'dental deposit', 'payment request',
-  'supplier quote', 'shipping', 'purchase order', 'tax id',
-  'factura', 'insumos', 'pedido', 'cuenta de cobro', 'cotización'
+    'invoice', 'supplies', 'order', 'dental deposit', 'payment request',
+    'supplier quote', 'shipping', 'purchase order', 'tax id',
+    'factura', 'insumos', 'pedido', 'cuenta de cobro', 'cotización'
 ];
 
 // ── Timezone
