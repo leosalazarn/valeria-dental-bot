@@ -56,5 +56,6 @@ export const COLOMBIA_TIMEZONE = 'America/Bogota';
 export const PRACTICE_NAME = 'Dra. Yuri Quintero — Odontología Estética';
 export const PRACTICE_LOCATION = 'Neiva, Huila, Colombia';
 export const CONSULTATION_PRICE = 80000;
-export const CONSULTATION_CURRENCY = 'COP';
+export const BOOK_PRICE = 30000;
+export const CONSULTATION_CURRENCY = 'Pesos';
 

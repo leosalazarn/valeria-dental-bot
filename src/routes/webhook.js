@@ -8,7 +8,7 @@ const router = express.Router();
 
 // ── Message debounce buffer (30 seconds per phone number) ────
 const messageBuffers = new Map();
-const DEBOUNCE_MS = 30000;
+const DEBOUNCE_MS = 10000;
 
 function debounceMessage(phone, text, chatType) {
     // If timer exists, cancel it and append message
