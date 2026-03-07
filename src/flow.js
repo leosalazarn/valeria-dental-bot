@@ -9,6 +9,14 @@ import { extractIntent } from './intent.js';
 import { REENGAGEMENT_DELAY_MINUTES } from './config.js';
 import log from './utils/logger.js';
 
+const POSITIVE_RESPONSES = [
+  'listo', 'sí', 'si', 'me convenciste', 'quiero agendar',
+  'dale', 'claro', 'ok', 'okay', 'perfecto', 'bueno',
+  'me interesa', 'quiero', 'vamos', 'agendemos', 'agendar',
+  'de acuerdo', 'está bien', 'acepto', 'me animo', 'cuándo',
+  'cuando', 'cómo agendo', 'como agendo'
+];
+
 export async function processMessage(phone, text, chatType) {
   try {
     // Get or initialize session
@@ -36,9 +44,9 @@ export async function processMessage(phone, text, chatType) {
     // Set session source from classification
     updateSession(phone, { source: classification.source });
 
-    // Handle conversion flow for new leads
+    // Handle conversion flow for new leads — pass text for intent detection
     if (classification.action === 'WARM_LEAD' || classification.action === 'ORGANIC_LEAD') {
-      const conversionResponse = handleConversionFlow(phone, session);
+      const conversionResponse = handleConversionFlow(phone, session, text);
       if (conversionResponse) {
         addMessageToHistory(phone, 'assistant', conversionResponse);
         await sendMessage(phone, conversionResponse);
@@ -88,46 +96,50 @@ export async function processMessage(phone, text, chatType) {
 }
 
 // Conversion flow phases
-function handleConversionFlow(phone, session) {
+function handleConversionFlow(phone, session, text = '') {
   const phase = session.phase || 'START';
+  const textLower = text.toLowerCase();
+  const isPositive = POSITIVE_RESPONSES.some(word => textLower.includes(word));
 
-  // Phase A: Data extraction
+  // Phase A: Data extraction — AI handles naturally until name + goal are known
   if (!session.name || !session.aesthetic_goal) {
     updateSession(phone, { phase: 'EXTRACTION' });
-    return null; // Let AI handle natural extraction
+    return null;
   }
 
-  // Phase B: Hook delivery
-  if (phase === 'EXTRACTION' && session.name && session.aesthetic_goal) {
+  // Phase B: Hook delivery — fires once when name + goal are available
+  if (phase === 'EXTRACTION') {
     updateSession(phone, { phase: 'HOOK' });
 
     // Start reengagement timer
     setReengagementTimer(phone, () => {
-      const reengagementMessage = `He estado pensando en tu caso, ${session.name} 😊 ¿Te gustaría ver fotos de resultados similares al tuyo antes de agendar? Muchos pacientes se deciden una vez que ven los antes y después.`;
+      const reengagementMessage = `Me quedé pensando en su caso, ${session.name} 😊 ¿Le gustaría ver fotos de resultados similares antes de agendar? Muchos pacientes se deciden cuando ven el antes y después.`;
       sendMessage(phone, reengagementMessage);
       log.reengagement(phone);
     }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
 
-    return `Entiendo, ${session.name}. Muchos de nuestros pacientes estaban buscando exactamente eso y lo lograron con nuestro protocolo. Para asegurarme de que seas la candidata ideal, la Dra. Yuri necesita verte para una consulta de 15 minutos — y lo mejor es que los $80.000 se acreditan completamente a tu tratamiento.
-¿Te gustaría agendar esta semana?`;
+    return `Entiendo, ${session.name}. Muchos de nuestros pacientes buscaban exactamente eso y lo lograron. Para asegurar que usted es el candidato ideal, la Dra. Yuri necesita verle en una valoración de 15 minutos — y lo mejor es que esos $80.000 se abonan completamente a su tratamiento.
+¿Le gustaría agendar esta semana?`;
   }
 
-  // Phase C: Data capture
-  if (phase === 'HOOK') {
+  // Phase C: Data capture — only triggers when patient responds positively to the hook
+  if (phase === 'HOOK' && isPositive) {
     updateSession(phone, { phase: 'DATA_CAPTURE' });
+    clearReengagementTimer(phone);
     return `¡Perfecto! Para apartar su cita con la Dra. Yuri necesito estos datos:
 
-- Nombre completo
-- Correo electrónico  
-- Motivo de la consulta
+• Nombre completo
+• Correo electrónico
+• Motivo de la consulta
 
 ¿Me los regala? 😊`;
   }
 
-  // Phase D: Closing
+  // Phase D: Closing — AI handles confirmation and scheduling preference
   if (phase === 'DATA_CAPTURE') {
     updateSession(phone, { phase: 'CLOSING' });
+    return null;
   }
 
-  return null; // Let AI handle
+  return null; // Let AI handle all other cases
 }

@@ -20,7 +20,7 @@ export function buildSystemPrompt(session) {
 ## CONTEXTO DE LEAD CALIENTE
 Esta persona acaba de hacer clic en un anuncio de Meta y envió un mensaje pre-llenado.
 Es un lead caliente con alta intención. Abre con energía y entusiasmo.
-Asegúrate de reconocer que vio el contenido y haz que se sienta que hacer clic fue la decisión correcta. Muévelo rápidamente hacia el hook de la consulta.`;
+Asegúrate de reconocer que vio el contenido y haz que se sienta que hacer clic fue la decisión correcta.`;
   } else {
     basePrompt += `
 
@@ -56,29 +56,44 @@ Siempre respondes: "Los precios los maneja directamente la Dra. Yuri en la valor
 - Ubicación: ${PRACTICE_LOCATION}
 - Horarios presenciales: lunes a viernes 8am–6pm, sábados 9am–1pm`;
 
-  // Add data capture instructions if in DATA_CAPTURE phase and not complete
+  // Phase-specific instructions
   if (session.phase === 'DATA_CAPTURE' && !session.data_complete) {
     basePrompt += `
 
-## CAPTURA DE DATOS
-El paciente acaba de recibir el mensaje solicitando nombre completo, correo electrónico y motivo de la consulta.
-- Si el paciente proporciona los datos, extrae y confirma: "Listo [nombre], la recepcionista de la Dra. Yuri le contactará pronto para confirmar el horario 😊"
-- Incluye al final de tu respuesta: EXTRACTED: full_name: [nombre extraído], email: [email extraído], consultation_reason: [motivo extraído]
-- No pidas datos adicionales ni confirmes por separado.
-- Motivo de la consulta puede reutilizar el objetivo estético ya capturado si el paciente lo confirma.`;
+## FASE ACTUAL: CAPTURA DE DATOS
+El paciente acaba de recibir el mensaje solicitando sus datos.
+Cuando el paciente responda con su información:
+- Extrae: nombre completo, correo electrónico y motivo de la consulta
+- NUNCA pidas número de teléfono — ya lo tenemos de WhatsApp
+- Una vez tengas los 3 datos, confirma con:
+  "Listo [nombre], tengo todo anotado. La recepcionista de la Dra. Yuri le contactará pronto para confirmar el horario 😊"
+- Al final de tu respuesta incluye en una línea separada:
+  EXTRACTED: full_name: [nombre], email: [email], consultation_reason: [motivo]
+- Si falta algún dato, pregunta solo por el que falta, en tono natural.`;
   }
 
-  // Add session context if available
+  if (session.phase === 'CLOSING') {
+    basePrompt += `
+
+## FASE ACTUAL: CIERRE
+Los datos del paciente ya están completos. Tu único objetivo ahora es:
+- Confirmar que la recepcionista se comunicará pronto
+- Preguntar preferencia de día u horario si aún no lo mencionó
+- Mantener el tono cálido y tranquilizador
+- NO pedir más datos personales
+- NO volver a mencionar precios ni el costo de la valoración
+- Mensaje sugerido si aún no has confirmado:
+  "Listo [nombre], la recepcionista de la Dra. Yuri le contactará pronto para confirmar el horario 😊 ¿Tiene alguna preferencia de día o franja horaria?"`;
+  }
+
+  // Add session context
   let contextPrompt = '';
-  if (session.name) {
-    contextPrompt += `\n\nEl nombre del paciente es: ${session.name}`;
-  }
-  if (session.aesthetic_goal) {
-    contextPrompt += `\n\nSu objetivo estético es: ${session.aesthetic_goal}`;
-  }
-  if (session.phase) {
-    contextPrompt += `\n\nFase actual: ${session.phase}`;
-  }
+  if (session.name) contextPrompt += `\n\nNombre del paciente: ${session.name}`;
+  if (session.aesthetic_goal) contextPrompt += `\nObjetivo estético: ${session.aesthetic_goal}`;
+  if (session.full_name) contextPrompt += `\nNombre completo capturado: ${session.full_name}`;
+  if (session.email) contextPrompt += `\nCorreo capturado: ${session.email}`;
+  if (session.consultation_reason) contextPrompt += `\nMotivo capturado: ${session.consultation_reason}`;
+  if (session.phase) contextPrompt += `\nFase actual: ${session.phase}`;
 
   return basePrompt + contextPrompt;
 }
