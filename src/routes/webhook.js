@@ -6,6 +6,30 @@ import log from '../utils/logger.js';
 
 const router = express.Router();
 
+// ── Message debounce buffer (30 seconds per phone number) ────
+const messageBuffers = new Map();
+const DEBOUNCE_MS = 30000;
+
+function debounceMessage(phone, text, chatType) {
+  // If timer exists, cancel it and append message
+  if (messageBuffers.has(phone)) {
+    const entry = messageBuffers.get(phone);
+    clearTimeout(entry.timer);
+    entry.messages.push(text);
+  } else {
+    messageBuffers.set(phone, { messages: [text], timer: null });
+  }
+
+  // Start new 30s timer
+  const entry = messageBuffers.get(phone);
+  entry.timer = setTimeout(async () => {
+    const combined = entry.messages.join('\n');
+    messageBuffers.delete(phone);
+    log.incoming(phone, `[${entry.messages.length} msg] ${combined}`);
+    await processMessage(phone, combined, chatType);
+  }, DEBOUNCE_MS);
+}
+
 // GET / — Meta verification (mounted at /webhook in server.js)
 router.get('/', (req, res) => {
   const mode = req.query['hub.mode'];
@@ -40,7 +64,7 @@ router.post('/', async (req, res) => {
     if (mensaje.type !== 'text') {
       const numero = mensaje.from;
       const response = await import('../whatsapp.js');
-      await response.sendMessage(numero, 'Por el momento solo puedo responder mensajes de texto 😊 ¿En qué te puedo ayudar?');
+      await response.sendMessage(numero, 'Por el momento solo respondo mensajes de texto 😊 ¿En qué le puedo ayudar?');
       return;
     }
 
@@ -48,8 +72,8 @@ router.post('/', async (req, res) => {
     const texto = mensaje.text.body.trim();
     const chatType = value.contacts?.[0]?.profile?.name ? 'individual' : 'group';
 
-    // Process message asynchronously
-    processMessage(numeroWA, texto, chatType);
+    // Debounce — wait 30s to group consecutive messages
+    debounceMessage(numeroWA, texto, chatType);
 
   } catch (error) {
     log.error('POST /webhook', error);
@@ -57,4 +81,3 @@ router.post('/', async (req, res) => {
 });
 
 export default router;
-

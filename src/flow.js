@@ -1,4 +1,4 @@
-// Conversion flow module — orchestrates message processing pipeline
+// Conversion flow module — orchestrates message processing pipeline (shorter messages)
 import { getSession, addMessageToHistory, updateSession, setReengagementTimer, clearReengagementTimer } from './session.js';
 import { upsertPatient } from './crm.js';
 import { buildSystemPrompt, buildCurrentPatientPrompt } from './prompt.js';
@@ -113,26 +113,22 @@ function handleConversionFlow(phone, session, text = '') {
 
     // Start reengagement timer
     setReengagementTimer(phone, () => {
-      const reengagementMessage = `Me quedé pensando en su caso, ${session.name} 😊 ¿Le gustaría ver fotos de resultados similares antes de agendar? Muchos pacientes se deciden cuando ven el antes y después.`;
-      sendMessage(phone, reengagementMessage);
+      sendMessage(phone, `${session.name}, ¿le gustaría ver resultados similares al suyo antes de agendar? 😊`);
       log.reengagement(phone);
     }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
 
-    return `Entiendo, ${session.name}. Muchos de nuestros pacientes buscaban exactamente eso y lo lograron. Para asegurar que usted es el candidato ideal, la Dra. Yuri necesita verle en una valoración de 15 minutos — y lo mejor es que esos $80.000 se abonan completamente a su tratamiento.
-¿Le gustaría agendar esta semana?`;
+    return `Entiendo, ${session.name} 😊 La Dra. Yuri puede ayudarle con eso.
+¿Le gustaría una valoración de 30 min? Los $80.000 se abonan al tratamiento.`;
   }
 
   // Phase C: Data capture — only triggers when patient responds positively to the hook
   if (phase === 'HOOK' && isPositive) {
     updateSession(phone, { phase: 'DATA_CAPTURE' });
     clearReengagementTimer(phone);
-    return `¡Perfecto! Para apartar su cita con la Dra. Yuri necesito estos datos:
-
+    return `¡Perfecto! Para apartar su cita necesito:
 • Nombre completo
 • Correo electrónico
-• Motivo de la consulta
-
-¿Me los regala? 😊`;
+• Motivo de consulta`;
   }
 
   // Phase D: Closing — AI handles confirmation and scheduling preference
