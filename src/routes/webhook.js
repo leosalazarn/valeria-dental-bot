@@ -25,7 +25,6 @@ function debounceMessage(phone, text, chatType) {
   entry.timer = setTimeout(async () => {
     const combined = entry.messages.join('\n');
     messageBuffers.delete(phone);
-    log.incoming(phone, `[${entry.messages.length} msg] ${combined}`);
     await processMessage(phone, combined, chatType);
   }, DEBOUNCE_MS);
 }
