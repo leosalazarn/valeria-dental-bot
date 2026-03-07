@@ -32,7 +32,18 @@ export function upsertPatient(data) {
       last_interaction: now,
       notes: data.notes || '',
       last_intent: data.last_intent || 'OTHER',
+      full_name: data.full_name || null,
+      email: data.email || null,
+      consultation_reason: data.consultation_reason || null,
+      data_complete: data.data_complete || false,
     });
+  }
+
+  // Set status to CONSULTATION_SCHEDULED when data is complete
+  const patient = patients.get(data.phone);
+  if (patient.data_complete) {
+    patient.status = 'CONSULTATION_SCHEDULED';
+    // TODO: POST to DentalLink API when integration is ready
   }
 }
 
@@ -61,4 +72,3 @@ export function getStats() {
 
   return { total_leads: totalLeads, by_source: bySource, by_status: byStatus, by_intent: byIntent };
 }
-

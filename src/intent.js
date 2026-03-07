@@ -32,6 +32,19 @@ export function extractIntent(phone, response, session, classification = {}) {
     intent.intent = 'REQUEST_INFO';
   }
 
+  // Extract data if in DATA_CAPTURE phase
+  if (session.phase === 'DATA_CAPTURE') {
+    const extractedMatch = response.match(/EXTRACTED:\s*full_name:\s*([^,]+),\s*email:\s*([^,]+),\s*consultation_reason:\s*(.+)/);
+    if (extractedMatch) {
+      intent.full_name = extractedMatch[1].trim();
+      intent.email = extractedMatch[2].trim();
+      intent.consultation_reason = extractedMatch[3].trim();
+      if (intent.full_name && intent.email && intent.consultation_reason) {
+        intent.data_complete = true;
+      }
+    }
+  }
+
   log.lead(intent);
 
   // Update patient in CRM
@@ -44,8 +57,11 @@ export function extractIntent(phone, response, session, classification = {}) {
     trigger_message: intent.trigger_message,
     last_intent: intent.intent,
     notes: `Intent: ${intent.intent} | Phase: ${intent.phase}`,
+    full_name: intent.full_name,
+    email: intent.email,
+    consultation_reason: intent.consultation_reason,
+    data_complete: intent.data_complete,
   });
 
   return intent;
 }
-

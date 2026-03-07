@@ -29,6 +29,10 @@ export function getSession(phone) {
       source: 'ORGANIC',
       reengagement_timer: null,
       last_interaction: new Date().toISOString(),
+      full_name: null,
+      email: null,
+      consultation_reason: null,
+      data_complete: false,
     });
   }
   const session = sessions.get(phone);
@@ -67,9 +71,3 @@ export function setReengagementTimer(phone, callback, delayMs) {
     session.reengagement_timer = setTimeout(callback, delayMs);
   }
 }
-
-export function getSessionHistory(phone) {
-  const session = sessions.get(phone);
-  return session ? session.history : [];
-}
-

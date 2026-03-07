@@ -68,6 +68,10 @@ export async function processMessage(phone, text, chatType) {
     updateSession(phone, {
       name: intent.name || session.name,
       aesthetic_goal: intent.aesthetic_goal || session.aesthetic_goal,
+      full_name: intent.full_name || session.full_name,
+      email: intent.email || session.email,
+      consultation_reason: intent.consultation_reason || session.consultation_reason,
+      data_complete: intent.data_complete || session.data_complete,
     });
 
     // Cancel reengagement timer if user responded
@@ -108,8 +112,20 @@ function handleConversionFlow(phone, session) {
 ¿Te gustaría agendar esta semana?`;
   }
 
-  // Phase C: Closing
+  // Phase C: Data capture
   if (phase === 'HOOK') {
+    updateSession(phone, { phase: 'DATA_CAPTURE' });
+    return `¡Perfecto! Para apartar su cita con la Dra. Yuri necesito estos datos:
+
+- Nombre completo
+- Correo electrónico  
+- Motivo de la consulta
+
+¿Me los regala? 😊`;
+  }
+
+  // Phase D: Closing
+  if (phase === 'DATA_CAPTURE') {
     updateSession(phone, { phase: 'CLOSING' });
   }
 

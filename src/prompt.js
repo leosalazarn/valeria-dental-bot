@@ -56,6 +56,18 @@ Siempre respondes: "Los precios los maneja directamente la Dra. Yuri en la valor
 - Ubicación: ${PRACTICE_LOCATION}
 - Horarios presenciales: lunes a viernes 8am–6pm, sábados 9am–1pm`;
 
+  // Add data capture instructions if in DATA_CAPTURE phase and not complete
+  if (session.phase === 'DATA_CAPTURE' && !session.data_complete) {
+    basePrompt += `
+
+## CAPTURA DE DATOS
+El paciente acaba de recibir el mensaje solicitando nombre completo, correo electrónico y motivo de la consulta.
+- Si el paciente proporciona los datos, extrae y confirma: "Listo [nombre], la recepcionista de la Dra. Yuri le contactará pronto para confirmar el horario 😊"
+- Incluye al final de tu respuesta: EXTRACTED: full_name: [nombre extraído], email: [email extraído], consultation_reason: [motivo extraído]
+- No pidas datos adicionales ni confirmes por separado.
+- Motivo de la consulta puede reutilizar el objetivo estético ya capturado si el paciente lo confirma.`;
+  }
+
   // Add session context if available
   let contextPrompt = '';
   if (session.name) {
@@ -87,4 +99,3 @@ Estás respondiendo a un paciente que actualmente está en tratamiento.
 - Si tienen complicaciones: urge contactar al consultorio inmediatamente
 - Mantén respuestas cortas y útiles`;
 }
-
