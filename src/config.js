@@ -17,7 +17,7 @@ export const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 export const PORT = process.env.PORT || 3000;
 
 // ── Claude Configuration
-export const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
+export const CLAUDE_MODEL = 'claude-sonnet-4-6';
 export const MAX_TOKENS = 450;
 
 // ── Session Configuration

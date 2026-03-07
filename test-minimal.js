@@ -3,10 +3,10 @@ import 'dotenv/config';
 
 const ai = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
+const CLAUDE_MODEL = 'claude-sonnet-4-6'; // Cheapest model for testing
 const MAX_TOKENS = 100; // Very short responses to save credits
 
-function buildSystemPrompt(session = {}) {
+function buildSystemPrompt() {
   return `Eres Valeria, asesora de la Dra. Yuri Quintero. Responde brevemente en español colombiano. Nunca des precios.`;
 }
 
