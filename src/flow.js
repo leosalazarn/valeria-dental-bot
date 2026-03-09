@@ -12,7 +12,7 @@ import {classifyMessage} from './classifier.js';
 import {callValeria} from './ai.js';
 import {sendMessage} from './whatsapp.js';
 import {extractIntent} from './intent.js';
-import {REENGAGEMENT_DELAY_MINUTES} from './config.js';
+import {REENGAGEMENT_DELAY_MINUTES, CONSULTATION_PRICE, CONSULTATION_DURATION_MINUTES} from './config.js';
 import log from './utils/logger.js';
 
 const POSITIVE_RESPONSES = [
@@ -137,7 +137,7 @@ function handleConversionFlow(phone, session, text = '') {
         }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
 
         return `¡Qué bueno, ${session.name}! La Dra. Yuri te puede ayudar con eso 😊
-¿Te gustaría una valoración de 30 min? Los $80.000 se abonan al tratamiento.`;
+¿Te gustaría una valoración de ${CONSULTATION_DURATION_MINUTES} min? Los $${CONSULTATION_PRICE.toLocaleString('es-CO')} se abonan al tratamiento.`;
     }
 
     // Phase C: Data capture — only triggers when patient responds positively to the hook
