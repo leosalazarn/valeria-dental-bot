@@ -18,6 +18,14 @@ export function extractIntent(phone, response, session, classification = {}) {
 
     const lowerResponse = response.toLowerCase();
 
+    // Extract name dynamically if AI signaled it
+    const nameMatch = response.match(/NAME:\s*([^\n]+)/);
+    if (nameMatch) intent.name = nameMatch[1].trim();
+
+    // Extract aesthetic_goal dynamically if AI signaled it
+    const goalMatch = response.match(/GOAL:\s*([^\n]+)/);
+    if (goalMatch) intent.aesthetic_goal = goalMatch[1].trim();
+
     // Detect intent from response
     if (lowerResponse.includes('agendar') || lowerResponse.includes('semana') || lowerResponse.includes('disponibilidad')) {
         intent.intent = 'SCHEDULE';
@@ -50,9 +58,9 @@ export function extractIntent(phone, response, session, classification = {}) {
     // Update patient in CRM
     upsertPatient({
         phone,
-        name: session.name,
+        name: intent.name || session.name,
         status: session.phase === 'CLOSING' ? 'CONSULTATION_SCHEDULED' : 'PROSPECT',
-        aesthetic_goal: session.aesthetic_goal,
+        aesthetic_goal: intent.aesthetic_goal || session.aesthetic_goal,
         source: intent.source,
         trigger_message: intent.trigger_message,
         last_intent: intent.intent,
