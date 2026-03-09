@@ -32,6 +32,7 @@ export const REENGAGEMENT_DELAY_MINUTES = 30;
 
 // ── Trigger Messages (pre-filled from Meta ads)
 export const TRIGGERS = [
+    "¡Hola! Quiero más información.",
     "Quiero mejorar mi sonrisa",
     "Quiero información",
     "Quiero más información",
@@ -63,7 +64,7 @@ export const CONSULTATION_PRICE = 80000;
 export const BOOK_PRICE = 30000;
 export const CONSULTATION_CURRENCY = 'Pesos';
 
-// ── Banking Info (sensitive — stored in env vars, never in code)
+// ── Banking Info
 export const BANK_HOLDER_NAME = process.env.BANK_HOLDER_NAME;
 export const BANK_HOLDER_CC = process.env.BANK_HOLDER_CC;
 export const BANCOLOMBIA_ACCOUNT = process.env.BANCOLOMBIA_ACCOUNT;
