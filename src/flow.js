@@ -23,6 +23,15 @@ const POSITIVE_RESPONSES = [
     'cuando', 'cómo agendo', 'como agendo'
 ];
 
+// Strip internal signals before sending to patient
+function stripSignals(text) {
+    return text
+        .replace(/\nNAME:.*$/gm, '')
+        .replace(/\nGOAL:.*$/gm, '')
+        .replace(/\nEXTRACTED:.*$/gm, '')
+        .trim();
+}
+
 export async function processMessage(phone, text, chatType) {
     try {
         // Get or initialize session
@@ -93,13 +102,12 @@ export async function processMessage(phone, text, chatType) {
             data_complete: intent.data_complete || session.data_complete,
         });
 
-        // Cancel reengagement timer if user responded
+        // Strip internal signals before sending to patient
+        const cleanResponse = stripSignals(aiResponse);
+
         clearReengagementTimer(phone);
-
-        log.outgoing(phone, aiResponse);
-
-        // Send response
-        await sendMessage(phone, aiResponse);
+        log.outgoing(phone, cleanResponse);
+        await sendMessage(phone, cleanResponse);
 
     } catch (error) {
         log.error('processMessage', error);
@@ -128,18 +136,19 @@ function handleConversionFlow(phone, session, text = '') {
             log.reengagement(phone);
         }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
 
-        return `Entiendo, ${session.name} 😊 La Dra. Yuri puede ayudarle con eso.
-¿Le gustaría una valoración de 15 min? Los $80.000 se abonan al tratamiento.`;
+        return `¡Qué bueno, ${session.name}! La Dra. Yuri te puede ayudar con eso 😊
+¿Te gustaría una valoración de 30 min? Los $80.000 se abonan al tratamiento.`;
     }
 
     // Phase C: Data capture — only triggers when patient responds positively to the hook
     if (phase === 'HOOK' && isPositive) {
         updateSession(phone, {phase: 'DATA_CAPTURE'});
         clearReengagementTimer(phone);
-        return `¡Perfecto! Para apartar su cita necesito:
+        const motivoPrefill = session.aesthetic_goal ? `\n(Motivo de consulta ya lo tenemos: ${session.aesthetic_goal} ✅ — solo confirma si es correcto)` : '\n• Motivo de consulta';
+        return `¡Perfecto! Solo necesito un par de datos para reservar tu cita con la Dra. Yuri 😊
+
 • Nombre completo
-• Correo electrónico
-• Motivo de consulta`;
+• Correo electrónico${motivoPrefill}`;
     }
 
     // Phase D: Payment — send payment info after data is captured

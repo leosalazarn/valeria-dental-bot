@@ -63,6 +63,7 @@ export const PRACTICE_LOCATION = 'Neiva, Huila, Colombia';
 export const CONSULTATION_PRICE = 80000;
 export const BOOK_PRICE = 30000;
 export const CONSULTATION_CURRENCY = 'Pesos';
+export const CONSULTATION_DURATION_MINUTES = 30;
 
 // ── Banking Info
 export const BANK_HOLDER_NAME = process.env.BANK_HOLDER_NAME;
