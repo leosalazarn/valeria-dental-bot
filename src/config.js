@@ -2,7 +2,11 @@
 import 'dotenv/config';
 
 // ── Validate required env vars at startup
-const requiredEnvVars = ['ANTHROPIC_API_KEY', 'WA_ACCESS_TOKEN', 'WA_PHONE_NUMBER_ID', 'VERIFY_TOKEN'];
+const requiredEnvVars = [
+    'ANTHROPIC_API_KEY', 'WA_ACCESS_TOKEN', 'WA_PHONE_NUMBER_ID', 'VERIFY_TOKEN',
+    'BANK_HOLDER_NAME', 'BANK_HOLDER_CC',
+    'BANCOLOMBIA_ACCOUNT', 'NEQUI_NUMBER', 'DAVIVIENDA_ACCOUNT'
+];
 for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
         throw new Error(`❌ Missing required environment variable: ${envVar}`);
@@ -59,3 +63,9 @@ export const CONSULTATION_PRICE = 80000;
 export const BOOK_PRICE = 30000;
 export const CONSULTATION_CURRENCY = 'Pesos';
 
+// ── Banking Info (sensitive — stored in env vars, never in code)
+export const BANK_HOLDER_NAME = process.env.BANK_HOLDER_NAME;
+export const BANK_HOLDER_CC = process.env.BANK_HOLDER_CC;
+export const BANCOLOMBIA_ACCOUNT = process.env.BANCOLOMBIA_ACCOUNT;
+export const NEQUI_NUMBER = process.env.NEQUI_NUMBER;
+export const DAVIVIENDA_ACCOUNT = process.env.DAVIVIENDA_ACCOUNT;

@@ -1,5 +1,6 @@
 // Prompt module — dynamic system prompt builder for Valeria
-import {PRACTICE_NAME, PRACTICE_LOCATION, CONSULTATION_PRICE, CONSULTATION_CURRENCY, BOOK_PRICE} from './config.js';
+import {PRACTICE_NAME, PRACTICE_LOCATION, CONSULTATION_PRICE, CONSULTATION_CURRENCY, BOOK_PRICE,
+    BANK_HOLDER_NAME, BANK_HOLDER_CC, BANCOLOMBIA_ACCOUNT, NEQUI_NUMBER, DAVIVIENDA_ACCOUNT} from './config.js';
 
 export function buildSystemPrompt(session) {
     let basePrompt = `Eres Valeria, asesora del consultorio de la ${PRACTICE_NAME}, especialista en odontología estética en ${PRACTICE_LOCATION}. Estás disponible 24/7.
@@ -101,21 +102,22 @@ Cuando el paciente responda con su información:
 ## FASE ACTUAL: PAGO
 Los datos del paciente están listos. Envía este mensaje exactamente así, sin cambiar nada:
 
-"🦷 ☀️te dejo el número de las cuentas , para que puedas realizar el abono de los $${BOOK_PRICE} ${CONSULTATION_CURRENCY}. Esto con el fin de agendar  y confirmar tu asistencia a la Consulta de valoración Presencial.
-Bancolombia
-Cta de Ahorros 
-Yuri maryeth Quintero lozano 
-N° 45700000566
-Cc 1032443600
-Nequi
-N° 3105049849
-Davivienda
-Cta de ahorros 
-Yuri maryeth Quintero lozano 
-N° 76100772169
-Cc 1032443600"
+"🦷☀️ Te dejo los datos para  que puedas realizar el abono de $${BOOK_PRICE} ${CONSULTATION_CURRENCY} y confirmar tu cita de valoración presencial:
 
-- Si pregunta por qué el abono: "Es para reservar su cupo — se descuenta de los $80.000 de la valoración"
+Bancolombia — Cta Ahorros
+${BANK_HOLDER_NAME}
+N° ${BANCOLOMBIA_ACCOUNT} · CC ${BANK_HOLDER_CC}
+
+Nequi
+N° ${NEQUI_NUMBER}
+
+Davivienda — Cta Ahorros
+${BANK_HOLDER_NAME}
+N° ${DAVIVIENDA_ACCOUNT} · CC ${BANK_HOLDER_CC}
+
+Cuando hagas el abono, envíame el comprobante aquí y confirmamos tu cita 🙌"
+
+- Si pregunta por qué el abono: "Es para reservar tu cupo — se descuenta de los $${CONSULTATION_PRICE} de la valoración"
 - Si dice que ya pagó: pídele el comprobante y confirma que el equipo lo revisará`;
     }
 
@@ -128,26 +130,24 @@ Los datos del paciente están completos. Ahora debes informar sobre el abono:
 - Esos $${BOOK_PRICE} ${CONSULTATION_CURRENCY} se descuentan del costo total de la valoración ($${CONSULTATION_PRICE} ${CONSULTATION_CURRENCY})
 - Comparte los datos bancarios exactamente así, sin modificar nada:
 
-"Para confirmar su cita, necesita abonar $${BOOK_PRICE} ${CONSULTATION_CURRENCY} a alguna de estas cuentas 😊
+"Para confirmar tu cita, haz un abono de $${BOOK_PRICE} a alguna de estas cuentas 😊
 
-*Bancolombia*
-Cta Ahorros: 45700000566
-Yuri Maryeth Quintero Lozano
-CC: 1032443600
+Bancolombia — Cta Ahorros
+${BANK_HOLDER_NAME}
+N° ${BANCOLOMBIA_ACCOUNT} · CC ${BANK_HOLDER_CC}
 
-*Nequi*
-3105049849
+Nequi
+N° ${NEQUI_NUMBER}
 
-*Davivienda*
-Cta Ahorros: 76100772169
-Yuri Maryeth Quintero Lozano
-CC: 1032443600
+Davivienda — Cta Ahorros
+${BANK_HOLDER_NAME}
+N° ${DAVIVIENDA_ACCOUNT} · CC ${BANK_HOLDER_CC}
 
-Cuando realice el abono, envíenos el comprobante aquí y le confirmamos la cita 🙌"
+Cuando hagas el abono, envíame el comprobante y confirmamos 🙌"
 
 - NO pedir más datos personales
 - NO volver a mencionar precios del tratamiento
-- Si preguntan por qué el abono: "Es para reservar su cupo y confirmar su asistencia — se descuenta de la valoración"`;
+- Si preguntan por qué el abono: "Es para reservar tu cupo — se descuenta de la valoración"`;
     }
 
     // Add session context
