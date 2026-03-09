@@ -1,6 +1,8 @@
 // Prompt module — dynamic system prompt builder for Valeria
-import {PRACTICE_NAME, PRACTICE_LOCATION, CONSULTATION_PRICE, CONSULTATION_CURRENCY, BOOK_PRICE,
-    BANK_HOLDER_NAME, BANK_HOLDER_CC, BANCOLOMBIA_ACCOUNT, NEQUI_NUMBER, DAVIVIENDA_ACCOUNT} from './config.js';
+import {
+    PRACTICE_NAME, PRACTICE_LOCATION, CONSULTATION_PRICE, CONSULTATION_CURRENCY, BOOK_PRICE,
+    BANK_HOLDER_NAME, BANK_HOLDER_CC, BANCOLOMBIA_ACCOUNT, NEQUI_NUMBER, DAVIVIENDA_ACCOUNT
+} from './config.js';
 
 export function buildSystemPrompt(session) {
     let basePrompt = `Eres Valeria, asesora del consultorio de la ${PRACTICE_NAME}, especialista en odontología estética en ${PRACTICE_LOCATION}. Estás disponible 24/7.
