@@ -1,6 +1,6 @@
 // Webhook routes — Meta webhook verification and message receiving
 import express from 'express';
-import {VERIFY_TOKEN} from '../config.js';
+import {VERIFY_TOKEN, MSG_NON_TEXT} from '../config.js';
 import {processMessage} from '../flow.js';
 import log from '../utils/logger.js';
 
@@ -63,7 +63,7 @@ router.post('/', async (req, res) => {
         if (mensaje.type !== 'text') {
             const numero = mensaje.from;
             const response = await import('../whatsapp.js');
-            await response.sendMessage(numero, 'Por ahora solo puedo leer mensajes de texto 😊 ¿Me escribes lo que necesitas?');
+            await response.sendMessage(numero, MSG_NON_TEXT);
             return;
         }
 

@@ -71,3 +71,20 @@ export const BANK_HOLDER_CC = process.env.BANK_HOLDER_CC;
 export const BANCOLOMBIA_ACCOUNT = process.env.BANCOLOMBIA_ACCOUNT;
 export const NEQUI_NUMBER = process.env.NEQUI_NUMBER;
 export const DAVIVIENDA_ACCOUNT = process.env.DAVIVIENDA_ACCOUNT;
+
+// ── Hardcoded Messages (all user-facing text centralized here)
+export const MSG_NON_TEXT = 'Por ahora solo puedo leer mensajes de texto 😊 ¿Me escribes lo que necesitas?';
+
+export const MSG_REENGAGEMENT = (name) =>
+    `${name}, ¿te gustaría ver resultados similares al tuyo antes de agendar? 😊`;
+
+export const MSG_HOOK = (name) =>
+    `¡Qué bueno, ${name}! La Dra. Yuri es especialista exactamente en eso 😊\n` +
+    `La valoración dura ${CONSULTATION_DURATION_MINUTES} min e incluye examen completo, tu plan de tratamiento y más — todo por $${CONSULTATION_PRICE.toLocaleString('es-CO')} que se abonan al tratamiento. ¿Te la agendamos?`;
+
+export const MSG_DATA_CAPTURE = (aestheticGoal) => {
+    const motivo = aestheticGoal
+        ? `\n(Motivo de consulta ya lo tenemos: ${aestheticGoal} ✅ — solo confirma si es correcto)`
+        : '\n• Motivo de consulta';
+    return `¡Perfecto! Solo necesito un par de datos para reservar tu cita con la Dra. Yuri 😊\n\n• Nombre completo\n• Correo electrónico \n• ${motivo}`;
+};

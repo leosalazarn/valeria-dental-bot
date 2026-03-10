@@ -12,7 +12,9 @@ import {classifyMessage} from './classifier.js';
 import {callValeria} from './ai.js';
 import {sendMessage} from './whatsapp.js';
 import {extractIntent} from './intent.js';
-import {REENGAGEMENT_DELAY_MINUTES, CONSULTATION_PRICE, CONSULTATION_DURATION_MINUTES} from './config.js';
+import {
+    REENGAGEMENT_DELAY_MINUTES, MSG_REENGAGEMENT, MSG_HOOK, MSG_DATA_CAPTURE
+} from './config.js';
 import log from './utils/logger.js';
 
 export const POSITIVE_RESPONSES = [
@@ -132,23 +134,18 @@ function handleConversionFlow(phone, session, text = '') {
 
         // Start reengagement timer
         setReengagementTimer(phone, () => {
-            sendMessage(phone, `${session.name}, ¿le gustaría ver resultados similares al suyo antes de agendar? 😊`);
+            sendMessage(phone, MSG_REENGAGEMENT(session.name));
             log.reengagement(phone);
         }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
 
-        return `¡Qué bueno, ${session.name}! La Dra. Yuri es especialista exactamente en eso 😊
-La valoración dura ${CONSULTATION_DURATION_MINUTES} min e incluye examen completo, tu plan de tratamiento y más — todo por $${CONSULTATION_PRICE.toLocaleString('es-CO')} que se abonan al tratamiento. ¿Te la agendamos?`;
+        return MSG_HOOK(session.name);
     }
 
     // Phase C: Data capture — only triggers when patient responds positively to the hook
     if (phase === 'HOOK' && isPositive) {
         updateSession(phone, {phase: 'DATA_CAPTURE'});
         clearReengagementTimer(phone);
-        const motivoPrefill = session.aesthetic_goal ? `\n(Motivo de consulta ya lo tenemos: ${session.aesthetic_goal} ✅ — solo confirma si es correcto)` : '\n• Motivo de consulta';
-        return `¡Perfecto! Solo necesito un par de datos para reservar tu cita con la Dra. Yuri 😊
-
-• Nombre completo
-• Correo electrónico${motivoPrefill}`;
+        return MSG_DATA_CAPTURE(session.aesthetic_goal);
     }
 
     // Phase D: Payment — send payment info after data is captured
