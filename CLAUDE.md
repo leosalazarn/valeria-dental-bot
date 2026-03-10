@@ -9,7 +9,7 @@
 
 AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practice in Neiva, Huila, Colombia. The bot is named **Valeria**.
 
-**Goal:** Capture leads from Meta ads (Click-to-WhatsApp), qualify them, collect their data, and guide them to pay a $30,000 COP deposit to confirm a consultation appointment with the doctor.
+**Goal:** Capture leads from Meta ads (Click-to-WhatsApp), qualify them, collect their data, and guide them to pay a deposit to confirm a consultation appointment with the doctor.
 
 **The appointment is confirmed by a human receptionist** — Valeria only captures data and provides payment details.
 
@@ -17,14 +17,14 @@ AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practic
 
 ## 2. ABSOLUTE BUSINESS RULES
 
-- ❌ **NEVER give treatment prices** — only the consultation price ($80,000)
+- ❌ **NEVER give treatment prices** — only the consultation price (set in env vars)
 - ❌ **NEVER ask for ID or additional phone number** — phone is already known from WhatsApp
 - ❌ **NEVER confirm or schedule appointments** — only capture data (DentalLink integration pending)
 - ✅ Dra. Yuri is a woman: always "la Dra. Yuri" or "la doctora"
 - ✅ Valeria always uses informal "tú" — natural, warm Colombian Spanish
 - ✅ Maximum 3 lines per message
 - ✅ Maximum 1 emoji per message
-- ✅ $30,000 deposit to confirm the slot (deducted from the $80,000 consultation fee)
+- ✅ Deposit required to confirm the slot — amounts set in env vars (BOOK_PRICE, CONSULTATION_PRICE)
 
 ---
 
@@ -38,8 +38,6 @@ AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practic
 | Hosting   | Render.com                                         |
 | CRM       | In-memory Map (Supabase migration pending)         |
 
-**Estimated cost:** ~$3–10 USD/month
-
 ---
 
 ## 4. INFRASTRUCTURE
@@ -49,7 +47,7 @@ AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practic
 | GitHub Repo       | ✅      | github.com/leosalazarn/valeria-dental-bot (public)                  |
 | Render Deploy     | ✅      | https://valeria-dental-bot.onrender.com                             |
 | Anthropic API Key | ✅      | Set in Render env vars                                              |
-| Meta App          | ✅      | "valeria-bot" — App ID: 939642968546393                             |
+| Meta App          | ✅      | "valeria-bot" (App ID in Render env vars)                           |
 | Webhook verified  | ✅      | Connected and active                                                |
 | Meta Token        | ⚠️     | Temporary (expires 24h) — permanent token pending                   |
 | WhatsApp Number   | ⚠️     | Test: +1 (555) 166-5964 — real clinic number pending                |
@@ -61,15 +59,15 @@ AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practic
 ## 5. ENVIRONMENT VARIABLES (Render)
 
 ```env
-ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_API_KEY=sk-ant-...          # Anthropic API key
 WA_ACCESS_TOKEN=...                    # Meta token (expires 24h)
-WA_PHONE_NUMBER_ID=1042987282225846
-VERIFY_TOKEN=dental_yuri_2024
-BANK_HOLDER_NAME=Yuri Maryeth Quintero Lozano
-BANK_HOLDER_CC=1032443600
-BANCOLOMBIA_ACCOUNT=45700000566
-NEQUI_NUMBER=3105049849
-DAVIVIENDA_ACCOUNT=76100772169
+WA_PHONE_NUMBER_ID=...                 # Meta phone number ID
+VERIFY_TOKEN=...                       # Webhook verification token
+BANK_HOLDER_NAME=...                   # Account holder full name
+BANK_HOLDER_CC=...                     # Account holder ID number
+BANCOLOMBIA_ACCOUNT=...                # Bancolombia account number
+NEQUI_NUMBER=...                       # Nequi phone number
+DAVIVIENDA_ACCOUNT=...                 # Davivienda account number
 ```
 
 > ⚠️ Banking details must NEVER be in the code — only in environment variables.
@@ -109,8 +107,8 @@ valeria-dental-bot/
 ```js
 CLAUDE_MODEL = 'claude-sonnet-4-6'
 MAX_TOKENS = 450
-CONSULTATION_PRICE = 80000          // $80,000 COP
-BOOK_PRICE = 30000                  // $30,000 COP deposit
+CONSULTATION_PRICE = ...          // set in config.js
+BOOK_PRICE = ...                  // set in config.js
 CONSULTATION_DURATION_MINUTES = 30  // consultation duration
 REENGAGEMENT_DELAY_MINUTES = 30     // re-engagement timer
 SESSION_EXPIRY_HOURS = 24
@@ -187,18 +185,18 @@ const messageBuffers = new Map(); // key: phone, value: { messages[], timer }
 Injected from environment variables into the prompt. Format of the message Valeria sends:
 
 ```
-🦷☀️ Te dejo los datos para que puedas realizar el abono de $30.000 Pesos
+🦷☀️ Te dejo los datos para que puedas realizar el abono de $[BOOK_PRICE]
 y confirmar tu cita de valoración presencial:
 
 Bancolombia — Cta Ahorros
-Yuri Maryeth Quintero Lozano
+[BANK_HOLDER_NAME]
 N° [BANCOLOMBIA_ACCOUNT] · CC [BANK_HOLDER_CC]
 
 Nequi
 N° [NEQUI_NUMBER]
 
 Davivienda — Cta Ahorros
-Yuri Maryeth Quintero Lozano
+[BANK_HOLDER_NAME]
 N° [DAVIVIENDA_ACCOUNT] · CC [BANK_HOLDER_CC]
 
 Cuando hagas el abono, envíame el comprobante aquí y confirmamos tu cita 🙌
@@ -296,4 +294,4 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 - **Name:** Dra. Yuri Quintero — Aesthetic Dentistry
 - **Location:** Neiva, Huila, Colombia
 - **Office hours:** Monday–Friday 8am–6pm, Saturdays 8am–12pm
-- **Doctor:** Yuri Quintero — general dentist with 10+ years of experience, specialized in aesthetic treatments like smile design, veneers, whitening, and implants. Passionate about helping patients achieve their dream smiles with a warm, personalized approach.
+- **Specialties:** Smile design, veneers, whitening, implants
