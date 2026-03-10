@@ -63,7 +63,7 @@ router.post('/', async (req, res) => {
         if (mensaje.type !== 'text') {
             const numero = mensaje.from;
             const response = await import('../whatsapp.js');
-            await response.sendMessage(numero, 'Por el momento solo respondo mensajes de texto 😊 ¿En qué le puedo ayudar?');
+            await response.sendMessage(numero, 'Por ahora solo puedo leer mensajes de texto 😊 ¿Me escribes lo que necesitas?');
             return;
         }
 

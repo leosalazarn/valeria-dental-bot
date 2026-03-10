@@ -109,9 +109,9 @@ Cuando el paciente responda con su información:
         basePrompt += `
 
 ## FASE ACTUAL: PAGO
-Los datos del paciente están listos. Envía este mensaje exactamente, sin modificar nada:
+Los datos del paciente están listos. Envía ÚNICAMENTE este bloque exacto, sin texto introductorio antes ni después:
 
-"🦷☀️ Te dejo los datos para que puedas realizar el abono de $${BOOK_PRICE} ${CONSULTATION_CURRENCY} y confirmar tu cita de valoración presencial:
+"🦷☀️ Te dejo los datos para realizar el abono de $${BOOK_PRICE.toLocaleString('es-CO')} y confirmar tu cita de valoración presencial:
 
 Bancolombia — Cta Ahorros
 ${BANK_HOLDER_NAME}
@@ -126,7 +126,7 @@ N° ${DAVIVIENDA_ACCOUNT} · CC ${BANK_HOLDER_CC}
 
 Cuando hagas el abono, envíame el comprobante aquí y confirmamos tu cita 🙌"
 
-- Si pregunta por qué el abono: "Es para reservar tu cupo — se descuenta de los $${CONSULTATION_PRICE} de la valoración"
+- Si pregunta por qué el abono: "Es para reservar tu cupo — se descuenta de los $${CONSULTATION_PRICE.toLocaleString('es-CO')} de la valoración"
 - Si dice que ya pagó: pídele el comprobante y confirma que el equipo lo revisará`;
     }
 

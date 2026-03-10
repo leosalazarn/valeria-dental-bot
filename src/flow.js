@@ -136,8 +136,8 @@ function handleConversionFlow(phone, session, text = '') {
             log.reengagement(phone);
         }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
 
-        return `¡Qué bueno, ${session.name}! La Dra. Yuri te puede ayudar con eso 😊
-¿Te gustaría una valoración de ${CONSULTATION_DURATION_MINUTES} min? Los $${CONSULTATION_PRICE.toLocaleString('es-CO')} se abonan al tratamiento.`;
+        return `¡Qué bueno, ${session.name}! La Dra. Yuri es especialista exactamente en eso 😊
+La valoración dura ${CONSULTATION_DURATION_MINUTES} min e incluye examen completo, tu plan de tratamiento y más — todo por $${CONSULTATION_PRICE.toLocaleString('es-CO')} que se abonan al tratamiento. ¿Te la agendamos?`;
     }
 
     // Phase C: Data capture — only triggers when patient responds positively to the hook
