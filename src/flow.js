@@ -15,7 +15,7 @@ import {extractIntent} from './intent.js';
 import {REENGAGEMENT_DELAY_MINUTES, CONSULTATION_PRICE, CONSULTATION_DURATION_MINUTES} from './config.js';
 import log from './utils/logger.js';
 
-const POSITIVE_RESPONSES = [
+export const POSITIVE_RESPONSES = [
     'listo', 'sí', 'si', 'me convenciste', 'quiero agendar',
     'dale', 'claro', 'ok', 'okay', 'perfecto', 'bueno',
     'me interesa', 'quiero', 'vamos', 'agendemos', 'agendar',
@@ -24,7 +24,7 @@ const POSITIVE_RESPONSES = [
 ];
 
 // Strip internal signals before sending to patient
-function stripSignals(text) {
+export function stripSignals(text) {
     return text
         .replace(/\nNAME:.*$/gm, '')
         .replace(/\nGOAL:.*$/gm, '')

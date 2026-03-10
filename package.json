@@ -7,6 +7,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:local": "node test-local.js",
     "test:minimal": "node test-minimal.js"
   },
@@ -20,5 +22,8 @@
     "node": ">=18.0.0"
   },
   "author": "Dra. Yuri Quintero — Odontología Estética Neiva",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "vitest": "^4.0.18"
+  }
 }
