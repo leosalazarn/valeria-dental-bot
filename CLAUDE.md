@@ -30,13 +30,13 @@ AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practic
 
 ## 3. TECH STACK
 
-| Component | Solution |
-|---|---|
-| WhatsApp | Meta Cloud API (free up to 1k conversations/month) |
-| AI | Anthropic Claude (model: `claude-sonnet-4-6`) |
-| Server | Node.js + Express |
-| Hosting | Render.com |
-| CRM | In-memory Map (Supabase migration pending) |
+| Component | Solution                                           |
+|-----------|----------------------------------------------------|
+| WhatsApp  | Meta Cloud API (free up to 1k conversations/month) |
+| AI        | Anthropic Claude (model: `claude-sonnet-4-6`)      |
+| Server    | Node.js + Express                                  |
+| Hosting   | Render.com                                         |
+| CRM       | In-memory Map (Supabase migration pending)         |
 
 **Estimated cost:** ~$3–10 USD/month
 
@@ -44,17 +44,17 @@ AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practic
 
 ## 4. INFRASTRUCTURE
 
-| Component | Status | Detail |
-|---|---|---|
-| GitHub Repo | ✅ | github.com/leosalazarn/valeria-dental-bot (public) |
-| Render Deploy | ✅ | https://valeria-dental-bot.onrender.com |
-| Anthropic API Key | ✅ | Set in Render env vars |
-| Meta App | ✅ | "valeria-bot" — App ID: 939642968546393 |
-| Webhook verified | ✅ | Connected and active |
-| Meta Token | ⚠️ | Temporary (expires 24h) — permanent token pending |
-| WhatsApp Number | ⚠️ | Test: +1 (555) 166-5964 — real clinic number pending |
-| Meta App | ⚠️ | In Development mode — needs to go Live |
-| Render plan | ⚠️ | Free (sleeps after 15 min) — upgrade to $7/month before running ads |
+| Component         | Status | Detail                                                              |
+|-------------------|--------|---------------------------------------------------------------------|
+| GitHub Repo       | ✅      | github.com/leosalazarn/valeria-dental-bot (public)                  |
+| Render Deploy     | ✅      | https://valeria-dental-bot.onrender.com                             |
+| Anthropic API Key | ✅      | Set in Render env vars                                              |
+| Meta App          | ✅      | "valeria-bot" — App ID: 939642968546393                             |
+| Webhook verified  | ✅      | Connected and active                                                |
+| Meta Token        | ⚠️     | Temporary (expires 24h) — permanent token pending                   |
+| WhatsApp Number   | ⚠️     | Test: +1 (555) 166-5964 — real clinic number pending                |
+| Meta App          | ⚠️     | In Development mode — needs to go Live                              |
+| Render plan       | ⚠️     | Free (sleeps after 15 min) — upgrade to $7/month before running ads |
 
 ---
 
@@ -124,13 +124,13 @@ SESSION_EXPIRY_HOURS = 24
 EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
 ```
 
-| Phase | Entry condition | Action |
-|---|---|---|
-| EXTRACTION | No name or no aesthetic_goal | AI extracts name and goal naturally |
-| HOOK | Has name + aesthetic_goal | Hardcoded message offering the consultation |
-| DATA_CAPTURE | Patient responds positively to hook | Asks for full name, email, reason |
-| PAYMENT | Data captured | AI sends exact banking details |
-| CLOSING | Payment instructed | AI awaits receipt, confirms |
+| Phase        | Entry condition                     | Action                                      |
+|--------------|-------------------------------------|---------------------------------------------|
+| EXTRACTION   | No name or no aesthetic_goal        | AI extracts name and goal naturally         |
+| HOOK         | Has name + aesthetic_goal           | Hardcoded message offering the consultation |
+| DATA_CAPTURE | Patient responds positively to hook | Asks for full name, email, reason           |
+| PAYMENT      | Data captured                       | AI sends exact banking details              |
+| CLOSING      | Payment instructed                  | AI awaits receipt, confirms                 |
 
 ### Internal signals (NOT visible to the patient)
 The AI appends to its responses:
@@ -242,13 +242,13 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 
 ## 14. ENDPOINTS
 
-| Method | Route | Purpose |
-|---|---|---|
-| GET | / | Health check |
-| GET | /webhook | Meta verification |
-| POST | /webhook | Receive WhatsApp messages |
-| GET | /leads | All in-memory patients (debug) |
-| GET | /stats | Summary by source/status/intent |
+| Method | Route    | Purpose                         |
+|--------|----------|---------------------------------|
+| GET    | /        | Health check                    |
+| GET    | /webhook | Meta verification               |
+| POST   | /webhook | Receive WhatsApp messages       |
+| GET    | /leads   | All in-memory patients (debug)  |
+| GET    | /stats   | Summary by source/status/intent |
 
 ---
 
@@ -258,7 +258,7 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 2. **Real clinic phone number** → register in Meta (remove personal WhatsApp from number first)
 3. **Meta App to Live mode** → requires registered real number
 4. **Upgrade Render to $7/month** → eliminates 15-min sleep — **critical before running ads**
-5. **Migrate CRM to Supabase** → code already structured, just change `findPatient` and `upsertPatient` in `crm.js`
+5. **Migrate to a CRM** → code already structured, just change `findPatient` and `upsertPatient` in `crm.js`
 6. **Meta Business Verification** → RUT or chamber of commerce from Dra. Yuri (for 1k+ conversations/month)
 7. **Expand triggers** → more variants and typo tolerance
 8. **DentalLink integration** → API for automatic scheduling (TODO in crm.js)
@@ -268,16 +268,16 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 
 ## 16. TECHNICAL DECISIONS
 
-| Decision | Reason |
-|---|---|
-| No n8n | The state machine with phases and timers required custom logic |
-| No Google Sheets | Crashed the server on startup — replaced by in-memory Map |
-| Supabase (future) | Only 2 functions to change in crm.js |
-| Public repo | Safe — .env excluded by .gitignore, sensitive data in Render |
-| Total silence for non-triggers | Avoids spam and confusion — only responds to leads with intent |
-| Total silence for suppliers | No automatic response — only CRM update |
-| All data in 1 message | Asks for full name + email + reason in a single message (token optimization) |
-| Sonnet 4.6 model | Haiku gave frequent 529 errors — Sonnet is more stable |
+| Decision                       | Reason                                                                       |
+|--------------------------------|------------------------------------------------------------------------------|
+| No n8n                         | The state machine with phases and timers required custom logic               |
+| No Google Sheets               | Crashed the server on startup — replaced by in-memory Map                    |
+| Supabase (future)              | Only 2 functions to change in crm.js                                         |
+| Public repo                    | Safe — .env excluded by .gitignore, sensitive data in Render                 |
+| Total silence for non-triggers | Avoids spam and confusion — only responds to leads with intent               |
+| Total silence for suppliers    | No automatic response — only CRM update                                      |
+| All data in 1 message          | Asks for full name + email + reason in a single message (token optimization) |
+| Sonnet 4.6 model               | Haiku gave frequent 529 errors — Sonnet is more stable                       |
 
 ---
 
@@ -295,7 +295,5 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 
 - **Name:** Dra. Yuri Quintero — Aesthetic Dentistry
 - **Location:** Neiva, Huila, Colombia
-- **Office hours:** Monday–Friday 8am–6pm, Saturdays 9am–1pm
-- **Consultation:** $80,000 COP · 30 minutes · includes x-rays, photos, clinical exam, diagnosis, and treatment plan
-- **Deposit to book:** $30,000 COP (deducted from consultation fee)
-- **Doctor:** Yuri Maryeth Quintero Lozano · CC 1032443600
+- **Office hours:** Monday–Friday 8am–6pm, Saturdays 8am–12pm
+- **Doctor:** Yuri Quintero — general dentist with 10+ years of experience, specialized in aesthetic treatments like smile design, veneers, whitening, and implants. Passionate about helping patients achieve their dream smiles with a warm, personalized approach.
