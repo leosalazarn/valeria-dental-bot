@@ -8,7 +8,7 @@ consultation scheduling.
 - 24/7 AI-powered WhatsApp assistant
 - Lead capture from Meta Click-to-WhatsApp ads
 - Intelligent message classification pre-processing
-- Multi-phase conversion flow with re-engagement automation
+- Multiphase conversion flow with re-engagement automation
 - Intent extraction and CRM tracking
 - Modular, scalable architecture
 
@@ -17,7 +17,7 @@ consultation scheduling.
 - **Runtime**: Node.js + Express
 - **AI**: Anthropic Claude API (claude-haiku-4-5-20251001)
 - **Messaging**: Meta WhatsApp Business API
-- **Data Storage**: In-memory Map (Supabase-ready)
+- **Data Storage**: In-memory Map
 
 ---
 
@@ -188,7 +188,7 @@ The application is organized into **14 focused, independent modules** following 
 ✅ **Stateless**: Pure functions, no hidden dependencies  
 ✅ **Resilient**: try/catch on all async operations  
 ✅ **Efficient**: Auto-cleanup of inactive sessions, sliding window history  
-✅ **Extensible**: CRM interface ready for Supabase upgrade  
+✅ **Extensible**: CRM interface ready for any CRM integration
 ✅ **Documented**: Clear function signatures and data contracts
 
 ---
