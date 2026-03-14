@@ -1,7 +1,12 @@
 # CLAUDE.md — Valeria WhatsApp Bot · Dra. Yuri Quintero
 
-> This file transfers the full project context to the AI assistant.
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![Status](https://img.shields.io/badge/status-production--ready-brightgreen)
+
+> This file transfers the full project context to an AI assistant.  
 > Created 09/03/2026. Keep it updated with every significant change.
+
+→ See [README.md](./README.md) for setup and deployment · [SECURITY.md](./SECURITY.md) for data policy · [PROJECT_FILES.md](./PROJECT_FILES.md) for module reference
 
 ---
 
@@ -288,6 +293,6 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 
 - **Name:** Dra. Yuri Quintero — Aesthetic Dentistry
 - **Location:** Neiva, Huila, Colombia
-- **Office hours:** Monday–Friday 8am–6pm, Saturdays 8am–12pm
+- **Office hours:** Monday–Friday 8am-12pm (AM part) 2pm–6pm (PM part), Saturdays 8am–12pm
 - **Specialties:** Smile design, 3D resins, composite resins, high-durability ceramic veneers, whitening, fillings &
   restorations, general dentistry
