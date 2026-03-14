@@ -7,9 +7,11 @@
 
 ## 1. PROJECT DESCRIPTION
 
-AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practice in Neiva, Huila, Colombia. The bot is named **Valeria**.
+AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practice in Neiva, Huila, Colombia. The bot is
+named **Valeria**.
 
-**Goal:** Capture leads from Meta ads (Click-to-WhatsApp), qualify them, collect their data, and guide them to pay a deposit to confirm a consultation appointment with the doctor.
+**Goal:** Capture leads from Meta ads (Click-to-WhatsApp), qualify them, collect their data, and guide them to pay a
+deposit to confirm a consultation appointment with the doctor.
 
 **The appointment is confirmed by a human receptionist** — Valeria only captures data and provides payment details.
 
@@ -131,7 +133,9 @@ EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
 | CLOSING      | Payment instructed                  | AI awaits receipt, confirms                 |
 
 ### Internal signals (NOT visible to the patient)
+
 The AI appends to its responses:
+
 - `NAME: [name]` → captured by intent.js to update session
 - `GOAL: [aesthetic goal]` → captured by intent.js
 - `EXTRACTED: full_name: [...], email: [...], consultation_reason: [...]` → in DATA_CAPTURE phase
@@ -139,6 +143,7 @@ The AI appends to its responses:
 The `stripSignals()` function in `flow.js` removes these before sending to the patient.
 
 ### Positive responses (trigger DATA_CAPTURE)
+
 ```js
 ['listo', 'sí', 'si', 'me convenciste', 'quiero agendar', 'dale', 'claro',
  'ok', 'okay', 'perfecto', 'bueno', 'me interesa', 'quiero', 'vamos',
@@ -150,28 +155,19 @@ The `stripSignals()` function in `flow.js` removes these before sending to the p
 
 ## 9. MESSAGE CLASSIFICATION (classifier.js)
 
-In priority order:
+Dedicated WhatsApp line — no triggers, no supplier detection. In priority order:
 
 1. Group message → **IGNORE**
-2. Supplier keywords → **SUPPLIER** (total silence + CRM update)
-3. Phone with status IN_TREATMENT → **CURRENT_PATIENT**
-4. Trigger detected → **WARM_LEAD**
-5. Active session (phase !== 'START') → **ORGANIC_LEAD**
-6. No trigger + no session → **IGNORE** (total silence)
-
-### Triggers (pre-filled messages from Meta ads)
-```js
-["Quiero mejorar mi sonrisa", "Quiero información", "Quiero más información",
- "Me gustaría agendar", "Hola, me recomendaron contigo", "Quiero agendar",
- "Quiero agendar una cita", "Estoy interesado en una consulta",
- "Precio?", "Precio de un diseño de sonrisa?", "Que costo tiene?", "Que precio tiene?"]
-```
+2. Phone with status `IN_TREATMENT` → **CURRENT_PATIENT**
+3. Active session (phase !== `START`) → **ORGANIC_LEAD** (`source: ORGANIC`)
+4. Any new individual contact → **WARM_LEAD** (`source: DIRECT`)
 
 ---
 
 ## 10. MESSAGE DEBOUNCE (webhook.js)
 
-If the patient sends multiple messages in a row, the bot waits **30 seconds** of silence before responding, processing all messages together as one.
+If the patient sends multiple messages in a row, the bot waits **30 seconds** of silence before responding, processing
+all messages together as one.
 
 ```js
 const DEBOUNCE_MS = 30000;
@@ -213,9 +209,9 @@ Cuando hagas el abono, envíame el comprobante aquí y confirmamos tu cita 🙌
   full_name,                // full name (from DATA_CAPTURE)
   email,                    // email (from DATA_CAPTURE)
   consultation_reason,      // reason (from DATA_CAPTURE or aesthetic_goal)
-  status,                   // NEW | PROSPECT | CONSULTATION_SCHEDULED | IN_TREATMENT | SUPPLIER | INACTIVE
+  status,                   // NEW | PROSPECT | CONSULTATION_SCHEDULED | IN_TREATMENT | INACTIVE
   aesthetic_goal,           // whitening, smile design, veneers, implants, etc.
-  source,                   // AD_TRIGGER | ORGANIC
+  source,                   // DIRECT | ORGANIC
   trigger_message,          // exact ad message
   data_complete,            // boolean — true when full_name + email + consultation_reason are set
   first_contact,
@@ -252,15 +248,14 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 
 ## 15. PENDING (priority order)
 
-1. **Permanent Meta token** → Meta Business Suite → Settings → System Users → generate token with `whatsapp_business_messaging`
+1. **Permanent Meta token** → Meta Business Suite → Settings → System Users → generate token with
+   `whatsapp_business_messaging`
 2. **Real clinic phone number** → register in Meta (remove personal WhatsApp from number first)
 3. **Meta App to Live mode** → requires registered real number
-4. **Upgrade Render to $7/month** → eliminates 15-min sleep — **critical before running ads**
+4. **Upgrade Render to $7/month** → eliminates 15-min sleep — **critical before going live**
 5. **Migrate to a CRM** → code already structured, just change `findPatient` and `upsertPatient` in `crm.js`
 6. **Meta Business Verification** → RUT or chamber of commerce from Dra. Yuri (for 1k+ conversations/month)
-7. **Expand triggers** → more variants and typo tolerance
-8. **DentalLink integration** → API for automatic scheduling (TODO in crm.js)
-9. **Click-to-WhatsApp ads** → configure in Meta Ads Manager with pre-filled triggers
+7. **DentalLink integration** → API for automatic scheduling (TODO in crm.js)
 
 ---
 
@@ -270,10 +265,10 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 |--------------------------------|------------------------------------------------------------------------------|
 | No n8n                         | The state machine with phases and timers required custom logic               |
 | No Google Sheets               | Crashed the server on startup — replaced by in-memory Map                    |
-| Supabase (future)              | Only 2 functions to change in crm.js                                         |
+| CRM migration pending          | Only 2 functions to change in crm.js                                         |
 | Public repo                    | Safe — .env excluded by .gitignore, sensitive data in Render                 |
-| Total silence for non-triggers | Avoids spam and confusion — only responds to leads with intent               |
-| Total silence for suppliers    | No automatic response — only CRM update                                      |
+| Dedicated WhatsApp line        | Eliminates need for triggers/supplier detection — every contact is a lead    |
+| Respond to all individual msgs | No IGNORE for unknown contacts — dedicated line = intent assumed             |
 | All data in 1 message          | Asks for full name + email + reason in a single message (token optimization) |
 | Sonnet 4.6 model               | Haiku gave frequent 529 errors — Sonnet is more stable                       |
 
@@ -294,4 +289,5 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 - **Name:** Dra. Yuri Quintero — Aesthetic Dentistry
 - **Location:** Neiva, Huila, Colombia
 - **Office hours:** Monday–Friday 8am–6pm, Saturdays 8am–12pm
-- **Specialties:** Smile design, veneers, whitening, implants
+- **Specialties:** Smile design, 3D resins, composite resins, high-durability ceramic veneers, whitening, fillings &
+  restorations, general dentistry

@@ -1,57 +1,36 @@
-# 🦷 Valeria — AI Advisor for Aesthetic Dentistry
+# 🦷 Valeria — AI WhatsApp Assistant · Dra. Yuri Quintero
 
-A production-ready WhatsApp Business AI chatbot that captures patient inquiries through Meta ads and qualifies leads for
-consultation scheduling.
+Valeria is a production-grade WhatsApp Business AI assistant for an aesthetic dentistry practice in Neiva, Colombia. It
+handles inbound inquiries on a dedicated WhatsApp line 24/7, qualifies patients, and guides them through scheduling a
+consultation with the doctor.
 
-**Key Features:**
-
-- 24/7 AI-powered WhatsApp assistant
-- Lead capture from Meta Click-to-WhatsApp ads
-- Intelligent message classification pre-processing
-- Multiphase conversion flow with re-engagement automation
-- Intent extraction and CRM tracking
-- Modular, scalable architecture
-
-## Technology Stack
-
-- **Runtime**: Node.js + Express
-- **AI**: Anthropic Claude API (claude-haiku-4-5-20251001)
-- **Messaging**: Meta WhatsApp Business API
-- **Data Storage**: In-memory Map
+> **Dedicated line architecture** — every person who messages is treated as a potential patient. No trigger filtering,
+> no supplier detection.
 
 ---
 
-## Core Features
+## Features
 
-### Lead Capture
+- **24/7 availability** — responds instantly regardless of office hours
+- **Natural conversation** — warm Colombian Spanish, never robotic
+- **Multiphase conversion flow** — guides patient from first contact to consultation deposit
+- **Silent data extraction** — captures name and aesthetic goal without interrupting conversation
+- **Re-engagement timer** — follows up automatically after 30 minutes of silence
+- **Intent tracking** — logs objection type, phase, and outcome per patient
+- **In-memory CRM** — session + patient data with 24h auto-cleanup
 
-- Detects trigger messages from Meta Click-to-WhatsApp ads
-- Classifies messages before AI processing (suppliers, returning patients, warm leads)
-- Routes to appropriate conversation flow
+---
 
-### Intelligent Routing
+## Tech Stack
 
-- **Warm Leads** (from ads): High-energy engagement flow
-- **Organic Leads**: Standard discovery flow
-- **Returning Patients**: Patient care flow
-- **Suppliers**: Administrative redirect
-
-### Conversion Flow
-
-- **Phase A**: Extract patient information (name, aesthetic goals)
-- **Phase B**: Present consultation hook
-- **Phase C**: Re-engagement automation (30-minute follow-up)
-
-### Intent Analysis
-
-Extracts intent from each interaction:
-
-- Schedule request
-- Information request
-- Price objection
-- Fear/concern objection
-- Undecided
-- Other
+| Component | Solution                               |
+|-----------|----------------------------------------|
+| Runtime   | Node.js 18+ / Express                  |
+| AI        | Anthropic Claude (`claude-sonnet-4-6`) |
+| Messaging | Meta WhatsApp Cloud API                |
+| Hosting   | Render.com                             |
+| Storage   | In-memory Map (CRM migration ready)    |
+| Tests     | Vitest (95 tests, 100% passing)        |
 
 ---
 
@@ -59,140 +38,119 @@ Extracts intent from each interaction:
 
 ```
 valeria-dental-bot/
-├── server.js                ← Express server entry point
+├── server.js                  ← Express entry point
 ├── package.json
-├── .env.example
-├── README.md
+├── .env.example               ← Environment variable template (no secrets)
+├── CLAUDE.md                  ← Full context for AI assistants
+├── README.md                  ← This file
+├── SECURITY.md                ← Security policy
 └── src/
-    ├── config.js            ← Configuration & constants
-    ├── crm.js               ← Patient CRM (in-memory)
-    ├── session.js           ← Conversation sessions
-    ├── classifier.js        ← Message classification
-    ├── prompt.js            ← Dynamic system prompts
-    ├── ai.js                ← Claude API integration
-    ├── whatsapp.js          ← Meta WhatsApp API
-    ├── intent.js            ← Intent extraction
-    ├── flow.js              ← Conversation orchestration
+    ├── config.js              ← Env vars + business constants + message templates
+    ├── crm.js                 ← In-memory patient store (CRM-ready interface)
+    ├── session.js             ← Session Map + 24h auto-cleanup
+    ├── classifier.js          ← 4-rule message classifier
+    ├── prompt.js              ← Dynamic system prompt builder
+    ├── ai.js                  ← Claude API wrapper with retry logic
+    ├── whatsapp.js            ← Meta API sendMessage()
+    ├── intent.js              ← Intent extraction + NAME/GOAL signal parsing
+    ├── flow.js                ← Conversation orchestration
     ├── routes/
-    │   ├── webhook.js       ← Webhook handlers
-    │   └── debug.js         ← Debug endpoints
+    │   ├── webhook.js         ← GET/POST /webhook + message debounce
+    │   └── debug.js           ← GET /leads, /stats
     └── utils/
-        ├── logger.js        ← Centralized logging
-        └── time.js          ← Timezone utilities
-```  
+        ├── logger.js          ← Emoji-prefixed console logging
+        └── time.js            ← Colombia timezone (America/Bogota)
+```
+
+---
+
+## Conversation Flow
+
+```
+EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
+```
+
+| Phase        | Trigger                         | Action                               |
+|--------------|---------------------------------|--------------------------------------|
+| EXTRACTION   | Session start — no name or goal | AI extracts name + aesthetic goal    |
+| HOOK         | Name + goal both available      | Hardcoded pitch for the consultation |
+| DATA_CAPTURE | Positive response to hook       | Collects full name, email, reason    |
+| PAYMENT      | Data complete                   | AI sends banking details for deposit |
+| CLOSING      | Payment instructions sent       | Awaits receipt, confirms appointment |
+
+---
+
+## Message Classification
+
+Four rules evaluated in order:
+
+1. **Group message** → IGNORE
+2. **`IN_TREATMENT` patient** → CURRENT_PATIENT (post-treatment flow)
+3. **Active session** (phase ≠ `START`) → ORGANIC_LEAD
+4. **Any new contact** → WARM_LEAD (`source: DIRECT`)
+
+---
 
 ## Setup
 
 ### Prerequisites
 
-- Node.js 18+
-- Meta WhatsApp Business Account with API access
+- Node.js ≥ 18
+- Meta WhatsApp Business account with Cloud API access
 - Anthropic API key
 
-### Installation
+### Local Development
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/leosalazarn/valeria-dental-bot.git
-   cd valeria-dental-bot
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment**
-   ```bash
-   # Copy template
-   cp .env.example .env
-   
-   # Edit .env with your credentials
-   ```
-
-4. **Run locally**
-   ```bash
-   npm run dev
-   ```
-
-   Server output:
-   ```
-   🦷 Valeria listening on port 3000
-   👩‍⚕️ Aesthetic Dental Clinic
-   🕐 [current time in clinic timezone]
-   ```
-
----
-
-## Environment Variables
-
-Required environment variables in `.env`:
-
+```bash
+git clone https://github.com/leosalazarn/valeria-dental-bot.git
+cd valeria-dental-bot
+npm install
+cp .env.example .env   # fill in your credentials
+npm run dev
 ```
-ANTHROPIC_API_KEY=your_anthropic_key
-WA_ACCESS_TOKEN=your_meta_token
-WA_PHONE_NUMBER_ID=your_phone_id
-VERIFY_TOKEN=your_verification_token
-PORT=3000 (optional, defaults to 3000)
+
+### Environment Variables
+
+```env
+ANTHROPIC_API_KEY=...          # Anthropic Console
+WA_ACCESS_TOKEN=...            # Meta token (permanent via System Users)
+WA_PHONE_NUMBER_ID=...         # Meta phone number ID
+VERIFY_TOKEN=...               # Webhook verification token
+BANK_HOLDER_NAME=...           # Account holder name
+BANK_HOLDER_CC=...             # Account holder national ID
+BANCOLOMBIA_ACCOUNT=...        # Bancolombia savings account
+NEQUI_NUMBER=...               # Nequi phone number
+DAVIVIENDA_ACCOUNT=...         # Davivienda savings account
 ```
 
 See `.env.example` for full template.
 
 ---
 
-## Deployment
+## Deployment (Render.com)
 
-### Deploy to Render.com
+1. Push to GitHub (`.env` must be in `.gitignore`)
+2. Create a new **Web Service** on Render.com
+3. Connect the repository
+4. Set build command: `npm install` · Start command: `npm start`
+5. Add all environment variables in the Render dashboard
+6. Set Meta webhook URL: `https://your-app.onrender.com/webhook`
 
-1. Push code to GitHub (ensure `.env` is in `.gitignore`)
-2. Create new Web Service on Render.com
-3. Connect your repository
-4. Configure build & start commands:
-    - **Build**: `npm install`
-    - **Start**: `npm start`
-5. Add environment variables in Render dashboard
-6. Deploy — get production URL
-7. Configure webhook in Meta for Developers: `https://your-app.onrender.com/webhook`
+> ⚠️ Upgrade to the **$7/month** paid plan before going live — the free plan sleeps after 15 minutes of inactivity.
 
 ---
 
 ## API Endpoints
 
-| Method | Endpoint   | Purpose                   |
-|--------|------------|---------------------------|
-| GET    | `/`        | Health check              |
-| GET    | `/webhook` | Meta verification         |
-| POST   | `/webhook` | Receive WhatsApp messages |
-| GET    | `/leads`   | List all leads (debug)    |
-| GET    | `/stats`   | Summary statistics        |
+| Method | Endpoint   | Purpose                           |
+|--------|------------|-----------------------------------|
+| GET    | `/`        | Health check                      |
+| GET    | `/webhook` | Meta webhook verification         |
+| POST   | `/webhook` | Receive inbound WhatsApp messages |
+| GET    | `/leads`   | All patients in memory (debug)    |
+| GET    | `/stats`   | Summary by source/status/phase    |
 
 ---
-
-## Architecture Overview
-
-The application is organized into **14 focused, independent modules** following single-responsibility principles.
-
-### Module Organization
-
-| Layer       | Modules                        | Responsibility                     |
-|-------------|--------------------------------|------------------------------------|
-| **Core**    | config, logger, time           | Configuration, logging, utilities  |
-| **Storage** | crm, session                   | Patient data, conversation state   |
-| **Logic**   | classifier, prompt, ai, intent | Message processing, AI integration |
-| **Flow**    | flow                           | Conversation orchestration         |
-| **API**     | routes/webhook, routes/debug   | HTTP handlers                      |
-
-### Design Principles
-
-✅ **Modular**: Each file ~30-90 lines, single responsibility  
-✅ **Stateless**: Pure functions, no hidden dependencies  
-✅ **Resilient**: try/catch on all async operations  
-✅ **Efficient**: Auto-cleanup of inactive sessions, sliding window history  
-✅ **Extensible**: CRM interface ready for any CRM integration
-✅ **Documented**: Clear function signatures and data contracts
-
----
-
 ## Commands
 
 ```bash
@@ -201,8 +159,24 @@ npm start       # Production mode
 npm run dev     # Development mode with auto-reload
 ```
 
+## Testing
+
+```bash
+npm test           # Run full test suite (Vitest)
+npm run test:watch # Watch mode during development
+```
+
+
+---
+
+## Security
+
+See [SECURITY.md](./SECURITY.md) for the full security policy, vulnerability reporting process, and data handling
+guidelines.
+
 ---
 
 ## License
 
-Proprietary — All rights reserved
+Proprietary — All rights reserved. Developed for Dra. Yuri Quintero — Perfeccionamiento dental #OdontologíaHechaConAmor,
+Neiva, Colombia.
