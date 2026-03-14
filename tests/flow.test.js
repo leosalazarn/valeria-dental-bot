@@ -74,22 +74,11 @@ describe('processMessage — IGNORE classification', () => {
         expect(callValeria).not.toHaveBeenCalled();
     });
 
-    it('does nothing for an unknown contact with no trigger', async () => {
-        await processMessage(phone('f-02'), 'Hola, buenos días', 'individual');
-        expect(sendMessage).not.toHaveBeenCalled();
-        expect(callValeria).not.toHaveBeenCalled();
-    });
-});
-
-// ─── processMessage — SUPPLIER ───────────────────────────────────────────────
-
-describe('processMessage — SUPPLIER classification', () => {
-    it('updates CRM to SUPPLIER status and sends no message', async () => {
-        const p = phone('f-03');
-        await processMessage(p, 'Le envío la factura del pedido', 'individual');
-        expect(sendMessage).not.toHaveBeenCalled();
-        expect(callValeria).not.toHaveBeenCalled();
-        expect(findPatient(p)?.status).toBe('SUPPLIER');
+    it('calls Claude for any new individual contact (dedicated line — no IGNORE)', async () => {
+        const p = phone('f-02');
+        await processMessage(p, 'Hola, buenos días', 'individual');
+        expect(callValeria).toHaveBeenCalledOnce();
+        expect(sendMessage).toHaveBeenCalledOnce();
     });
 });
 
@@ -98,7 +87,6 @@ describe('processMessage — SUPPLIER classification', () => {
 describe('processMessage — EXTRACTION phase (warm lead)', () => {
     it('calls Claude and sends AI response when name is unknown', async () => {
         const p = phone('f-04');
-        // Trigger message starts a WARM_LEAD flow; session has no name yet
         await processMessage(p, 'Quiero mejorar mi sonrisa', 'individual');
         expect(callValeria).toHaveBeenCalledOnce();
         expect(sendMessage).toHaveBeenCalledOnce();
@@ -120,12 +108,11 @@ describe('processMessage — EXTRACTION phase (warm lead)', () => {
 describe('processMessage — HOOK phase', () => {
     it('sends hardcoded hook message when name + goal are available after EXTRACTION', async () => {
         const p = phone('f-06');
-        // Simulate: session already has name + goal, phase is still EXTRACTION
-        updateSession(p, { name: 'Laura', aesthetic_goal: 'diseño de sonrisa', phase: 'EXTRACTION', source: 'AD_TRIGGER' });
+        updateSession(p, { name: 'Laura', aesthetic_goal: 'diseño de sonrisa', phase: 'EXTRACTION', source: 'DIRECT' });
 
         await processMessage(p, 'Sí, me interesa', 'individual');
 
-        expect(callValeria).not.toHaveBeenCalled(); // hardcoded response, no AI needed
+        expect(callValeria).not.toHaveBeenCalled();
         expect(sendMessage).toHaveBeenCalledOnce();
         const sentText = vi.mocked(sendMessage).mock.calls[0][1];
         expect(sentText).toContain('Laura');
@@ -134,7 +121,7 @@ describe('processMessage — HOOK phase', () => {
 
     it('transitions session phase to HOOK', async () => {
         const p = phone('f-07');
-        updateSession(p, { name: 'Juliana', aesthetic_goal: 'calzas', phase: 'EXTRACTION', source: 'AD_TRIGGER' });
+        updateSession(p, { name: 'Juliana', aesthetic_goal: 'calzas', phase: 'EXTRACTION', source: 'DIRECT' });
         await processMessage(p, 'Bueno', 'individual');
         expect(getSession(p).phase).toBe('HOOK');
     });
@@ -145,7 +132,7 @@ describe('processMessage — HOOK phase', () => {
 describe('processMessage — DATA_CAPTURE phase', () => {
     it('sends data capture request on positive response to HOOK', async () => {
         const p = phone('f-08');
-        updateSession(p, { name: 'Mariela', aesthetic_goal: 'implantes', phase: 'HOOK', source: 'AD_TRIGGER' });
+        updateSession(p, { name: 'Mariela', aesthetic_goal: 'implantes', phase: 'HOOK', source: 'DIRECT' });
 
         await processMessage(p, 'sí, quiero agendar', 'individual');
 
@@ -166,9 +153,8 @@ describe('processMessage — DATA_CAPTURE phase', () => {
     it('does NOT trigger DATA_CAPTURE on negative/neutral response', async () => {
         const p = phone('f-10');
         callValeria.mockResolvedValueOnce('Entiendo, sin problema. ¿Hay algo más?');
-        updateSession(p, { name: 'Tania', aesthetic_goal: 'blanqueamiento', phase: 'HOOK', source: 'AD_TRIGGER' });
+        updateSession(p, { name: 'Tania', aesthetic_goal: 'blanqueamiento', phase: 'HOOK', source: 'DIRECT' });
         await processMessage(p, 'Ahora no puedo', 'individual');
-        // Should fall through to AI, not send hardcoded data capture form
         expect(callValeria).toHaveBeenCalledOnce();
     });
 });

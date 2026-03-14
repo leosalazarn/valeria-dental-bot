@@ -6,7 +6,6 @@ import {
     setReengagementTimer,
     clearReengagementTimer
 } from './session.js';
-import {upsertPatient} from './crm.js';
 import {buildSystemPrompt, buildCurrentPatientPrompt} from './prompt.js';
 import {classifyMessage} from './classifier.js';
 import {callValeria} from './ai.js';
@@ -49,17 +48,6 @@ export async function processMessage(phone, text, chatType) {
 
         if (classification.action === 'IGNORE') {
             log.groupIgnored(phone);
-            return;
-        }
-
-        if (classification.action === 'SUPPLIER') {
-            upsertPatient({
-                phone,
-                status: 'SUPPLIER',
-                source: classification.source,
-                trigger_message: classification.trigger_message
-            });
-            log.supplierIgnored(phone);
             return;
         }
 

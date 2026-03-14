@@ -30,30 +30,6 @@ export const SESSION_EXPIRY_HOURS = 24;
 export const CLEANUP_INTERVAL_MINUTES = 60;
 export const REENGAGEMENT_DELAY_MINUTES = 30;
 
-// ── Trigger Messages (pre-filled from Meta ads)
-export const TRIGGERS = [
-    "¡Hola! Quiero más información.",
-    "Quiero mejorar mi sonrisa",
-    "Quiero información",
-    "Quiero más información",
-    "Me gustaría agendar",
-    "Hola, me recomendaron contigo",
-    "Quiero agendar",
-    "Quiero agendar una cita",
-    "Estoy interesado en una consulta",
-    "Precio?",
-    "Precio de un diseño de sonrisa?",
-    "Que costo tiene?",
-    "Que precio tiene?"
-];
-
-// ── Supplier Detection Keywords
-export const SUPPLIER_KEYWORDS = [
-    'invoice', 'supplies', 'order', 'dental deposit', 'payment request',
-    'supplier quote', 'shipping', 'purchase order', 'tax id',
-    'factura', 'insumos', 'pedido', 'cuenta de cobro', 'cotización'
-];
-
 // ── Timezone
 export const COLOMBIA_TIMEZONE = 'America/Bogota';
 
@@ -86,5 +62,5 @@ export const MSG_DATA_CAPTURE = (aestheticGoal) => {
     const motivo = aestheticGoal
         ? `\n(Motivo de consulta ya lo tenemos: ${aestheticGoal} ✅ — solo confirma si es correcto)`
         : '\n• Motivo de consulta';
-    return `¡Perfecto! Solo necesito un par de datos para reservar tu cita con la Dra. Yuri 🦷\n\n• Nombre completo\n• Correo electrónico${motivo}`;
+    return `¡Perfecto! Solo necesito un par de datos para reservar tu cita con la Dra. Yuri 😊\n\n• Nombre completo\n• Correo electrónico \n• ${motivo}`;
 };
