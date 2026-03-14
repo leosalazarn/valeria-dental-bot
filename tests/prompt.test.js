@@ -42,22 +42,16 @@ describe('buildSystemPrompt — core content', () => {
     });
 });
 
-describe('buildSystemPrompt — AD_TRIGGER context', () => {
-    it('includes warm lead context for AD_TRIGGER source', () => {
-        const prompt = buildSystemPrompt({ ...baseSession, source: 'AD_TRIGGER' });
-        expect(prompt).toContain('lead caliente');
+describe('buildSystemPrompt — direct contact context', () => {
+    it('includes direct contact context for any source', () => {
+        const prompt = buildSystemPrompt({ ...baseSession, source: 'DIRECT' });
+        expect(prompt).toContain('CONTEXTO DE CONTACTO');
     });
 
-    it('does NOT include organic context for AD_TRIGGER source', () => {
-        const prompt = buildSystemPrompt({ ...baseSession, source: 'AD_TRIGGER' });
-        expect(prompt).not.toContain('orgánico');
-    });
-});
-
-describe('buildSystemPrompt — ORGANIC context', () => {
-    it('includes organic lead context for ORGANIC source', () => {
-        const prompt = buildSystemPrompt({ ...baseSession, source: 'ORGANIC' });
-        expect(prompt).toContain('orgánica');
+    it('does NOT include AD_TRIGGER or organic lead sections', () => {
+        const prompt = buildSystemPrompt({ ...baseSession, source: 'DIRECT' });
+        expect(prompt).not.toContain('lead caliente');
+        expect(prompt).not.toContain('CONTEXTO DE LEAD ORGÁNICO');
     });
 });
 

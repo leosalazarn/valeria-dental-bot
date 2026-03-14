@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:local": "node test-local.js",
-    "test:minimal": "node test-minimal.js"
+    "test:minimal": "node test-minimal.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -22,8 +23,9 @@
     "node": ">=18.0.0"
   },
   "author": "Dra. Yuri Quintero — Odontología Estética Neiva",
-  "license": "UNLICENSED",
+  "license": "LICENSED",
   "devDependencies": {
+    "husky": "^9.1.7",
     "vitest": "^4.0.18"
   }
 }
