@@ -34,7 +34,7 @@ export const REENGAGEMENT_DELAY_MINUTES = 30;
 export const COLOMBIA_TIMEZONE = 'America/Bogota';
 
 // ── Practice Info
-export const PRACTICE_NAME = 'Dra. Yuri Quintero — Odontología Estética';
+export const PRACTICE_NAME = 'Dra. Yuri Quintero — Perfeccionamiento dental #OdontologíaHechaConAmor';
 export const PRACTICE_LOCATION = 'Neiva, Huila, Colombia';
 export const CONSULTATION_PRICE = 80000;
 export const BOOK_PRICE = 30000;

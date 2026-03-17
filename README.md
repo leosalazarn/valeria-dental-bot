@@ -6,7 +6,8 @@
 ![License](https://img.shields.io/badge/license-Proprietary-red)
 ![Status](https://img.shields.io/badge/status-production--ready-brightgreen)
 
-> AI-powered WhatsApp Business assistant for **Dra. Yuri Quintero — Odontología Estética**, Neiva, Colombia.  
+> AI-powered WhatsApp Business assistant for **Dra. Yuri Quintero — Perfeccionamiento dental #OdontologíaHechaConAmor**,
+> Neiva, Colombia.  
 > Handles inbound inquiries 24/7 on a dedicated line, qualifies patients, and guides them to book a consultation.
 
 **Dedicated line architecture** — every person who messages is treated as a potential patient. No trigger filtering, no

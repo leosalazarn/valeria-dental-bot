@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
     res.json({
         status: '🦷 Valeria activa',
-        servicio: `${PRACTICE_NAME} · ${PRACTICE_LOCATION}`,
+        service: `${PRACTICE_NAME} · ${PRACTICE_LOCATION}`,
         hora: formatColombiaTime(),
     });
 });

@@ -1,7 +1,7 @@
 {
   "name": "valeria-dental-bot",
   "version": "1.0.0",
-  "description": "Asesora IA 24/7 para el consultorio de la Dra. Yuri Quintero — Odontología Estética Neiva · WhatsApp Business + Claude",
+  "description": "Asesora IA 24/7 para la clínica de la Dra. Yuri Quintero — Perfeccionamiento dental #OdontologíaHechaConAmor en Neiva · WhatsApp Business + Claude",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -22,7 +22,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "author": "Dra. Yuri Quintero — Odontología Estética Neiva",
+  "author": "Leonardo Salazar & Dra. Yuri Quintero",
   "license": "LICENSED",
   "devDependencies": {
     "husky": "^9.1.7",

@@ -77,8 +77,6 @@ NEQUI_NUMBER=...                       # Nequi phone number
 DAVIVIENDA_ACCOUNT=...                 # Davivienda account number
 ```
 
-> ⚠️ Banking details must NEVER be in the code — only in environment variables.
-
 ---
 
 ## 6. PROJECT STRUCTURE
