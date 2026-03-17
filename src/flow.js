@@ -4,7 +4,9 @@ import {
     addMessageToHistory,
     updateSession,
     setReengagementTimer,
-    clearReengagementTimer
+    clearReengagementTimer,
+    recordPhase,
+    recordFirstResponse,
 } from './session.js';
 import {buildSystemPrompt, buildCurrentPatientPrompt} from './prompt.js';
 import {classifyMessage} from './classifier.js';
@@ -60,6 +62,7 @@ export async function processMessage(phone, text, chatType) {
             if (conversionResponse) {
                 addMessageToHistory(phone, 'assistant', conversionResponse);
                 await sendMessage(phone, conversionResponse);
+                recordFirstResponse(phone);
                 extractIntent(phone, conversionResponse, session, classification);
                 return;
             }
@@ -96,6 +99,7 @@ export async function processMessage(phone, text, chatType) {
         const cleanResponse = stripSignals(aiResponse);
 
         clearReengagementTimer(phone);
+        recordFirstResponse(phone);
         log.outgoing(phone, cleanResponse);
         await sendMessage(phone, cleanResponse);
 
@@ -113,15 +117,19 @@ function handleConversionFlow(phone, session, text = '') {
     // Phase A: Data extraction — AI handles naturally until name + goal are known
     if (!session.name || !session.aesthetic_goal) {
         updateSession(phone, {phase: 'EXTRACTION'});
+        recordPhase(phone, 'EXTRACTION');
         return null;
     }
 
     // Phase B: Hook delivery — fires once when name + goal are available
     if (phase === 'EXTRACTION') {
         updateSession(phone, {phase: 'HOOK'});
+        recordPhase(phone, 'HOOK');
 
         // Start reengagement timer
         setReengagementTimer(phone, () => {
+            const s = getSession(phone);
+            if (s?.metrics) s.metrics.reengagement_sent = true;
             sendMessage(phone, MSG_REENGAGEMENT(session.name));
             log.reengagement(phone);
         }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
@@ -132,19 +140,25 @@ function handleConversionFlow(phone, session, text = '') {
     // Phase C: Data capture — only triggers when patient responds positively to the hook
     if (phase === 'HOOK' && isPositive) {
         updateSession(phone, {phase: 'DATA_CAPTURE'});
+        recordPhase(phone, 'DATA_CAPTURE');
         clearReengagementTimer(phone);
+        // Mark recovered if reengagement was sent before this positive response
+        const s = getSession(phone);
+        if (s?.metrics?.reengagement_sent) s.metrics.reengagement_recovered = true;
         return MSG_DATA_CAPTURE(session.aesthetic_goal);
     }
 
     // Phase D: Payment — send payment info after data is captured
     if (phase === 'DATA_CAPTURE') {
         updateSession(phone, {phase: 'PAYMENT'});
+        recordPhase(phone, 'PAYMENT');
         return null; // AI handles data extraction first
     }
 
     // Phase E: Closing — after payment instructions sent
     if (phase === 'PAYMENT') {
         updateSession(phone, {phase: 'CLOSING'});
+        recordPhase(phone, 'CLOSING');
         return null;
     }
 
