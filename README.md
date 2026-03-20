@@ -1,5 +1,7 @@
 # 🦷 Valeria — AI WhatsApp Assistant · Dra. Yuri Quintero
 
+
+![Valeria Banner](./assets/valeria-banner.png)
 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![Tests](https://img.shields.io/badge/tests-95%20passed-brightgreen)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green)
@@ -251,3 +253,4 @@ See [SECURITY.md](./SECURITY.md) for:
 
 Proprietary — All rights reserved.  
 Developed for **Dra. Yuri Quintero — Perfeccionamiento dental #OdontologíaHechaConAmor**, Neiva, Huila, Colombia.
+![LOGO Dra. Yuri Quintero](./assets/logo-dra.png)
