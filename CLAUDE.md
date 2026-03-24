@@ -285,9 +285,34 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 - Error handling with try/catch in all async functions
 - Business constants ALWAYS in `config.js`, never hardcoded elsewhere
 
+## 18. ENGINEERING WORKFLOW
+
+### Before writing any code
+1. Read CLAUDE.md fully
+2. Identify which modules are affected
+3. State the plan explicitly before touching any file
+4. Check if existing tests cover the area — if not, write them first
+
+### Code standards
+- Never hardcode user-facing text — use config.js MSG_* constants
+- Never add sensitive data to any file — env vars only
+- All async functions must have try/catch
+- Business constants always in config.js
+
+### Before declaring done
+- Run npm test — all 94 tests must pass
+- Verify no new hardcoded strings were introduced
+- Confirm no sensitive data was added to any file
+- State which files were modified and why
+
+### Debugging protocol
+- Read the full error before proposing a fix
+- Identify root cause, not just symptoms
+- Never apply a workaround without flagging it
+
 ---
 
-## 18. PRACTICE INFORMATION
+## 19. PRACTICE INFORMATION
 
 - **Name:** Dra. Yuri Quintero — Aesthetic Dentistry
 - **Location:** Neiva, Huila, Colombia
