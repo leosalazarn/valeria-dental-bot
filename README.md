@@ -1,9 +1,7 @@
 # 🦷 Valeria — AI WhatsApp Assistant · Dra. Yuri Quintero
 
-
 ![Valeria Banner](./assets/valeria-banner.png)
 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
-![Tests](https://img.shields.io/badge/tests-95%20passed-brightgreen)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green)
 ![License](https://img.shields.io/badge/license-Proprietary-red)
 ![Status](https://img.shields.io/badge/status-production--ready-brightgreen)
@@ -66,38 +64,16 @@ supplier detection.
 
 ```
 valeria-dental-bot/
-├── server.js                  ← Express entry point
-├── package.json
-├── .env.example               ← Environment variable template (no secrets)
-├── CLAUDE.md                  ← Full context for AI assistant handoff
-├── README.md                  ← This file
-├── SECURITY.md                ← Security policy and vulnerability reporting
-├── PROJECT_FILES.md           ← Module reference and test inventory
-├── tests/
-│   ├── crm.test.js
-│   ├── session.test.js
-│   ├── classifier.test.js
-│   ├── intent.test.js
-│   ├── flow.test.js
-│   ├── prompt.test.js
-│   └── utils/time.test.js
-└── src/
-    ├── config.js              ← Env vars + constants + message templates
-    ├── crm.js                 ← In-memory patient store (CRM-ready interface)
-    ├── session.js             ← Session Map + 24h auto-cleanup
-    ├── classifier.js          ← 4-rule message classifier
-    ├── prompt.js              ← Dynamic system prompt builder
-    ├── ai.js                  ← Claude API wrapper with retry logic
-    ├── whatsapp.js            ← Meta API sendMessage()
-    ├── intent.js              ← Intent extraction + NAME/GOAL signal parsing
-    ├── flow.js                ← Conversation orchestration
-    ├── routes/
-    │   ├── webhook.js         ← GET/POST /webhook + message debounce
-    │   └── debug.js           ← GET /leads, /stats
-    └── utils/
-        ├── logger.js          ← Emoji-prefixed console logging
-        └── time.js            ← Colombia timezone (America/Bogota)
+├── server.js          ← Express entry point
+├── src/               ← Application modules (config, crm, ai, flow, …)
+│   ├── routes/        ← webhook.js, debug.js
+│   └── utils/         ← logger.js, time.js
+├── tests/             ← Vitest test suites (7 suites, 95 tests)
+├── .claude/           ← Claude Code settings and slash commands
+└── *.md               ← Documentation (README, CLAUDE, SECURITY, PROJECT_FILES)
 ```
+
+See [PROJECT_FILES.md](./PROJECT_FILES.md) for the full module reference and test inventory.
 
 ---
 

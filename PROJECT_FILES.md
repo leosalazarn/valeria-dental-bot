@@ -4,11 +4,12 @@
 ![Modules](https://img.shields.io/badge/modules-14-lightgrey)
 ![Tests](https://img.shields.io/badge/tests-95%20passed-brightgreen)
 
-**Project:** Valeria — AI Assistant · Dra. Yuri Quintero's clinic 
+**Project:** Valeria — AI Assistant · Dra. Yuri Quintero's clinic
 **Repository:** [github.com/leosalazarn/valeria-dental-bot](https://github.com/leosalazarn/valeria-dental-bot)  
 **Last updated:** March 2026
 
-→ See [README.md](./README.md) for setup and deployment · [SECURITY.md](./SECURITY.md) for data policy · [CLAUDE.md](./CLAUDE.md) for full project context
+→ See [README.md](./README.md) for setup and deployment · [SECURITY.md](./SECURITY.md) for data
+policy · [CLAUDE.md](./CLAUDE.md) for full project context
 
 ---
 
@@ -21,6 +22,13 @@ valeria-dental-bot/
 ├── .env.example
 ├── .gitignore
 ├── CLAUDE.md
+└── .claude/
+    ├── settings.json        ← critical: allow/deny rules
+    ├── CLAUDE.md            ← move here from root
+    └── commands/
+        ├── test.md          ← run test suite + show failures
+        ├── review.md        ← diff + affected tests before merging
+        └── deploy-check.md  ← pre-deploy safety checklist
 ├── README.md
 ├── SECURITY.md
 ├── PROJECT_FILES.md
@@ -98,17 +106,6 @@ npm run test:watch  # watch mode
 
 ---
 
-## Documentation
-
-| File                                   | Purpose                                                   |
-|----------------------------------------|-----------------------------------------------------------|
-| [README.md](./README.md)               | Setup, architecture, deployment, endpoints                |
-| [CLAUDE.md](./CLAUDE.md)               | Full project context for AI assistant handoff             |
-| [SECURITY.md](./SECURITY.md)           | Credential policy, privacy rules, vulnerability reporting |
-| [PROJECT_FILES.md](./PROJECT_FILES.md) | This file — module reference and test inventory           |
-
----
-
 ## Dependencies
 
 ```
@@ -128,4 +125,5 @@ Development:
 All credentials and sensitive business data are stored exclusively as Render environment variables.  
 `.env.example` contains only placeholder values — no real keys.
 
-> ⚠️ Banking details, API keys, and patient data must never appear in source code or documentation. See [SECURITY.md](./SECURITY.md) for the full policy.
+> ⚠️ Banking details, API keys, and patient data must never appear in source code or documentation.
+> See [SECURITY.md](./SECURITY.md) for the full policy.

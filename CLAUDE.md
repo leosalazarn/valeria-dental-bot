@@ -6,7 +6,8 @@
 > This file transfers the full project context to an AI assistant.  
 > Created 09/03/2026. Keep it updated with every significant change.
 
-→ See [README.md](./README.md) for setup and deployment · [SECURITY.md](./SECURITY.md) for data policy · [PROJECT_FILES.md](./PROJECT_FILES.md) for module reference
+→ See [README.md](./README.md) for setup and deployment · [SECURITY.md](./SECURITY.md) for data
+policy · [PROJECT_FILES.md](./PROJECT_FILES.md) for module reference
 
 ---
 
@@ -81,29 +82,9 @@ DAVIVIENDA_ACCOUNT=...                 # Davivienda account number
 
 ## 6. PROJECT STRUCTURE
 
-```
-valeria-dental-bot/
-├── server.js                  ← entry point
-├── package.json               ← express, @anthropic-ai/sdk, dotenv
-├── .env.example
-├── CLAUDE.md                  ← this file
-└── src/
-    ├── config.js              ← env vars + business constants
-    ├── prompt.js              ← dynamic system prompt builder for Valeria
-    ├── crm.js                 ← in-memory CRM (findPatient, upsertPatient)
-    ├── session.js             ← session Map + 24h cleanup
-    ├── classifier.js          ← incoming message classifier
-    ├── ai.js                  ← Claude API call with retries
-    ├── whatsapp.js            ← sendMessage() via Meta API
-    ├── flow.js                ← conversation flow orchestration
-    ├── intent.js              ← intent extraction + NAME/GOAL signals
-    ├── routes/
-    │   ├── webhook.js         ← GET/POST /webhook + 30s debounce
-    │   └── debug.js           ← GET /leads, GET /stats
-    └── utils/
-        ├── logger.js          ← emoji-prefixed logging
-        └── time.js            ← Colombia timezone (America/Bogota)
-```
+See [PROJECT_FILES.md](./PROJECT_FILES.md) for the full file tree and per-module descriptions.
+
+Key layout: `src/` (all modules), `tests/` (7 Vitest suites), `.claude/` (settings + slash commands).
 
 ---
 
@@ -288,24 +269,28 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 ## 18. ENGINEERING WORKFLOW
 
 ### Before writing any code
+
 1. Read CLAUDE.md fully
 2. Identify which modules are affected
 3. State the plan explicitly before touching any file
 4. Check if existing tests cover the area — if not, write them first
 
 ### Code standards
+
 - Never hardcode user-facing text — use config.js MSG_* constants
 - Never add sensitive data to any file — env vars only
 - All async functions must have try/catch
 - Business constants always in config.js
 
 ### Before declaring done
-- Run npm test — all 94 tests must pass
+
+- Run npm test — all tests must pass
 - Verify no new hardcoded strings were introduced
 - Confirm no sensitive data was added to any file
 - State which files were modified and why
 
 ### Debugging protocol
+
 - Read the full error before proposing a fix
 - Identify root cause, not just symptoms
 - Never apply a workaround without flagging it
