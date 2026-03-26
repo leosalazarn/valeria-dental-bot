@@ -33,12 +33,14 @@ export function getSession(phone) {
             email: null,
             consultation_reason: null,
             data_complete: false,
+            message_count: 0,          // tracks exchanges to avoid premature hook
+            payment_info_sent: false,   // true after payment block is sent once
             // ── Conversion metrics
             metrics: {
-                first_contact: new Date().toISOString(),  // when session was created
-                first_response_ms: null,                  // ms until Valeria's first reply
-                reengagement_sent: false,                 // did the 30-min timer fire?
-                reengagement_recovered: false,            // did patient reply after reengagement?
+                first_contact: new Date().toISOString(),
+                first_response_ms: null,
+                reengagement_sent: false,
+                reengagement_recovered: false,
                 phase_timestamps: {
                     START:        new Date().toISOString(),
                     EXTRACTION:   null,

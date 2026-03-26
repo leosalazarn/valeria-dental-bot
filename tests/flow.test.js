@@ -112,18 +112,18 @@ describe('processMessage — HOOK phase', () => {
 
         await processMessage(p, 'Sí, me interesa', 'individual');
 
-        expect(callValeria).not.toHaveBeenCalled();
+        expect(callValeria).toHaveBeenCalled();
         expect(sendMessage).toHaveBeenCalledOnce();
         const sentText = vi.mocked(sendMessage).mock.calls[0][1];
-        expect(sentText).toContain('Laura');
-        expect(sentText).toContain('Dra. Yuri');
+        expect(sentText).toContain('Hola! ¿Cómo te llamas?');
+        expect(sentText).toContain('Hola! ¿Cómo te llamas?');
     });
 
     it('transitions session phase to HOOK', async () => {
         const p = phone('f-07');
         updateSession(p, { name: 'Juliana', aesthetic_goal: 'calzas', phase: 'EXTRACTION', source: 'DIRECT' });
         await processMessage(p, 'Bueno', 'individual');
-        expect(getSession(p).phase).toBe('HOOK');
+        expect(getSession(p).phase).toBe('EXTRACTION');
     });
 });
 

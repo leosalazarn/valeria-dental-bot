@@ -42,6 +42,7 @@ export async function processMessage(phone, text, chatType) {
 
         // Add user message to history
         addMessageToHistory(phone, 'user', text);
+        updateSession(phone, {message_count: (session.message_count || 0) + 1});
 
         log.incoming(phone, text);
 
@@ -121,12 +122,12 @@ function handleConversionFlow(phone, session, text = '') {
         return null;
     }
 
-    // Phase B: Hook delivery — fires once when name + goal are available
-    if (phase === 'EXTRACTION') {
+    // Phase B: Hook delivery — requires min 3 exchanges to avoid premature pitch
+    const MIN_EXCHANGES_FOR_HOOK = 3;
+    if (phase === 'EXTRACTION' && (session.message_count || 0) >= MIN_EXCHANGES_FOR_HOOK) {
         updateSession(phone, {phase: 'HOOK'});
         recordPhase(phone, 'HOOK');
 
-        // Start reengagement timer
         setReengagementTimer(phone, () => {
             const s = getSession(phone);
             if (s?.metrics) s.metrics.reengagement_sent = true;
@@ -137,26 +138,38 @@ function handleConversionFlow(phone, session, text = '') {
         return MSG_HOOK(session.name);
     }
 
+    // Still in EXTRACTION but not enough exchanges yet — let AI keep talking
+    if (phase === 'EXTRACTION') {
+        return null;
+    }
+
     // Phase C: Data capture — only triggers when patient responds positively to the hook
     if (phase === 'HOOK' && isPositive) {
         updateSession(phone, {phase: 'DATA_CAPTURE'});
         recordPhase(phone, 'DATA_CAPTURE');
         clearReengagementTimer(phone);
-        // Mark recovered if reengagement was sent before this positive response
         const s = getSession(phone);
         if (s?.metrics?.reengagement_sent) s.metrics.reengagement_recovered = true;
         return MSG_DATA_CAPTURE(session.aesthetic_goal);
     }
 
-    // Phase D: Payment — send payment info after data is captured
+    // Phase D: Payment — only advance when data is fully captured (data_complete = true)
     if (phase === 'DATA_CAPTURE') {
-        updateSession(phone, {phase: 'PAYMENT'});
-        recordPhase(phone, 'PAYMENT');
-        return null; // AI handles data extraction first
+        if (session.data_complete) {
+            updateSession(phone, {phase: 'PAYMENT'});
+            recordPhase(phone, 'PAYMENT');
+        }
+        return null; // AI handles data extraction and confirmation
     }
 
-    // Phase E: Closing — after payment instructions sent
+    // Phase E: Closing — AI handles PAYMENT phase entirely; only advance after payment info was sent
     if (phase === 'PAYMENT') {
+        if (!session.payment_info_sent) {
+            // First time in PAYMENT — mark it and let AI send the block
+            updateSession(phone, {payment_info_sent: true});
+            return null;
+        }
+        // Subsequent messages in PAYMENT → move to CLOSING
         updateSession(phone, {phase: 'CLOSING'});
         recordPhase(phone, 'CLOSING');
         return null;
