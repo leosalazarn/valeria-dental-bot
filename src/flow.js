@@ -14,7 +14,11 @@ import {callValeria} from './ai.js';
 import {sendMessage} from './whatsapp.js';
 import {extractIntent} from './intent.js';
 import {
-    REENGAGEMENT_DELAY_MINUTES, MSG_REENGAGEMENT, MSG_HOOK, MSG_DATA_CAPTURE
+    REENGAGEMENT_DELAY_MINUTES,
+    MSG_REENGAGEMENT_HOOK,
+    MSG_REENGAGEMENT_EXTRACTION,
+    MSG_REENGAGEMENT_DATA_CAPTURE,
+    MSG_HOOK, MSG_DATA_CAPTURE
 } from './config.js';
 import log from './utils/logger.js';
 
@@ -119,6 +123,14 @@ function handleConversionFlow(phone, session, text = '') {
     if (!session.name || !session.aesthetic_goal) {
         updateSession(phone, {phase: 'EXTRACTION'});
         recordPhase(phone, 'EXTRACTION');
+        // Reengagement if patient goes silent during extraction
+        setReengagementTimer(phone, () => {
+            const s = getSession(phone);
+            if (s?.metrics) s.metrics.reengagement_sent = true;
+            const name = s?.name || 'Hola';
+            sendMessage(phone, MSG_REENGAGEMENT_EXTRACTION(name));
+            log.reengagement(phone);
+        }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
         return null;
     }
 
@@ -131,7 +143,7 @@ function handleConversionFlow(phone, session, text = '') {
         setReengagementTimer(phone, () => {
             const s = getSession(phone);
             if (s?.metrics) s.metrics.reengagement_sent = true;
-            sendMessage(phone, MSG_REENGAGEMENT(session.name));
+            sendMessage(phone, MSG_REENGAGEMENT_HOOK(session.name));
             log.reengagement(phone);
         }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
 
@@ -150,6 +162,13 @@ function handleConversionFlow(phone, session, text = '') {
         clearReengagementTimer(phone);
         const s = getSession(phone);
         if (s?.metrics?.reengagement_sent) s.metrics.reengagement_recovered = true;
+        // Reengagement if patient goes silent after receiving data capture form
+        setReengagementTimer(phone, () => {
+            const s2 = getSession(phone);
+            if (s2?.metrics) s2.metrics.reengagement_sent = true;
+            sendMessage(phone, MSG_REENGAGEMENT_DATA_CAPTURE(session.name));
+            log.reengagement(phone);
+        }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
         return MSG_DATA_CAPTURE(session.aesthetic_goal);
     }
 

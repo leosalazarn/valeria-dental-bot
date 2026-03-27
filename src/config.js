@@ -28,7 +28,8 @@ export const MAX_TOKENS = 450;
 export const MAX_HISTORY = 20;
 export const SESSION_EXPIRY_HOURS = 24;
 export const CLEANUP_INTERVAL_MINUTES = 60;
-export const REENGAGEMENT_DELAY_MINUTES = 30;
+export const REENGAGEMENT_DELAY_HOURS = 24;
+export const REENGAGEMENT_DELAY_MINUTES = REENGAGEMENT_DELAY_HOURS * 60;
 
 // ── Timezone
 export const COLOMBIA_TIMEZONE = 'America/Bogota';
@@ -36,10 +37,17 @@ export const COLOMBIA_TIMEZONE = 'America/Bogota';
 // ── Practice Info
 export const PRACTICE_NAME = 'Dra. Yuri Quintero — Perfeccionamiento dental #OdontologíaHechaConAmor';
 export const PRACTICE_LOCATION = 'Neiva, Huila, Colombia';
-export const CONSULTATION_PRICE = 80000;
-export const BOOK_PRICE = 30000;
+export const CONSULTATION_PRICE = 80_000;
+export const BOOK_PRICE = 30_000;
+export const MIN_RANGE_PRICE = 2_700_000;
+export const MAX_RANGE_PRICE = 24_000_000;
 export const CONSULTATION_CURRENCY = 'Pesos';
 export const CONSULTATION_DURATION_MINUTES = 30;
+
+// All prices in COP. These are ranges — exact price depends on diagnosis.
+export const TREATMENT_PRICES = {
+    'default':                  { min: MIN_RANGE_PRICE,  max: MAX_RANGE_PRICE, note: 'varía según diagnóstico' },
+};
 
 // ── Banking Info
 export const BANK_HOLDER_NAME = process.env.BANK_HOLDER_NAME;
@@ -50,6 +58,15 @@ export const DAVIVIENDA_ACCOUNT = process.env.DAVIVIENDA_ACCOUNT;
 
 // ── Hardcoded Messages (all user-facing text centralized here)
 export const MSG_NON_TEXT = 'Por ahora solo puedo leer mensajes de texto 😊 ¿Me escribes lo que necesitas?';
+
+export const MSG_REENGAGEMENT_HOOK = (name) =>
+    `${name}, ¿te gustaría ver resultados de pacientes con un caso similar al tuyo? ✨`;
+
+export const MSG_REENGAGEMENT_EXTRACTION = (name) =>
+    `${name}, quedé pensando en lo que me contaste 🦷 ¿Pudiste resolver tus dudas? Aquí estamos para ayudarte.`;
+
+export const MSG_REENGAGEMENT_DATA_CAPTURE = (name) =>
+    `${name}, tengo todo listo para reservar tu cita ✨ ¿Me confirmas tus datos para asegurarte el cupo?`;
 
 export const MSG_REENGAGEMENT = (name) =>
     `${name}, ¿te gustaría ver resultados de pacientes con un caso similar al tuyo? ✨`;
