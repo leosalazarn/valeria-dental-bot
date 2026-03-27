@@ -68,6 +68,7 @@ export async function processMessage(phone, text, chatType) {
                 addMessageToHistory(phone, 'assistant', conversionResponse);
                 await sendMessage(phone, conversionResponse);
                 recordFirstResponse(phone);
+                resetReengagementTimer(phone, session);
                 extractIntent(phone, conversionResponse, session, classification);
                 return;
             }
@@ -103,7 +104,8 @@ export async function processMessage(phone, text, chatType) {
         // Strip internal signals before sending to patient
         const cleanResponse = stripSignals(aiResponse);
 
-        clearReengagementTimer(phone);
+        // Reset reengagement timer on every outgoing message — covers all phases
+        resetReengagementTimer(phone, session);
         recordFirstResponse(phone);
         log.outgoing(phone, cleanResponse);
         await sendMessage(phone, cleanResponse);
@@ -111,6 +113,30 @@ export async function processMessage(phone, text, chatType) {
     } catch (error) {
         log.error('processMessage', error);
     }
+}
+
+// Universal reengagement reset — fires after every outgoing message in any phase
+function resetReengagementTimer(phone, session) {
+    clearReengagementTimer(phone);
+    const s = getSession(phone);
+    const name = s?.name || '';
+    const phase = s?.phase || 'EXTRACTION';
+
+    let msg;
+    if (phase === 'DATA_CAPTURE') {
+        msg = MSG_REENGAGEMENT_DATA_CAPTURE(name);
+    } else if (phase === 'HOOK') {
+        msg = MSG_REENGAGEMENT_HOOK(name);
+    } else {
+        msg = MSG_REENGAGEMENT_EXTRACTION(name);
+    }
+
+    setReengagementTimer(phone, () => {
+        const current = getSession(phone);
+        if (current?.metrics) current.metrics.reengagement_sent = true;
+        sendMessage(phone, msg);
+        log.reengagement(phone);
+    }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
 }
 
 // Conversion flow phases
@@ -123,14 +149,6 @@ function handleConversionFlow(phone, session, text = '') {
     if (!session.name || !session.aesthetic_goal) {
         updateSession(phone, {phase: 'EXTRACTION'});
         recordPhase(phone, 'EXTRACTION');
-        // Reengagement if patient goes silent during extraction
-        setReengagementTimer(phone, () => {
-            const s = getSession(phone);
-            if (s?.metrics) s.metrics.reengagement_sent = true;
-            const name = s?.name || 'Hola';
-            sendMessage(phone, MSG_REENGAGEMENT_EXTRACTION(name));
-            log.reengagement(phone);
-        }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
         return null;
     }
 
@@ -139,14 +157,6 @@ function handleConversionFlow(phone, session, text = '') {
     if (phase === 'EXTRACTION' && (session.message_count || 0) >= MIN_EXCHANGES_FOR_HOOK) {
         updateSession(phone, {phase: 'HOOK'});
         recordPhase(phone, 'HOOK');
-
-        setReengagementTimer(phone, () => {
-            const s = getSession(phone);
-            if (s?.metrics) s.metrics.reengagement_sent = true;
-            sendMessage(phone, MSG_REENGAGEMENT_HOOK(session.name));
-            log.reengagement(phone);
-        }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
-
         return MSG_HOOK(session.name);
     }
 
@@ -159,36 +169,26 @@ function handleConversionFlow(phone, session, text = '') {
     if (phase === 'HOOK' && isPositive) {
         updateSession(phone, {phase: 'DATA_CAPTURE'});
         recordPhase(phone, 'DATA_CAPTURE');
-        clearReengagementTimer(phone);
         const s = getSession(phone);
         if (s?.metrics?.reengagement_sent) s.metrics.reengagement_recovered = true;
-        // Reengagement if patient goes silent after receiving data capture form
-        setReengagementTimer(phone, () => {
-            const s2 = getSession(phone);
-            if (s2?.metrics) s2.metrics.reengagement_sent = true;
-            sendMessage(phone, MSG_REENGAGEMENT_DATA_CAPTURE(session.name));
-            log.reengagement(phone);
-        }, REENGAGEMENT_DELAY_MINUTES * 60 * 1000);
         return MSG_DATA_CAPTURE(session.aesthetic_goal);
     }
 
-    // Phase D: Payment — only advance when data is fully captured (data_complete = true)
+    // Phase D: Payment — only advance when data is fully captured
     if (phase === 'DATA_CAPTURE') {
         if (session.data_complete) {
             updateSession(phone, {phase: 'PAYMENT'});
             recordPhase(phone, 'PAYMENT');
         }
-        return null; // AI handles data extraction and confirmation
+        return null;
     }
 
-    // Phase E: Closing — AI handles PAYMENT phase entirely; only advance after payment info was sent
+    // Phase E: Closing — advance after payment info was sent once
     if (phase === 'PAYMENT') {
         if (!session.payment_info_sent) {
-            // First time in PAYMENT — mark it and let AI send the block
             updateSession(phone, {payment_info_sent: true});
             return null;
         }
-        // Subsequent messages in PAYMENT → move to CLOSING
         updateSession(phone, {phase: 'CLOSING'});
         recordPhase(phone, 'CLOSING');
         return null;
