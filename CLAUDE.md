@@ -25,7 +25,7 @@ deposit to confirm a consultation appointment with the doctor.
 
 ## 2. ABSOLUTE BUSINESS RULES
 
-- ❌ **NEVER give treatment prices** — only the consultation price (set in env vars)
+- ❌ **NEVER give exact treatment prices** — only approximate ranges when patient insists (configured in `config.js TREATMENT_PRICES`)
 - ❌ **NEVER ask for ID or additional phone number** — phone is already known from WhatsApp
 - ❌ **NEVER confirm or schedule appointments** — only capture data (DentalLink integration pending)
 - ✅ Dra. Yuri is a woman: always "la Dra. Yuri" or "la doctora"
@@ -44,7 +44,7 @@ deposit to confirm a consultation appointment with the doctor.
 | AI        | Anthropic Claude (model: `claude-sonnet-4-6`)      |
 | Server    | Node.js + Express                                  |
 | Hosting   | Render.com                                         |
-| CRM       | In-memory Map (Supabase migration pending)         |
+| Database  | Supabase (PostgreSQL) — patient CRM                |
 
 ---
 
@@ -55,12 +55,13 @@ deposit to confirm a consultation appointment with the doctor.
 | GitHub Repo       | ✅      | github.com/leosalazarn/valeria-dental-bot (public)                  |
 | Render Deploy     | ✅      | https://valeria-dental-bot.onrender.com                             |
 | Anthropic API Key | ✅      | Set in Render env vars                                              |
+| Supabase          | ✅      | Patient CRM — credentials in Render env vars                        |
 | Meta App          | ✅      | "valeria-bot" (App ID in Render env vars)                           |
 | Webhook verified  | ✅      | Connected and active                                                |
 | Meta Token        | ⚠️     | Temporary (expires 24h) — permanent token pending                   |
 | WhatsApp Number   | ⚠️     | Test: +1 (555) 166-5964 — real clinic number pending                |
 | Meta App          | ⚠️     | In Development mode — needs to go Live                              |
-| Render plan       | ⚠️     | Free (sleeps after 15 min) — upgrade to $7/month before running ads |
+| Render plan       | ⚠️     | Free (sleeps after 15 min) — upgrade to $7/month before going live  |
 
 ---
 
@@ -75,7 +76,9 @@ BANK_HOLDER_NAME=...                   # Account holder full name
 BANK_HOLDER_CC=...                     # Account holder ID number
 BANCOLOMBIA_ACCOUNT=...                # Bancolombia account number
 NEQUI_NUMBER=...                       # Nequi phone number
-DAVIVIENDA_ACCOUNT=...                 # Davivienda account number
+DAVIVIENDA_ACCOUNT=...                 # Davivienda savings account number
+SUPABASE_URL=...                       # Supabase → Project Settings → API → Project URL
+SUPABASE_ANON_KEY=...                  # Supabase → Project Settings → API → anon public key
 ```
 
 ---
@@ -93,10 +96,12 @@ Key layout: `src/` (all modules), `tests/` (7 Vitest suites), `.claude/` (settin
 ```js
 CLAUDE_MODEL = 'claude-sonnet-4-6'
 MAX_TOKENS = 450
-CONSULTATION_PRICE = ...          // set in config.js
-BOOK_PRICE = ...                  // set in config.js
-CONSULTATION_DURATION_MINUTES = 30  // consultation duration
-REENGAGEMENT_DELAY_MINUTES = 30     // re-engagement timer
+CONSULTATION_PRICE = ...              // set in config.js
+BOOK_PRICE = ...                      // set in config.js
+MIN_RANGE_PRICE = 2_700_000          // lowest treatment range (COP)
+MAX_RANGE_PRICE = 24_000_000         // highest treatment range (COP)
+CONSULTATION_DURATION_MINUTES = 30   // consultation duration
+REENGAGEMENT_DELAY_HOURS = 24        // 24h universal re-engagement timer
 SESSION_EXPIRY_HOURS = 24
 ```
 
@@ -108,13 +113,20 @@ SESSION_EXPIRY_HOURS = 24
 EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
 ```
 
-| Phase        | Entry condition                     | Action                                      |
-|--------------|-------------------------------------|---------------------------------------------|
-| EXTRACTION   | No name or no aesthetic_goal        | AI extracts name and goal naturally         |
-| HOOK         | Has name + aesthetic_goal           | Hardcoded message offering the consultation |
-| DATA_CAPTURE | Patient responds positively to hook | Asks for full name, email, reason           |
-| PAYMENT      | Data captured                       | AI sends exact banking details              |
-| CLOSING      | Payment instructed                  | AI awaits receipt, confirms                 |
+| Phase        | Entry condition                                      | Action                              |
+|--------------|------------------------------------------------------|-------------------------------------|
+| EXTRACTION   | No name or no aesthetic_goal                         | AI extracts name and goal naturally |
+| HOOK         | Has name + goal AND ≥3 exchanges (MIN_EXCHANGES = 3) | Hardcoded consultation pitch        |
+| DATA_CAPTURE | Patient responds positively to hook                  | Asks for full name, email, reason   |
+| PAYMENT      | data_complete = true                                 | AI sends exact banking details      |
+| CLOSING      | payment_info_sent = true + next message              | AI awaits receipt, confirms         |
+
+### Universal re-engagement (24h)
+
+After every outgoing message in ANY phase, a 24h timer resets. If the patient goes silent:
+- `EXTRACTION` → *"quedé pensando en lo que me contaste..."*
+- `HOOK` → *"todavía tenemos cupos disponibles..."*
+- `DATA_CAPTURE` → *"tengo todo listo para reservar tu cita..."*
 
 ### Internal signals (NOT visible to the patient)
 
@@ -196,12 +208,12 @@ Cuando hagas el abono, envíame el comprobante aquí y confirmamos tu cita 🙌
   status,                   // NEW | PROSPECT | CONSULTATION_SCHEDULED | IN_TREATMENT | INACTIVE
   aesthetic_goal,           // whitening, smile design, veneers, implants, etc.
   source,                   // DIRECT | ORGANIC
-  trigger_message,          // exact ad message
   data_complete,            // boolean — true when full_name + email + consultation_reason are set
   first_contact,
   last_interaction,
   notes
 }
+// Persisted in Supabase — survives server restarts
 // TODO: integrate with DentalLink API when data_complete === true
 ```
 
@@ -232,14 +244,12 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 
 ## 15. PENDING (priority order)
 
-1. **Permanent Meta token** → Meta Business Suite → Settings → System Users → generate token with
-   `whatsapp_business_messaging`
+1. **Permanent Meta token** → Meta Business Suite → Settings → System Users → generate token with `whatsapp_business_messaging`
 2. **Real clinic phone number** → register in Meta (remove personal WhatsApp from number first)
 3. **Meta App to Live mode** → requires registered real number
 4. **Upgrade Render to $7/month** → eliminates 15-min sleep — **critical before going live**
-5. **Migrate to a CRM** → code already structured, just change `findPatient` and `upsertPatient` in `crm.js`
-6. **Meta Business Verification** → RUT or chamber of commerce from Dra. Yuri (for 1k+ conversations/month)
-7. **DentalLink integration** → API for automatic scheduling (TODO in crm.js)
+5. **Meta Business Verification** → RUT or chamber of commerce from Dra. Yuri (for 1k+ conversations/month)
+6. **DentalLink integration** → API for automatic scheduling (TODO in crm.js)
 
 ---
 
@@ -249,10 +259,13 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 |--------------------------------|------------------------------------------------------------------------------|
 | No n8n                         | The state machine with phases and timers required custom logic               |
 | No Google Sheets               | Crashed the server on startup — replaced by in-memory Map                    |
-| CRM migration pending          | Only 2 functions to change in crm.js                                         |
+| Supabase for CRM               | Free tier, persistent across restarts, minimal code change (2 functions)     |
 | Public repo                    | Safe — .env excluded by .gitignore, sensitive data in Render                 |
 | Dedicated WhatsApp line        | Eliminates need for triggers/supplier detection — every contact is a lead    |
 | Respond to all individual msgs | No IGNORE for unknown contacts — dedicated line = intent assumed             |
+| Price ranges (not exact)       | Reduces drop-off when patients ask budget — still drives toward valoración   |
+| MIN_EXCHANGES_FOR_HOOK = 3     | Prevents premature pitch — needs rapport before offering consultation        |
+| Universal 24h reengagement     | Covers all phases — patient silences detected regardless of funnel position  |
 | All data in 1 message          | Asks for full name + email + reason in a single message (token optimization) |
 | Sonnet 4.6 model               | Haiku gave frequent 529 errors — Sonnet is more stable                       |
 

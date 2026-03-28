@@ -34,16 +34,17 @@ supplier detection.
 
 ## Features
 
-| Feature                    | Description                                            |
-|----------------------------|--------------------------------------------------------|
-| 24/7 availability          | Responds instantly regardless of office hours          |
-| Natural conversation       | Warm Colombian Spanish (`tú`), never robotic           |
-| Multiphase conversion flow | Guides patient from first contact to deposit           |
-| Silent data extraction     | Captures name and goal without interrupting flow       |
-| Re-engagement timer        | Follows up automatically after 30 min of silence       |
-| Intent tracking            | Logs objection type, phase, and outcome per patient    |
-| In-memory CRM              | Session + patient data with 24h auto-cleanup           |
-| Retry logic                | Exponential backoff on Claude API errors (529/503/500) |
+| Feature                    | Description                                                          |
+|----------------------------|----------------------------------------------------------------------|
+| 24/7 availability          | Responds instantly regardless of office hours                        |
+| Natural conversation       | Warm Colombian Spanish (`tú`), first person plural ("nosotros")      |
+| Multiphase conversion flow | Guides patient from first contact to deposit                         |
+| Silent data extraction     | Captures name and goal without interrupting flow                     |
+| Universal re-engagement    | 24h follow-up timer active in every phase (EXTRACTION→CLOSING)       |
+| Approximate price ranges   | Shares treatment ranges when patient insists — never exact prices    |
+| Intent tracking            | Logs objection type, phase, and outcome per patient                  |
+| Supabase CRM               | Patient data persisted in Supabase (survives server restarts)        |
+| Retry logic                | Exponential backoff on Claude API errors (529/503/500)               |
 
 ---
 
@@ -55,8 +56,8 @@ supplier detection.
 | AI        | Anthropic Claude `claude-sonnet-4-6`      |
 | Messaging | Meta WhatsApp Cloud API                   |
 | Hosting   | Render.com                                |
-| Storage   | In-memory Map (CRM migration ready)       |
-| Tests     | Vitest — 95 tests, 7 suites, 100% passing |
+| Database  | Supabase (PostgreSQL) — patient CRM       |
+| Tests     | Vitest — 94 tests, 7 suites, 100% passing |
 
 ---
 
@@ -148,6 +149,8 @@ BANK_HOLDER_CC=...          # Account holder national ID
 BANCOLOMBIA_ACCOUNT=...     # Bancolombia savings account number
 NEQUI_NUMBER=...            # Nequi phone number
 DAVIVIENDA_ACCOUNT=...      # Davivienda savings account number
+SUPABASE_URL=...            # Supabase → Project Settings → API → Project URL
+SUPABASE_ANON_KEY=...       # Supabase → Project Settings → API → anon public key
 ```
 
 > ⚠️ Banking credentials must live **only** in environment variables — never in source code, logs, or documentation.
@@ -163,8 +166,8 @@ DAVIVIENDA_ACCOUNT=...      # Davivienda savings account number
 2. Create a new **Web Service** on [Render.com](https://render.com)
 3. Connect the repository
 4. Configure:
-    - **Build command:** `npm install`
-    - **Start command:** `npm start`
+   - **Build command:** `npm install`
+   - **Start command:** `npm start`
 5. Add all environment variables in the Render dashboard
 6. Deploy — copy the production URL
 7. Set Meta webhook URL: `https://your-app.onrender.com/webhook`
