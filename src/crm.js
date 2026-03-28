@@ -1,74 +1,109 @@
-// CRM module — in-memory patient store with Supabase-ready interface
-// TODO: Replace with Supabase client when scaling
-// supabase.from('patients').select().eq('phone', phone)
-
+// CRM module — Supabase-backed patient store
+// Interface unchanged: findPatient, upsertPatient, getAllPatients, getStats
+import {createClient} from '@supabase/supabase-js';
+import {SUPABASE_URL, SUPABASE_ANON_KEY} from './config.js';
 import {getColombiaNow} from './utils/time.js';
+import log from './utils/logger.js';
 
-const patients = new Map();
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-export function findPatient(phone) {
-    return patients.get(phone) || null;
-}
+export async function findPatient(phone) {
+    try {
+        const {data, error} = await supabase
+            .from('patients')
+            .select('*')
+            .eq('phone', phone)
+            .single();
 
-export function upsertPatient(data) {
-    const existing = findPatient(data.phone);
-    const now = getColombiaNow();
-
-    if (existing) {
-        patients.set(data.phone, {
-            ...existing,
-            ...data,
-            last_interaction: now,
-        });
-    } else {
-        patients.set(data.phone, {
-            phone: data.phone,
-            name: data.name || null,
-            status: data.status || 'NEW',
-            aesthetic_goal: data.aesthetic_goal || null,
-            source: data.source || 'ORGANIC',
-            trigger_message: data.trigger_message || null,
-            first_contact: now,
-            last_interaction: now,
-            notes: data.notes || '',
-            last_intent: data.last_intent || 'OTHER',
-            full_name: data.full_name || null,
-            email: data.email || null,
-            consultation_reason: data.consultation_reason || null,
-            data_complete: data.data_complete || false,
-        });
-    }
-
-    // Set status to CONSULTATION_SCHEDULED when data is complete
-    const patient = patients.get(data.phone);
-    if (patient.data_complete) {
-        patient.status = 'CONSULTATION_SCHEDULED';
-        // TODO: POST to DentalLink API when integration is ready
+        if (error && error.code !== 'PGRST116') { // PGRST116 = row not found
+            log.error('findPatient', error);
+        }
+        return data || null;
+    } catch (err) {
+        log.error('findPatient', err);
+        return null;
     }
 }
 
-export function getAllPatients() {
-    return Array.from(patients.values());
+export async function upsertPatient(data) {
+    try {
+        const now = getColombiaNow();
+        const existing = await findPatient(data.phone);
+
+        const record = existing
+            ? {...existing, ...data, last_interaction: now}
+            : {
+                phone: data.phone,
+                name: data.name || null,
+                status: data.status || 'NEW',
+                aesthetic_goal: data.aesthetic_goal || null,
+                source: data.source || 'ORGANIC',
+                trigger_message: data.trigger_message || null,
+                first_contact: now,
+                last_interaction: now,
+                notes: data.notes || '',
+                last_intent: data.last_intent || 'OTHER',
+                full_name: data.full_name || null,
+                email: data.email || null,
+                consultation_reason: data.consultation_reason || null,
+                data_complete: data.data_complete || false,
+            };
+
+        // Auto-promote to CONSULTATION_SCHEDULED when data is complete
+        if (record.data_complete) {
+            record.status = 'CONSULTATION_SCHEDULED';
+            // TODO: POST to DentalLink API when integration is ready
+        }
+
+        const {error} = await supabase
+            .from('patients')
+            .upsert(record, {onConflict: 'phone'});
+
+        if (error) log.error('upsertPatient', error);
+
+    } catch (err) {
+        log.error('upsertPatient', err);
+    }
 }
 
-export function getStats() {
-    const patientsArray = getAllPatients();
-    const totalLeads = patientsArray.length;
+export async function getAllPatients() {
+    try {
+        const {data, error} = await supabase
+            .from('patients')
+            .select('*')
+            .order('last_interaction', {ascending: false});
 
-    const bySource = patientsArray.reduce((acc, p) => {
-        acc[p.source] = (acc[p.source] || 0) + 1;
-        return acc;
-    }, {});
+        if (error) log.error('getAllPatients', error);
+        return data || [];
+    } catch (err) {
+        log.error('getAllPatients', err);
+        return [];
+    }
+}
 
-    const byStatus = patientsArray.reduce((acc, p) => {
-        acc[p.status] = (acc[p.status] || 0) + 1;
-        return acc;
-    }, {});
+export async function getStats() {
+    try {
+        const patients = await getAllPatients();
+        const total = patients.length;
 
-    const byIntent = patientsArray.reduce((acc, p) => {
-        acc[p.last_intent] = (acc[p.last_intent] || 0) + 1;
-        return acc;
-    }, {});
+        const bySource = patients.reduce((acc, p) => {
+            acc[p.source] = (acc[p.source] || 0) + 1;
+            return acc;
+        }, {});
 
-    return {total_leads: totalLeads, by_source: bySource, by_status: byStatus, by_intent: byIntent};
+        const byStatus = patients.reduce((acc, p) => {
+            acc[p.status] = (acc[p.status] || 0) + 1;
+            return acc;
+        }, {});
+
+        const byIntent = patients.reduce((acc, p) => {
+            acc[p.last_intent] = (acc[p.last_intent] || 0) + 1;
+            return acc;
+        }, {});
+
+        return {total_leads: total, by_source: bySource, by_status: byStatus, by_intent: byIntent};
+    } catch (err) {
+        log.error('getStats', err);
+        return {total_leads: 0, by_source: {}, by_status: {}, by_intent: {}};
+    }
 }

@@ -51,7 +51,7 @@ export async function processMessage(phone, text, chatType) {
         log.incoming(phone, text);
 
         // Classification
-        const classification = classifyMessage(phone, text, chatType);
+        const classification = await classifyMessage(phone, text, chatType);
 
         if (classification.action === 'IGNORE') {
             log.groupIgnored(phone);

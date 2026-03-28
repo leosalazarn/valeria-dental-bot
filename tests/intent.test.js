@@ -1,4 +1,22 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// ── In-memory CRM mock (no Supabase in tests) ────────────────────────────────
+const store = new Map();
+vi.mock('../src/crm.js', () => ({
+    findPatient: async (phone) => store.get(phone) || null,
+    upsertPatient: async (data) => {
+        const now = new Date().toISOString();
+        const existing = store.get(data.phone);
+        const record = existing
+            ? { ...existing, ...data, last_interaction: now }
+            : { status: 'NEW', source: 'ORGANIC', data_complete: false, ...data, first_contact: now, last_interaction: now };
+        if (record.data_complete) record.status = 'CONSULTATION_SCHEDULED';
+        store.set(record.phone, record);
+    },
+    getAllPatients: async () => Array.from(store.values()),
+    getStats: async () => ({}),
+}));
+
 import { extractIntent } from '../src/intent.js';
 import { findPatient } from '../src/crm.js';
 
@@ -101,19 +119,22 @@ describe('intent — EXTRACTED signal (DATA_CAPTURE phase)', () => {
 });
 
 describe('intent — CRM update side effect', () => {
-    it('creates or updates patient in CRM after extraction', () => {
+    it('creates or updates patient in CRM after extraction', async () => {
         const p = phone('i-14');
         extractIntent(p, 'Hola!\nNAME: Valentina\nGOAL: implantes', { ...baseSession, name: null });
-        const patient = findPatient(p);
+        await new Promise(r => setTimeout(r, 50));
+        const patient = await findPatient(p);
         expect(patient).not.toBeNull();
         expect(patient.name).toBe('Valentina');
         expect(patient.aesthetic_goal).toBe('implantes');
     });
 
-    it('sets status to CONSULTATION_SCHEDULED in CLOSING phase', () => {
+    it('sets status to CONSULTATION_SCHEDULED in CLOSING phase', async () => {
         const p = phone('i-15');
         const closingSession = { ...baseSession, phase: 'CLOSING', name: 'Nadia' };
         extractIntent(p, 'Tu cita está confirmada!', closingSession);
-        expect(findPatient(p).status).toBe('CONSULTATION_SCHEDULED');
+        await new Promise(r => setTimeout(r, 50));
+        const patient = await findPatient(p);
+        expect(patient?.status).toBe('CONSULTATION_SCHEDULED');
     });
 });

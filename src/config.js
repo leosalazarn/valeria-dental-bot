@@ -5,7 +5,8 @@ import 'dotenv/config';
 const requiredEnvVars = [
     'ANTHROPIC_API_KEY', 'WA_ACCESS_TOKEN', 'WA_PHONE_NUMBER_ID', 'VERIFY_TOKEN',
     'BANK_HOLDER_NAME', 'BANK_HOLDER_CC',
-    'BANCOLOMBIA_ACCOUNT', 'NEQUI_NUMBER', 'DAVIVIENDA_ACCOUNT'
+    'BANCOLOMBIA_ACCOUNT', 'NEQUI_NUMBER', 'DAVIVIENDA_ACCOUNT',
+    'SUPABASE_URL', 'SUPABASE_ANON_KEY'
 ];
 for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
@@ -19,6 +20,8 @@ export const WA_ACCESS_TOKEN = process.env.WA_ACCESS_TOKEN;
 export const WA_PHONE_NUMBER_ID = process.env.WA_PHONE_NUMBER_ID;
 export const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 export const PORT = process.env.PORT || 3000;
+export const SUPABASE_URL = process.env.SUPABASE_URL;
+export const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 // ── Claude Configuration
 export const CLAUDE_MODEL = 'claude-sonnet-4-6';

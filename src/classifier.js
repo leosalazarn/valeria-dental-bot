@@ -3,14 +3,14 @@ import {findPatient} from './crm.js';
 import {getSession} from './session.js';
 import log from './utils/logger.js';
 
-export function classifyMessage(phone, text, chatType) {
+export async function classifyMessage(phone, text, chatType) {
     // RULE 1: Ignore group messages
     if (chatType === 'group') {
         return {action: 'IGNORE', reason: 'group_message'};
     }
 
     // RULE 2: Returning patient in active treatment
-    const patient = findPatient(phone);
+    const patient = await findPatient(phone);
     if (patient && patient.status === 'IN_TREATMENT') {
         return {action: 'CURRENT_PATIENT', reason: 'in_treatment'};
     }
