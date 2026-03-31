@@ -131,7 +131,7 @@ describe('intent — CRM update side effect', () => {
 
     it('sets status to CONSULTATION_SCHEDULED in CLOSING phase', async () => {
         const p = phone('i-15');
-        const closingSession = { ...baseSession, phase: 'CLOSING', name: 'Nadia' };
+        const closingSession = { ...baseSession, phase: 'CLOSING', name: 'Coco' };
         extractIntent(p, 'Tu cita está confirmada!', closingSession);
         await new Promise(r => setTimeout(r, 50));
         const patient = await findPatient(p);
