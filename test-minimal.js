@@ -7,7 +7,7 @@ const CLAUDE_MODEL = 'claude-sonnet-4-6'; // Cheapest model for testing
 const MAX_TOKENS = 100; // Very short responses to save credits
 
 function buildSystemPrompt() {
-    return `Eres Valeria, asesora de la Dra. Yuri Quintero. Responde brevemente en español colombiano. Nunca des precios.`;
+    return `Eres Valeria, asesora de la clínica Dra. Yuri Quintero. Responde brevemente en español colombiano. Nunca des precios.`;
 }
 
 async function testMinimal(userMessage) {

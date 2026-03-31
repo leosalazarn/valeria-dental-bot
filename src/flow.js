@@ -18,7 +18,8 @@ import {
     MSG_REENGAGEMENT_HOOK,
     MSG_REENGAGEMENT_EXTRACTION,
     MSG_REENGAGEMENT_DATA_CAPTURE,
-    MSG_HOOK, MSG_DATA_CAPTURE
+    MSG_HOOK, MSG_DATA_CAPTURE,
+    MSG_WELCOME
 } from './config.js';
 import log from './utils/logger.js';
 
@@ -46,7 +47,8 @@ export async function processMessage(phone, text, chatType) {
 
         // Add user message to history
         await addMessageToHistory(phone, 'user', text);
-        await updateSession(phone, {message_count: (session.message_count || 0) + 1});
+        const currentMessageCount = (session.message_count || 0) + 1;
+        await updateSession(phone, {message_count: currentMessageCount});
 
         log.incoming(phone, text);
 
@@ -63,13 +65,14 @@ export async function processMessage(phone, text, chatType) {
 
         // Handle conversion flow for new leads — pass text for intent detection
         if (classification.action === 'WARM_LEAD' || classification.action === 'ORGANIC_LEAD') {
-            const conversionResponse = await handleConversionFlow(phone, session, text);
+            const updatedSession = await getSession(phone); // Get updated count
+            const conversionResponse = await handleConversionFlow(phone, updatedSession, text);
             if (conversionResponse) {
                 await addMessageToHistory(phone, 'assistant', conversionResponse);
                 await sendMessage(phone, conversionResponse);
                 await recordFirstResponse(phone);
-                await resetReengagementTimer(phone, session);
-                extractIntent(phone, conversionResponse, session, classification);
+                await resetReengagementTimer(phone, updatedSession);
+                extractIntent(phone, conversionResponse, updatedSession, classification);
                 return;
             }
         }
