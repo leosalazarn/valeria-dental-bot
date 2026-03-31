@@ -6,7 +6,8 @@ const requiredEnvVars = [
     'ANTHROPIC_API_KEY', 'WA_ACCESS_TOKEN', 'WA_PHONE_NUMBER_ID', 'VERIFY_TOKEN',
     'BANK_HOLDER_NAME', 'BANK_HOLDER_CC',
     'BANCOLOMBIA_ACCOUNT', 'NEQUI_NUMBER', 'DAVIVIENDA_ACCOUNT',
-    'SUPABASE_URL', 'SUPABASE_ANON_KEY'
+    'SUPABASE_URL', 'SUPABASE_ANON_KEY',
+    'CONSULTATION_PRICE', 'BOOK_PRICE', 'MIN_RANGE_PRICE', 'MAX_RANGE_PRICE'
 ];
 for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
@@ -40,10 +41,10 @@ export const COLOMBIA_TIMEZONE = 'America/Bogota';
 // ── Practice Info
 export const PRACTICE_NAME = 'Dra. Yuri Quintero — Perfeccionamiento dental #OdontologíaHechaConAmor';
 export const PRACTICE_LOCATION = 'Neiva, Huila, Colombia';
-export const CONSULTATION_PRICE = 80_000;
-export const BOOK_PRICE = 30_000;
-export const MIN_RANGE_PRICE = 2_700_000;
-export const MAX_RANGE_PRICE = 24_000_000;
+export const CONSULTATION_PRICE = Number(process.env.CONSULTATION_PRICE);
+export const BOOK_PRICE = Number(process.env.BOOK_PRICE);
+export const MIN_RANGE_PRICE = Number(process.env.MIN_RANGE_PRICE);
+export const MAX_RANGE_PRICE = Number(process.env.MAX_RANGE_PRICE);
 export const CONSULTATION_CURRENCY = 'Pesos';
 export const CONSULTATION_DURATION_MINUTES = 30;
 
