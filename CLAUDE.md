@@ -95,7 +95,7 @@ Key layout: `src/` (all modules), `tests/` (7 Vitest suites), `.claude/` (settin
 
 ```js
 CLAUDE_MODEL = 'claude-sonnet-4-6'
-MAX_TOKENS = 200
+MAX_TOKENS = 1000
 CONSULTATION_PRICE = ...              // set in config.js
 BOOK_PRICE = ...                      // set in config.js
 MIN_RANGE_PRICE = 2_700_000          // lowest treatment range (COP)

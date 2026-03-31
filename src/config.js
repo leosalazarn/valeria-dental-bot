@@ -26,7 +26,7 @@ export const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 // ── Claude Configuration
 export const CLAUDE_MODEL = 'claude-sonnet-4-6';
-export const MAX_TOKENS = 200;
+export const MAX_TOKENS = 1000;
 
 // ── Session Configuration
 export const MAX_HISTORY = 20;
