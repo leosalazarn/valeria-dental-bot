@@ -48,6 +48,28 @@ supplier detection.
 
 ---
 
+## Architecture
+
+![Architecture](./assets/architecture.png)
+```mermaid
+graph TD
+    User((Patient)) -- WhatsApp --> Meta[Meta Cloud API]
+    Meta -- Webhook --> Express[Express Server]
+    Express -- Context --> Claude[Anthropic Claude]
+    Claude -- AI Response --> Express
+    Express -- Signal Extraction --> CRM[Supabase CRM]
+    Express -- Clean Message --> Meta
+    Meta -- Response --> User
+```
+
+## Performance
+
+- **Volume:** 200+ qualified patient conversations handled autonomously.
+- **Conversion:** 40% conversion rate from first contact to data capture/deposit phase.
+- **Tracking:** Real-time funnel analysis, drop-off rates, and response times available via the `/metrics` endpoint.
+
+---
+
 ## Tech Stack
 
 | Component | Solution                                  |
