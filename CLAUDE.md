@@ -322,3 +322,28 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 - **Office hours:** Monday–Friday 8am-12pm (AM part) 2pm–6pm (PM part), Saturdays 8am–12pm
 - **Specialties:** Smile design, 3D resins, composite resins, high-durability ceramic veneers, whitening, fillings &
   restorations, general dentistry
+
+---
+
+## 20. TROUBLESHOOTING
+
+### Supabase Row Level Security (RLS) Errors
+
+**Error:** `new row violates row-level security policy for table "conversations"/"patients"`
+
+**Solution:** Run the SQL commands in `fix_rls.sql` in your Supabase SQL Editor to create proper RLS policies:
+
+**Alternative:** For stricter security, uncomment the restrictive policies in `fix_rls.sql` that only allow users to access their own records based on phone number.
+
+**Note:** These policies allow your application secure access while maintaining RLS protection.
+
+### WhatsApp Token Expiration
+
+**Error:** `Session has expired on Tuesday, 31-Mar-26 08:00:00 PDT`
+
+**Solution:** Temporary tokens expire after 24 hours. Get a new token from:
+1. Meta Business Suite → Settings → System Users
+2. Generate new token with `whatsapp_business_messaging` permission
+3. Update `WA_ACCESS_TOKEN` environment variable
+
+**Note:** For production, set up permanent tokens through the Meta app review process.

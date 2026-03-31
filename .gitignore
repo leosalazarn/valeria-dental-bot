@@ -1,5 +1,6 @@
-# ── Secretos — NUNCA subir a GitHub ─────────────────────────
+# ── Secrets ─────────────────────────
 .env
+scripts/fix_rls.sql
 
 # ── Node.js ──────────────────────────────────────────────────
 node_modules/
