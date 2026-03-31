@@ -16,25 +16,26 @@ CREATE TABLE conversations (
     payment_info_sent BOOLEAN DEFAULT FALSE,
     message_count INTEGER DEFAULT 0,
     last_interaction TIMESTAMPTZ DEFAULT NOW(),
-    metrics JSONB DEFAULT '{
-        "first_contact": null,
-        "first_response_ms": null,
-        "reengagement_sent": false,
-        "reengagement_recovered": false,
-        "phase_timestamps": {
-            "START": null,
-            "EXTRACTION": null,
-            "HOOK": null,
-            "DATA_CAPTURE": null,
-            "PAYMENT": null,
-            "CLOSING": null
-        }
-    }'::jsonb
+    metrics JSONB
 );
 
--- Add RLS policies if needed (for production)
--- ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+-- Set default for metrics column
+ALTER TABLE conversations
+ALTER COLUMN metrics SET DEFAULT '{
+    "first_contact": null,
+    "first_response_ms": null,
+    "reengagement_sent": false,
+    "reengagement_recovered": false,
+    "phase_timestamps": {
+        "START": null,
+        "EXTRACTION": null,
+        "HOOK": null,
+        "DATA_CAPTURE": null,
+        "PAYMENT": null,
+        "CLOSING": null
+    }
+}'::jsonb;
 
--- Index for performance
+-- Create indexes for performance
 CREATE INDEX idx_conversations_last_interaction ON conversations(last_interaction);
 CREATE INDEX idx_conversations_phase ON conversations(phase);
