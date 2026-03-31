@@ -95,14 +95,14 @@ Key layout: `src/` (all modules), `tests/` (7 Vitest suites), `.claude/` (settin
 
 ```js
 CLAUDE_MODEL = 'claude-sonnet-4-6'
-MAX_TOKENS = 450
+MAX_TOKENS = 200
 CONSULTATION_PRICE = ...              // set in config.js
 BOOK_PRICE = ...                      // set in config.js
 MIN_RANGE_PRICE = 2_700_000          // lowest treatment range (COP)
 MAX_RANGE_PRICE = 24_000_000         // highest treatment range (COP)
 CONSULTATION_DURATION_MINUTES = 30   // consultation duration
-REENGAGEMENT_DELAY_HOURS = 24        // 24h universal re-engagement timer
-SESSION_EXPIRY_HOURS = 24
+REENGAGEMENT_DELAY_HOURS = 24        // send re-engagement after 24h of silence
+SESSION_EXPIRY_HOURS = 72            // expire sessions after 72h of total inactivity
 ```
 
 ---
@@ -127,6 +127,11 @@ After every outgoing message in ANY phase, a 24h timer resets. If the patient go
 - `EXTRACTION` → *"quedé pensando en lo que me contaste..."*
 - `HOOK` → *"todavía tenemos cupos disponibles..."*
 - `DATA_CAPTURE` → *"tengo todo listo para reservar tu cita..."*
+
+**Session Management Logic:**
+- **24 hours of silence** → Send re-engagement message, session remains active
+- **72 hours of total inactivity** → Expire session for memory management
+- This ensures patients can respond to re-engagement messages with a valid session
 
 ### Internal signals (NOT visible to the patient)
 
@@ -162,11 +167,11 @@ Dedicated WhatsApp line — no triggers, no supplier detection. In priority orde
 
 ## 10. MESSAGE DEBOUNCE (webhook.js)
 
-If the patient sends multiple messages in a row, the bot waits **30 seconds** of silence before responding, processing
+If the patient sends multiple messages in a row, the bot waits **9 seconds** of silence before responding, processing
 all messages together as one.
 
 ```js
-const DEBOUNCE_MS = 30000;
+const DEBOUNCE_MS = 9000;
 const messageBuffers = new Map(); // key: phone, value: { messages[], timer }
 ```
 

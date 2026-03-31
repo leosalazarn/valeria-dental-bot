@@ -26,13 +26,13 @@ export const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 // ── Claude Configuration
 export const CLAUDE_MODEL = 'claude-sonnet-4-6';
-export const MAX_TOKENS = 450;
+export const MAX_TOKENS = 200;
 
 // ── Session Configuration
 export const MAX_HISTORY = 20;
-export const SESSION_EXPIRY_HOURS = 24;
+export const SESSION_EXPIRY_HOURS = 72;  // Keep sessions alive longer to handle re-engagement responses
 export const CLEANUP_INTERVAL_MINUTES = 60;
-export const REENGAGEMENT_DELAY_HOURS = 24;
+export const REENGAGEMENT_DELAY_HOURS = 24;  // Send re-engagement after 24h of silence
 export const REENGAGEMENT_DELAY_MINUTES = REENGAGEMENT_DELAY_HOURS * 60;
 
 // ── Timezone

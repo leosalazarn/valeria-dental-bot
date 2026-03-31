@@ -6,9 +6,9 @@ import log from '../utils/logger.js';
 
 const router = express.Router();
 
-// ── Message debounce buffer (30 seconds per phone number) ────
+// ── Message debounce buffer (9 seconds per phone number) ────
 const messageBuffers = new Map();
-const DEBOUNCE_MS = 10000;
+const DEBOUNCE_MS = 9000;
 
 function debounceMessage(phone, text, chatType) {
     // If timer exists, cancel it and append message
@@ -20,7 +20,7 @@ function debounceMessage(phone, text, chatType) {
         messageBuffers.set(phone, {messages: [text], timer: null});
     }
 
-    // Start new 30s timer
+    // Start new 10s timer
     const entry = messageBuffers.get(phone);
     entry.timer = setTimeout(async () => {
         const combined = entry.messages.join('\n');
@@ -74,7 +74,7 @@ router.post('/', async (req, res) => {
         const text = message.text.body.trim();
         const chatType = value.contacts?.[0]?.profile?.name ? 'individual' : 'group';
 
-        // Debounce — wait 30s to group consecutive messages
+        // Debounce — wait 10s to group consecutive messages
         debounceMessage(phoneWA, text, chatType);
 
     } catch (error) {
