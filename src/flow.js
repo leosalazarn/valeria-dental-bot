@@ -42,11 +42,11 @@ export function stripSignals(text) {
 export async function processMessage(phone, text, chatType) {
     try {
         // Get or initialize session
-        const session = getSession(phone);
+        const session = await getSession(phone);
 
         // Add user message to history
-        addMessageToHistory(phone, 'user', text);
-        updateSession(phone, {message_count: (session.message_count || 0) + 1});
+        await addMessageToHistory(phone, 'user', text);
+        await updateSession(phone, {message_count: (session.message_count || 0) + 1});
 
         log.incoming(phone, text);
 
@@ -59,16 +59,16 @@ export async function processMessage(phone, text, chatType) {
         }
 
         // Set session source from classification
-        updateSession(phone, {source: classification.source});
+        await updateSession(phone, {source: classification.source});
 
         // Handle conversion flow for new leads — pass text for intent detection
         if (classification.action === 'WARM_LEAD' || classification.action === 'ORGANIC_LEAD') {
-            const conversionResponse = handleConversionFlow(phone, session, text);
+            const conversionResponse = await handleConversionFlow(phone, session, text);
             if (conversionResponse) {
-                addMessageToHistory(phone, 'assistant', conversionResponse);
+                await addMessageToHistory(phone, 'assistant', conversionResponse);
                 await sendMessage(phone, conversionResponse);
-                recordFirstResponse(phone);
-                resetReengagementTimer(phone, session);
+                await recordFirstResponse(phone);
+                await resetReengagementTimer(phone, session);
                 extractIntent(phone, conversionResponse, session, classification);
                 return;
             }
@@ -86,13 +86,13 @@ export async function processMessage(phone, text, chatType) {
         const aiResponse = await callValeria(session.history, systemPrompt);
 
         // Add AI response to history
-        addMessageToHistory(phone, 'assistant', aiResponse);
+        await addMessageToHistory(phone, 'assistant', aiResponse);
 
         // Extract intent and update CRM
         const intent = extractIntent(phone, aiResponse, session, classification);
 
         // Update session data from intent
-        updateSession(phone, {
+        await updateSession(phone, {
             name: intent.name || session.name,
             aesthetic_goal: intent.aesthetic_goal || session.aesthetic_goal,
             full_name: intent.full_name || session.full_name,
@@ -105,8 +105,8 @@ export async function processMessage(phone, text, chatType) {
         const cleanResponse = stripSignals(aiResponse);
 
         // Reset reengagement timer on every outgoing message — covers all phases
-        resetReengagementTimer(phone, session);
-        recordFirstResponse(phone);
+        await resetReengagementTimer(phone, session);
+        await recordFirstResponse(phone);
         log.outgoing(phone, cleanResponse);
         await sendMessage(phone, cleanResponse);
 
@@ -116,9 +116,9 @@ export async function processMessage(phone, text, chatType) {
 }
 
 // Universal reengagement reset — fires after every outgoing message in any phase
-function resetReengagementTimer(phone, session) {
+async function resetReengagementTimer(phone, session) {
     clearReengagementTimer(phone);
-    const s = getSession(phone);
+    const s = await getSession(phone);
     const name = s?.name || '';
     const phase = s?.phase || 'EXTRACTION';
 
@@ -131,8 +131,8 @@ function resetReengagementTimer(phone, session) {
         msg = MSG_REENGAGEMENT_EXTRACTION(name);
     }
 
-    setReengagementTimer(phone, () => {
-        const current = getSession(phone);
+    setReengagementTimer(phone, async () => {
+        const current = await getSession(phone);
         if (current?.metrics) current.metrics.reengagement_sent = true;
         sendMessage(phone, msg);
         log.reengagement(phone);
@@ -140,23 +140,23 @@ function resetReengagementTimer(phone, session) {
 }
 
 // Conversion flow phases
-function handleConversionFlow(phone, session, text = '') {
+async function handleConversionFlow(phone, session, text = '') {
     const phase = session.phase || 'START';
     const textLower = text.toLowerCase();
     const isPositive = POSITIVE_RESPONSES.some(word => textLower.includes(word));
 
     // Phase A: Data extraction — AI handles naturally until name + goal are known
     if (!session.name || !session.aesthetic_goal) {
-        updateSession(phone, {phase: 'EXTRACTION'});
-        recordPhase(phone, 'EXTRACTION');
+        await updateSession(phone, {phase: 'EXTRACTION'});
+        await recordPhase(phone, 'EXTRACTION');
         return null;
     }
 
     // Phase B: Hook delivery — requires min 3 exchanges to avoid premature pitch
     const MIN_EXCHANGES_FOR_HOOK = 3;
     if (phase === 'EXTRACTION' && (session.message_count || 0) >= MIN_EXCHANGES_FOR_HOOK) {
-        updateSession(phone, {phase: 'HOOK'});
-        recordPhase(phone, 'HOOK');
+        await updateSession(phone, {phase: 'HOOK'});
+        await recordPhase(phone, 'HOOK');
         return MSG_HOOK(session.name);
     }
 
@@ -167,9 +167,9 @@ function handleConversionFlow(phone, session, text = '') {
 
     // Phase C: Data capture — only triggers when patient responds positively to the hook
     if (phase === 'HOOK' && isPositive) {
-        updateSession(phone, {phase: 'DATA_CAPTURE'});
-        recordPhase(phone, 'DATA_CAPTURE');
-        const s = getSession(phone);
+        await updateSession(phone, {phase: 'DATA_CAPTURE'});
+        await recordPhase(phone, 'DATA_CAPTURE');
+        const s = await getSession(phone);
         if (s?.metrics?.reengagement_sent) s.metrics.reengagement_recovered = true;
         return MSG_DATA_CAPTURE(session.aesthetic_goal);
     }
@@ -177,8 +177,8 @@ function handleConversionFlow(phone, session, text = '') {
     // Phase D: Payment — only advance when data is fully captured
     if (phase === 'DATA_CAPTURE') {
         if (session.data_complete) {
-            updateSession(phone, {phase: 'PAYMENT'});
-            recordPhase(phone, 'PAYMENT');
+            await updateSession(phone, {phase: 'PAYMENT'});
+            await recordPhase(phone, 'PAYMENT');
         }
         return null;
     }
@@ -186,11 +186,11 @@ function handleConversionFlow(phone, session, text = '') {
     // Phase E: Closing — advance after payment info was sent once
     if (phase === 'PAYMENT') {
         if (!session.payment_info_sent) {
-            updateSession(phone, {payment_info_sent: true});
+            await updateSession(phone, {payment_info_sent: true});
             return null;
         }
-        updateSession(phone, {phase: 'CLOSING'});
-        recordPhase(phone, 'CLOSING');
+        await updateSession(phone, {phase: 'CLOSING'});
+        await recordPhase(phone, 'CLOSING');
         return null;
     }
 

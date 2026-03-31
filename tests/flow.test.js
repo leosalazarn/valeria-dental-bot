@@ -1,6 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock external I/O modules before any other imports
+vi.mock('@supabase/supabase-js', () => ({
+    createClient: vi.fn(() => ({
+        from: vi.fn(() => ({
+            select: vi.fn(() => ({
+                eq: vi.fn(() => ({
+                    single: vi.fn(() => Promise.resolve({ data: null, error: { code: 'PGRST116' } }))
+                })),
+                order: vi.fn(() => ({
+                    ascending: vi.fn(() => Promise.resolve({ data: [], error: null }))
+                }))
+            })),
+            upsert: vi.fn(() => Promise.resolve({ error: null }))
+        }))
+    }))
+}));
+
 vi.mock('../src/ai.js', () => ({
     callValeria: vi.fn().mockResolvedValue('Hola! ¿Cómo te llamas?\nNAME: test'),
 }));
@@ -108,7 +124,7 @@ describe('processMessage — EXTRACTION phase (warm lead)', () => {
 describe('processMessage — HOOK phase', () => {
     it('sends hardcoded hook message when name + goal are available after EXTRACTION', async () => {
         const p = phone('f-06');
-        updateSession(p, { name: 'Laura', aesthetic_goal: 'diseño de sonrisa', phase: 'EXTRACTION', source: 'DIRECT' });
+        await updateSession(p, { name: 'Laura', aesthetic_goal: 'diseño de sonrisa', phase: 'EXTRACTION', source: 'DIRECT' });
 
         await processMessage(p, 'Sí, me interesa', 'individual');
 
@@ -121,9 +137,9 @@ describe('processMessage — HOOK phase', () => {
 
     it('transitions session phase to HOOK', async () => {
         const p = phone('f-07');
-        updateSession(p, { name: 'Juliana', aesthetic_goal: 'calzas', phase: 'EXTRACTION', source: 'DIRECT' });
+        await updateSession(p, { name: 'Juliana', aesthetic_goal: 'calzas', phase: 'EXTRACTION', source: 'DIRECT' });
         await processMessage(p, 'Bueno', 'individual');
-        expect(getSession(p).phase).toBe('EXTRACTION');
+        expect((await getSession(p)).phase).toBe('EXTRACTION');
     });
 });
 
@@ -132,7 +148,7 @@ describe('processMessage — HOOK phase', () => {
 describe('processMessage — DATA_CAPTURE phase', () => {
     it('sends data capture request on positive response to HOOK', async () => {
         const p = phone('f-08');
-        updateSession(p, { name: 'Mariela', aesthetic_goal: 'implantes', phase: 'HOOK', source: 'DIRECT' });
+        await updateSession(p, { name: 'Mariela', aesthetic_goal: 'implantes', phase: 'HOOK', source: 'DIRECT' });
 
         await processMessage(p, 'sí, quiero agendar', 'individual');
 
@@ -145,15 +161,15 @@ describe('processMessage — DATA_CAPTURE phase', () => {
 
     it('transitions session phase to DATA_CAPTURE', async () => {
         const p = phone('f-09');
-        updateSession(p, { name: 'Carmen', aesthetic_goal: 'blanqueamiento', phase: 'HOOK', source: 'ORGANIC' });
+        await updateSession(p, { name: 'Carmen', aesthetic_goal: 'blanqueamiento', phase: 'HOOK', source: 'ORGANIC' });
         await processMessage(p, 'dale', 'individual');
-        expect(getSession(p).phase).toBe('DATA_CAPTURE');
+        expect((await getSession(p)).phase).toBe('DATA_CAPTURE');
     });
 
     it('does NOT trigger DATA_CAPTURE on negative/neutral response', async () => {
         const p = phone('f-10');
         callValeria.mockResolvedValueOnce('Entiendo, sin problema. ¿Hay algo más?');
-        updateSession(p, { name: 'Tania', aesthetic_goal: 'blanqueamiento', phase: 'HOOK', source: 'DIRECT' });
+        await updateSession(p, { name: 'Tania', aesthetic_goal: 'blanqueamiento', phase: 'HOOK', source: 'DIRECT' });
         await processMessage(p, 'Ahora no puedo', 'individual');
         expect(callValeria).toHaveBeenCalledOnce();
     });

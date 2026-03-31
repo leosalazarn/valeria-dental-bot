@@ -16,7 +16,7 @@ export async function classifyMessage(phone, text, chatType) {
     }
 
     // RULE 3: Active session — conversation already in progress
-    const session = getSession(phone);
+    const session = await getSession(phone);
     if (session && session.phase && session.phase !== 'START') {
         return {action: 'ORGANIC_LEAD', reason: 'active_session', source: 'ORGANIC'};
     }

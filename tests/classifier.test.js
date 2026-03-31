@@ -1,5 +1,19 @@
 import { describe, it, expect, vi } from 'vitest';
 
+// Mock Supabase client
+vi.mock('@supabase/supabase-js', () => ({
+    createClient: vi.fn(() => ({
+        from: vi.fn(() => ({
+            select: vi.fn(() => ({
+                eq: vi.fn(() => ({
+                    single: vi.fn(() => Promise.resolve({ data: null, error: { code: 'PGRST116' } }))
+                }))
+            })),
+            upsert: vi.fn(() => Promise.resolve({ error: null }))
+        }))
+    }))
+}));
+
 // ── In-memory CRM mock (no Supabase in tests) ────────────────────────────────
 const store = new Map();
 vi.mock('../src/crm.js', () => ({
@@ -55,7 +69,7 @@ describe('classifier — Rule 2: in-treatment patient', () => {
 describe('classifier — Rule 3: active session (organic lead)', () => {
     it('returns ORGANIC_LEAD when session phase is not START', async () => {
         const p = phone('c-05');
-        updateSession(p, { phase: 'EXTRACTION' });
+        await updateSession(p, { phase: 'EXTRACTION' });
         const result = await classifyMessage(p, 'Quiero hacerme los dientes', 'individual');
         expect(result.action).toBe('ORGANIC_LEAD');
         expect(result.source).toBe('ORGANIC');
@@ -63,8 +77,8 @@ describe('classifier — Rule 3: active session (organic lead)', () => {
 
     it('does NOT return ORGANIC_LEAD when phase is START', async () => {
         const p = phone('c-06');
-        updateSession(p, { phase: 'START' });
-        const result = await classifyMessage(p, 'Hola buenas', 'individual');
+        await updateSession(p, { phase: 'START' });
+        const result = await classifyMessage(p, 'Una pregunta', 'individual');
         expect(result.action).not.toBe('ORGANIC_LEAD');
     });
 });
