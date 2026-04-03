@@ -1,17 +1,27 @@
 // Webhook routes — Meta webhook verification and message receiving
 import express from 'express';
-import {VERIFY_TOKEN} from '../config.js';
+import {VERIFY_TOKEN, MSG_NON_TEXT} from '../config.js';
 import {processMessage} from '../flow.js';
 import log from '../utils/logger.js';
 
 const router = express.Router();
 
-// ── Message debounce buffer (9 seconds per phone number) ────
+// ── Deduplication — prevent Meta retries from processing same message twice
+const processedIds = new Set();
+const DEDUP_TTL_MS = 60 * 1000; // forget message IDs after 1 minute
+
+function isDuplicate(messageId) {
+    if (processedIds.has(messageId)) return true;
+    processedIds.add(messageId);
+    setTimeout(() => processedIds.delete(messageId), DEDUP_TTL_MS);
+    return false;
+}
+
+// ── Message debounce buffer — accumulates rapid consecutive messages
 const messageBuffers = new Map();
-const DEBOUNCE_MS = 9000;
+const DEBOUNCE_MS = 5000; // 5s — tight enough to feel instant, wide enough to catch bursts
 
 function debounceMessage(phone, text, chatType) {
-    // If timer exists, cancel it and append message
     if (messageBuffers.has(phone)) {
         const entry = messageBuffers.get(phone);
         clearTimeout(entry.timer);
@@ -20,7 +30,6 @@ function debounceMessage(phone, text, chatType) {
         messageBuffers.set(phone, {messages: [text], timer: null});
     }
 
-    // Start new 10s timer
     const entry = messageBuffers.get(phone);
     entry.timer = setTimeout(async () => {
         const combined = entry.messages.join('\n');
@@ -61,6 +70,12 @@ router.post('/', async (req, res) => {
         if (!value?.messages) return;
 
         const message = value.messages[0];
+
+        // Deduplicate — ignore Meta retries
+        if (isDuplicate(message.id)) {
+            log.info(`Duplicate message ignored: ${message.id}`);
+            return;
+        }
 
         // Only process text messages
         if (message.type !== 'text') {

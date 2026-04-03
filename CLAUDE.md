@@ -25,7 +25,8 @@ deposit to confirm a consultation appointment with the doctor.
 
 ## 2. ABSOLUTE BUSINESS RULES
 
-- ❌ **NEVER give exact treatment prices** — only approximate ranges when patient insists (configured in `config.js TREATMENT_PRICES`)
+- ❌ **NEVER give exact treatment prices** — only approximate ranges when patient insists (configured in
+  `config.js TREATMENT_PRICES`)
 - ❌ **NEVER ask for ID or additional phone number** — phone is already known from WhatsApp
 - ❌ **NEVER confirm or schedule appointments** — only capture data (DentalLink integration pending)
 - ✅ Dra. Yuri is a woman: always "la Dra. Yuri" or "la doctora"
@@ -50,18 +51,18 @@ deposit to confirm a consultation appointment with the doctor.
 
 ## 4. INFRASTRUCTURE
 
-| Component         | Status | Detail                                                              |
-|-------------------|--------|---------------------------------------------------------------------|
-| GitHub Repo       | ✅      | github.com/leosalazarn/valeria-dental-bot (public)                  |
-| Render Deploy     | ✅      | https://valeria-dental-bot.onrender.com                             |
-| Anthropic API Key | ✅      | Set in Render env vars                                              |
-| Supabase          | ✅      | Patient CRM — credentials in Render env vars                        |
-| Meta App          | ✅      | "valeria-bot" (App ID in Render env vars)                           |
-| Webhook verified  | ✅      | Connected and active                                                |
-| Meta Token        | ⚠️     | Temporary (expires 24h) — permanent token pending                   |
-| WhatsApp Number   | ⚠️     | Test: +1 (555) 166-5964 — real clinic number pending                |
-| Meta App          | ⚠️     | In Development mode — needs to go Live                              |
-| Render plan       | ⚠️     | Free (sleeps after 15 min) — upgrade to $7/month before going live  |
+| Component         | Status | Detail                                                             |
+|-------------------|--------|--------------------------------------------------------------------|
+| GitHub Repo       | ✅      | github.com/leosalazarn/valeria-dental-bot (public)                 |
+| Render Deploy     | ✅      | https://valeria-dental-bot.onrender.com                            |
+| Anthropic API Key | ✅      | Set in Render env vars                                             |
+| Supabase          | ✅      | Patient CRM — credentials in Render env vars                       |
+| Meta App          | ✅      | "valeria-bot" (App ID in Render env vars)                          |
+| Webhook verified  | ✅      | Connected and active                                               |
+| Meta Token        | ⚠️     | Temporary (expires 24h) — permanent token pending                  |
+| WhatsApp Number   | ⚠️     | Test: +1 (555) 166-5964 — real clinic number pending               |
+| Meta App          | ⚠️     | In Development mode — needs to go Live                             |
+| Render plan       | ⚠️     | Free (sleeps after 15 min) — upgrade to $7/month before going live |
 
 ---
 
@@ -124,11 +125,13 @@ EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
 ### Universal re-engagement (24h)
 
 After every outgoing message in ANY phase, a 24h timer resets. If the patient goes silent:
+
 - `EXTRACTION` → *"quedé pensando en lo que me contaste..."*
 - `HOOK` → *"todavía tenemos cupos disponibles..."*
 - `DATA_CAPTURE` → *"tengo todo listo para reservar tu cita..."*
 
 **Session Management Logic:**
+
 - **24 hours of silence** → Send re-engagement message, session remains active
 - **72 hours of total inactivity** → Expire session for memory management
 - This ensures patients can respond to re-engagement messages with a valid session
@@ -167,11 +170,11 @@ Dedicated WhatsApp line — no triggers, no supplier detection. In priority orde
 
 ## 10. MESSAGE DEBOUNCE (webhook.js)
 
-If the patient sends multiple messages in a row, the bot waits **9 seconds** of silence before responding, processing
-all messages together as one.
+If the patient sends multiple messages in a row, the bot waits **5 seconds** of silence before responding, processing
+all messages together as one, or if send 2 or more messages, it will be grouped all messages and response a single msg.
 
 ```js
-const DEBOUNCE_MS = 9000;
+const DEBOUNCE_MS = 5000;
 const messageBuffers = new Map(); // key: phone, value: { messages[], timer }
 ```
 
@@ -249,7 +252,8 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 
 ## 15. PENDING (priority order)
 
-1. **Permanent Meta token** → Meta Business Suite → Settings → System Users → generate token with `whatsapp_business_messaging`
+1. **Permanent Meta token** → Meta Business Suite → Settings → System Users → generate token with
+   `whatsapp_business_messaging`
 2. **Real clinic phone number** → register in Meta (remove personal WhatsApp from number first)
 3. **Meta App to Live mode** → requires registered real number
 4. **Upgrade Render to $7/month** → eliminates 15-min sleep — **critical before going live**
@@ -333,7 +337,8 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 
 **Solution:** Run the SQL commands in `fix_rls.sql` in your Supabase SQL Editor to create proper RLS policies:
 
-**Alternative:** For stricter security, uncomment the restrictive policies in `fix_rls.sql` that only allow users to access their own records based on phone number.
+**Alternative:** For stricter security, uncomment the restrictive policies in `fix_rls.sql` that only allow users to
+access their own records based on phone number.
 
 **Note:** These policies allow your application secure access while maintaining RLS protection.
 
@@ -342,6 +347,7 @@ RETRY_DELAY_MS = 2000       // exponential backoff: 2s, 4s
 **Error:** `Session has expired on Tuesday, 31-Mar-26 08:00:00 PDT`
 
 **Solution:** Temporary tokens expire after 24 hours. Get a new token from:
+
 1. Meta Business Suite → Settings → System Users
 2. Generate new token with `whatsapp_business_messaging` permission
 3. Update `WA_ACCESS_TOKEN` environment variable
