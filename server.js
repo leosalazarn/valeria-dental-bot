@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Mount routes
 app.use('/webhook', webhookRouter);
-app.use('/', debugRouter);
+app.use('/debug', debugRouter);
 
 // Start server
 app.listen(PORT, () => {

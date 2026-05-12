@@ -27,14 +27,14 @@ router.get('/', (req, res) => {
 });
 
 // GET /leads — all patients (Protected)
-router.get('/leads', auth, (req, res) => {
-    const patients = getAllPatients();
+router.get('/leads', auth, async (req, res) => {
+    const patients = await getAllPatients();
     res.json({patients});
 });
 
 // GET /stats — CRM lead statistics (Protected)
-router.get('/stats', auth, (req, res) => {
-    const stats = getStats();
+router.get('/stats', auth, async (req, res) => {
+    const stats = await getStats();
     res.json(stats);
 });
 
