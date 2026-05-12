@@ -19,17 +19,11 @@ import {
     MSG_REENGAGEMENT_EXTRACTION,
     MSG_REENGAGEMENT_DATA_CAPTURE,
     MSG_HOOK, MSG_DATA_CAPTURE,
-    MSG_WELCOME
+    MSG_WELCOME,
+    POSITIVE_RESPONSES,
+    MIN_EXCHANGES_FOR_HOOK
 } from './config.js';
 import log from './utils/logger.js';
-
-export const POSITIVE_RESPONSES = [
-    'listo', 'sí', 'si', 'me convenciste', 'quiero agendar',
-    'dale', 'claro', 'ok', 'okay', 'perfecto', 'bueno',
-    'me interesa', 'quiero', 'vamos', 'agendemos', 'agendar',
-    'de acuerdo', 'está bien', 'acepto', 'me animo', 'cuándo',
-    'cuando', 'cómo agendo', 'como agendo'
-];
 
 // Strip internal signals before sending to patient
 export function stripSignals(text) {
@@ -155,8 +149,7 @@ async function handleConversionFlow(phone, session, text = '') {
         return null;
     }
 
-    // Phase B: Hook delivery — requires min 3 exchanges to avoid premature pitch
-    const MIN_EXCHANGES_FOR_HOOK = 3;
+    // Phase B: Hook delivery — requires min X exchanges to avoid premature pitch
     if (phase === 'EXTRACTION' && (session.message_count || 0) >= MIN_EXCHANGES_FOR_HOOK) {
         await updateSession(phone, {phase: 'HOOK'});
         await recordPhase(phone, 'HOOK');

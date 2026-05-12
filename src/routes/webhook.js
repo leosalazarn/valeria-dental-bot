@@ -1,6 +1,6 @@
 // Webhook routes — Meta webhook verification and message receiving
 import express from 'express';
-import {VERIFY_TOKEN, MSG_NON_TEXT} from '../config.js';
+import {VERIFY_TOKEN, MSG_NON_TEXT, DEDUP_TTL_MS, MAX_BUFFER_SIZE, DEBOUNCE_MS} from '../config.js';
 import {processMessage} from '../flow.js';
 import log from '../utils/logger.js';
 
@@ -8,8 +8,6 @@ const router = express.Router();
 
 // ── Deduplication — prevent Meta retries from processing same message twice
 const processedIds = new Set();
-const DEDUP_TTL_MS = 60 * 1000; // forget message IDs after 1 minute
-const MAX_BUFFER_SIZE = 10; // anti-flood: max 10 messages per burst
 
 function sanitizeInput(text) {
     // Basic cleaning: remove control characters and limit length
@@ -28,7 +26,6 @@ function isDuplicate(messageId) {
 
 // ── Message debounce buffer — accumulates rapid consecutive messages
 const messageBuffers = new Map();
-const DEBOUNCE_MS = 5000; // 5s — tight enough to feel instant, wide enough to catch bursts
 
 function debounceMessage(phone, text, chatType) {
     const sanitized = sanitizeInput(text);

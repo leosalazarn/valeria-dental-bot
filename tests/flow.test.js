@@ -25,7 +25,8 @@ vi.mock('../src/whatsapp.js', () => ({
     sendMessage: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { processMessage, stripSignals, POSITIVE_RESPONSES } from '../src/flow.js';
+import { processMessage, stripSignals } from '../src/flow.js';
+import { POSITIVE_RESPONSES } from '../src/config.js';
 import { sendMessage } from '../src/whatsapp.js';
 import { callValeria } from '../src/ai.js';
 import { updateSession, getSession } from '../src/session.js';

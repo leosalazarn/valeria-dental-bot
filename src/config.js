@@ -62,6 +62,20 @@ export const BANCOLOMBIA_ACCOUNT = process.env.BANCOLOMBIA_ACCOUNT;
 export const NEQUI_NUMBER = process.env.NEQUI_NUMBER;
 export const DAVIVIENDA_ACCOUNT = process.env.DAVIVIENDA_ACCOUNT;
 
+// ── Flow & Safety Configuration
+export const POSITIVE_RESPONSES = [
+    'listo', 'sí', 'si', 'me convenciste', 'quiero agendar',
+    'dale', 'claro', 'ok', 'okay', 'perfecto', 'bueno',
+    'me interesa', 'quiero', 'vamos', 'agendemos', 'agendar',
+    'de acuerdo', 'está bien', 'acepto', 'me animo', 'cuándo',
+    'cuando', 'cómo agendo', 'como agendo'
+];
+export const MIN_EXCHANGES_FOR_HOOK = 3;
+export const DEBOUNCE_MS = 5000;
+export const DEDUP_TTL_MS = 60 * 1000;
+export const MAX_BUFFER_SIZE = 10;
+export const CONVERSION_PHASES = ['START', 'EXTRACTION', 'HOOK', 'DATA_CAPTURE', 'PAYMENT', 'CLOSING'];
+
 // ── Hardcoded Messages (all user-facing text centralized here)
 export const MSG_WELCOME = 'Hola, soy Valeria tu asistente, te hablamos de la clínica Dra Yuri Quintero, perfeccionamiento dental #OdontologíaHechaConAmor 🦷 ¿Con quién tengo el gusto?';
 

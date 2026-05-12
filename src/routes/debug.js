@@ -3,7 +3,7 @@ import express from 'express';
 import {getAllPatients, getStats} from '../crm.js';
 import {getAllSessions} from '../session.js';
 import {formatColombiaTime} from '../utils/time.js';
-import {PRACTICE_NAME, PRACTICE_LOCATION, DEBUG_API_KEY} from '../config.js';
+import {PRACTICE_NAME, PRACTICE_LOCATION, DEBUG_API_KEY, CONVERSION_PHASES} from '../config.js';
 
 const router = express.Router();
 
@@ -48,9 +48,8 @@ router.get('/metrics', auth, (req, res) => {
     }
 
     // ── Funnel: how many sessions reached each phase
-    const phases = ['START', 'EXTRACTION', 'HOOK', 'DATA_CAPTURE', 'PAYMENT', 'CLOSING'];
     const funnel = {};
-    for (const phase of phases) {
+    for (const phase of CONVERSION_PHASES) {
         const reached = sessions.filter(s =>
             s.metrics?.phase_timestamps?.[phase] !== null &&
             s.metrics?.phase_timestamps?.[phase] !== undefined
@@ -63,9 +62,9 @@ router.get('/metrics', auth, (req, res) => {
 
     // ── Drop-off between consecutive phases
     const dropoff = {};
-    for (let i = 1; i < phases.length; i++) {
-        const from = phases[i - 1];
-        const to = phases[i];
+    for (let i = 1; i < CONVERSION_PHASES.length; i++) {
+        const from = CONVERSION_PHASES[i - 1];
+        const to = CONVERSION_PHASES[i];
         const fromCount = funnel[from].count;
         const toCount = funnel[to].count;
         const lost = fromCount - toCount;
