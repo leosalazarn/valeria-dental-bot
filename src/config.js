@@ -7,7 +7,8 @@ const requiredEnvVars = [
     'BANK_HOLDER_NAME', 'BANK_HOLDER_CC',
     'BANCOLOMBIA_ACCOUNT', 'NEQUI_NUMBER', 'DAVIVIENDA_ACCOUNT',
     'SUPABASE_URL', 'SUPABASE_ANON_KEY',
-    'CONSULTATION_PRICE', 'BOOK_PRICE', 'MIN_RANGE_PRICE', 'MAX_RANGE_PRICE'
+    'CONSULTATION_PRICE', 'BOOK_PRICE', 'MIN_RANGE_PRICE', 'MAX_RANGE_PRICE',
+    'DEBUG_API_KEY'
 ];
 for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
@@ -23,6 +24,7 @@ export const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 export const PORT = process.env.PORT || 3000;
 export const SUPABASE_URL = process.env.SUPABASE_URL;
 export const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+export const DEBUG_API_KEY = process.env.DEBUG_API_KEY;
 
 // ── Claude Configuration
 export const CLAUDE_MODEL = 'claude-sonnet-4-6';

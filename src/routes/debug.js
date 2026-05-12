@@ -3,11 +3,21 @@ import express from 'express';
 import {getAllPatients, getStats} from '../crm.js';
 import {getAllSessions} from '../session.js';
 import {formatColombiaTime} from '../utils/time.js';
-import {PRACTICE_NAME, PRACTICE_LOCATION} from '../config.js';
+import {PRACTICE_NAME, PRACTICE_LOCATION, DEBUG_API_KEY} from '../config.js';
 
 const router = express.Router();
 
-// GET / — health check
+// ── Auth Middleware — check x-api-key header
+const auth = (req, res, next) => {
+    const apiKey = req.headers['x-api-key'];
+    if (apiKey === DEBUG_API_KEY) {
+        next();
+    } else {
+        res.status(401).json({error: 'Unauthorized — Invalid or missing x-api-key'});
+    }
+};
+
+// GET / — health check (Public)
 router.get('/', (req, res) => {
     res.json({
         status: '🦷 Valeria activa',
@@ -16,20 +26,20 @@ router.get('/', (req, res) => {
     });
 });
 
-// GET /leads — all patients for debugging
-router.get('/leads', (req, res) => {
+// GET /leads — all patients (Protected)
+router.get('/leads', auth, (req, res) => {
     const patients = getAllPatients();
     res.json({patients});
 });
 
-// GET /stats — CRM lead statistics
-router.get('/stats', (req, res) => {
+// GET /stats — CRM lead statistics (Protected)
+router.get('/stats', auth, (req, res) => {
     const stats = getStats();
     res.json(stats);
 });
 
-// GET /metrics — conversion funnel + response time + reengagement stats
-router.get('/metrics', (req, res) => {
+// GET /metrics — conversion funnel (Protected)
+router.get('/metrics', auth, (req, res) => {
     const sessions = getAllSessions();
     const total = sessions.length;
 

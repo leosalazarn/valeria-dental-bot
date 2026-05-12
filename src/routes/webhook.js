@@ -9,6 +9,15 @@ const router = express.Router();
 // ── Deduplication — prevent Meta retries from processing same message twice
 const processedIds = new Set();
 const DEDUP_TTL_MS = 60 * 1000; // forget message IDs after 1 minute
+const MAX_BUFFER_SIZE = 10; // anti-flood: max 10 messages per burst
+
+function sanitizeInput(text) {
+    // Basic cleaning: remove control characters and limit length
+    return text
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove control characters
+        .slice(0, 1000) // Cap individual message length
+        .trim();
+}
 
 function isDuplicate(messageId) {
     if (processedIds.has(messageId)) return true;
@@ -22,12 +31,21 @@ const messageBuffers = new Map();
 const DEBOUNCE_MS = 5000; // 5s — tight enough to feel instant, wide enough to catch bursts
 
 function debounceMessage(phone, text, chatType) {
+    const sanitized = sanitizeInput(text);
+
     if (messageBuffers.has(phone)) {
         const entry = messageBuffers.get(phone);
         clearTimeout(entry.timer);
-        entry.messages.push(text);
+
+        // Anti-flood: only add if buffer is not full
+        if (entry.messages.length < MAX_BUFFER_SIZE) {
+            entry.messages.push(sanitized);
+        } else if (entry.messages.length === MAX_BUFFER_SIZE) {
+            entry.messages.push('... [mensajes omitidos por exceso]');
+            log.warn(`Anti-flood triggered for ${phone}`);
+        }
     } else {
-        messageBuffers.set(phone, {messages: [text], timer: null});
+        messageBuffers.set(phone, {messages: [sanitized], timer: null});
     }
 
     const entry = messageBuffers.get(phone);
