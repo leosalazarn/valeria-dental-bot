@@ -96,7 +96,7 @@ valeria-dental-bot/
 └── *.md               ← Documentation (README, CLAUDE, SECURITY, PROJECT_FILES)
 ```
 
-See [PROJECT_FILES.md](./PROJECT_FILES.md) for the full module reference and test inventory.
+See [PROJECT_FILES.md](./docs/PROJECT_FILES.md) for the full module reference and test inventory.
 
 ---
 
@@ -176,7 +176,7 @@ SUPABASE_ANON_KEY=...       # Supabase → Project Settings → API → anon pub
 ```
 
 > ⚠️ Banking credentials must live **only** in environment variables — never in source code, logs, or documentation.
-> See [SECURITY.md](./SECURITY.md).
+> See [SECURITY.md](./docs/SECURITY.md).
 
 ---
 
@@ -201,16 +201,14 @@ SUPABASE_ANON_KEY=...       # Supabase → Project Settings → API → anon pub
 
 ## API Endpoints
 
-| Method | Endpoint   | Purpose                                           |
-|--------|------------|---------------------------------------------------|
-| `GET`  | `/`        | Health check                                      |
-| `GET`  | `/webhook` | Meta webhook verification                         |
-| `POST` | `/webhook` | Receive inbound WhatsApp messages                 |
-| `GET`  | `/leads`   | All patients in memory *(debug only)*             |
-| `GET`  | `/stats`   | Summary by source / status / phase *(debug only)* |
-
-> ⚠️ `/leads` and `/stats` expose patient data without authentication. Restrict or remove before high-volume production
-> use. See [SECURITY.md § Known Limitations](./SECURITY.md#known-limitations).
+| Method | Endpoint         | Purpose                            | Auth               |
+|--------|------------------|------------------------------------|--------------------|
+| `GET`  | `/debug/`        | Health check                       | Public             |
+| `GET`  | `/webhook`       | Meta webhook verification          | Public             |
+| `POST` | `/webhook`       | Receive inbound WhatsApp messages  | Public             |
+| `GET`  | `/debug/leads`   | All persistent patients (Supabase) | x-api-key required |
+| `GET`  | `/debug/stats`   | Summary by source / status / phase | x-api-key required |
+| `GET`  | `/debug/metrics` | Funnel & response time analytics   |                    |
 
 ---
 
@@ -221,14 +219,14 @@ npm test            # run full suite once
 npm run test:watch  # watch mode during development
 ```
 
-95 tests across 7 suites — all passing. See [PROJECT_FILES.md § Test Suite](./PROJECT_FILES.md#test-suite) for full
+95 tests across 7 suites — all passing. See [PROJECT_FILES.md § Test Suite](./docs/PROJECT_FILES.md#test-suite) for full
 coverage breakdown.
 
 ---
 
 ## Security
 
-See [SECURITY.md](./SECURITY.md) for:
+See [SECURITY.md](./docs/SECURITY.md) for:
 
 - Sensitive data classification and storage policy
 - Credential rotation guidelines
@@ -241,12 +239,12 @@ See [SECURITY.md](./SECURITY.md) for:
 
 ## Documentation
 
-| File                                   | Purpose                                       |
-|----------------------------------------|-----------------------------------------------|
-| [README.md](./README.md)               | Setup, architecture, deployment *(this file)* |
-| [CLAUDE.md](./CLAUDE.md)               | Full project context for AI assistant handoff |
-| [SECURITY.md](./SECURITY.md)           | Security policy and vulnerability reporting   |
-| [PROJECT_FILES.md](./PROJECT_FILES.md) | Module reference and test inventory           |
+| File                                        | Purpose                                       |
+|---------------------------------------------|-----------------------------------------------|
+| [README.md](./README.md)                    | Setup, architecture, deployment *(this file)* |
+| [CLAUDE.md](./CLAUDE.md)                    | Full project context for AI assistant handoff |
+| [SECURITY.md](./docs/SECURITY.md)           | Security policy and vulnerability reporting   |
+| [PROJECT_FILES.md](./docs/PROJECT_FILES.md) | Module reference and test inventory           |
 
 ---
 

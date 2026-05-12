@@ -27,7 +27,7 @@
 - **Testing:** New features or bug fixes MUST include Vitest tests in `tests/`.
 
 ## 5. Development Workflow
-1.  **Research:** Read `CLAUDE.md` and `PROJECT_FILES.md` for context.
+1.  **Research:** Read `CLAUDE.md` and `docs/PROJECT_FILES.md` for context.
 2.  **Strategy:** Propose changes before implementation.
 3.  **Execute:** Surgical edits to relevant modules in `src/`.
 4.  **Validate:** Run `npm test` and verify no hardcoded strings or sensitive data leaks.
