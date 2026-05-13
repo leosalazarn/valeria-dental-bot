@@ -26,6 +26,16 @@ function isDuplicate(messageId) {
 
 // ── Message debounce buffer — accumulates rapid consecutive messages
 const messageBuffers = new Map();
+const BUFFER_HARD_CAP = 5;
+
+function flushBuffer(phone, chatType) {
+    const entry = messageBuffers.get(phone);
+    if (!entry) return;
+    clearTimeout(entry.timer);
+    const combined = entry.messages.join('\n');
+    messageBuffers.delete(phone);
+    processMessage(phone, combined, chatType);
+}
 
 function debounceMessage(phone, text, chatType) {
     const sanitized = sanitizeInput(text);
@@ -46,10 +56,15 @@ function debounceMessage(phone, text, chatType) {
     }
 
     const entry = messageBuffers.get(phone);
-    entry.timer = setTimeout(async () => {
-        const combined = entry.messages.join('\n');
-        messageBuffers.delete(phone);
-        await processMessage(phone, combined, chatType);
+
+    // Hard cap: process immediately at BUFFER_HARD_CAP messages
+    if (entry.messages.length >= BUFFER_HARD_CAP) {
+        flushBuffer(phone, chatType);
+        return;
+    }
+
+    entry.timer = setTimeout(() => {
+        flushBuffer(phone, chatType);
     }, DEBOUNCE_MS);
 }
 

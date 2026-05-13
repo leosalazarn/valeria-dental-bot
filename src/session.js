@@ -1,13 +1,10 @@
 // Session module — persistent session store with Supabase
-import {createClient} from '@supabase/supabase-js';
-import {MAX_HISTORY, SESSION_EXPIRY_HOURS, CLEANUP_INTERVAL_MINUTES, SUPABASE_URL, SUPABASE_ANON_KEY} from './config.js';
+import {getDb} from './db/client.js';
+import {MAX_HISTORY, SESSION_EXPIRY_HOURS, CLEANUP_INTERVAL_MINUTES} from './config.js';
 import log from './utils/logger.js';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = getDb();
 const sessions = new Map();
-
-// TODO: Replace with Supabase when scaling
-// supabase.from('conversations').select().eq('phone', phone)
 
 async function loadSessionFromDB(phone) {
     try {

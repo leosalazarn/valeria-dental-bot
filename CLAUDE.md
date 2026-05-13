@@ -136,14 +136,7 @@ EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
 
 ## 10. ENDPOINTS
 
-| Method | Route          | Purpose                              | Auth               |
-|--------|----------------|--------------------------------------|--------------------|
-| GET    | /debug/        | Health check                         | Public             |
-| GET    | /webhook       | Meta verification                    | Public             |
-| POST   | /webhook       | Receive WhatsApp messages            | Public             |
-| GET    | /debug/leads   | All persistent patients (Supabase)   | x-api-key required |
-| GET    | /debug/stats   | Summary by source/status/intent      | x-api-key required |
-| GET    | /debug/metrics | Funnel & response time analytics     | x-api-key required |
+See [ENDPOINTS.md](./docs/reference/ENDPOINTS.md) for all routes and auth requirements.
 
 ---
 

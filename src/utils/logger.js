@@ -1,11 +1,11 @@
 // Logger module — centralized console output with emoji prefixes
 const log = {
     incoming: (phone, text) => {
-        console.log(`📩 [${phone}]: ${text.substring(0, 60)}...`);
+        console.log(`📩 [${phone}] (${text.length} chars)`);
     },
 
     outgoing: (phone, text) => {
-        console.log(`✉️ Valeria → [${phone}]: ${text.substring(0, 60)}...`);
+        console.log(`✉️ Valeria → [${phone}] (${text.length} chars)`);
     },
 
     lead: (intentJson) => {

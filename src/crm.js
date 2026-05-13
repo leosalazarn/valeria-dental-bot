@@ -1,11 +1,10 @@
 // CRM module — Supabase-backed patient store
 // Interface unchanged: findPatient, upsertPatient, getAllPatients, getStats
-import {createClient} from '@supabase/supabase-js';
-import {SUPABASE_URL, SUPABASE_ANON_KEY} from './config.js';
+import {getDb} from './db/client.js';
 import {getColombiaNow} from './utils/time.js';
 import log from './utils/logger.js';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = getDb();
 
 export async function findPatient(phone) {
     try {

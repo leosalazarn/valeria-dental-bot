@@ -72,14 +72,7 @@ graph TD
 
 ## Tech Stack
 
-| Component | Solution                                  |
-|-----------|-------------------------------------------|
-| Runtime   | Node.js 18+ / Express                     |
-| AI        | Anthropic Claude `claude-sonnet-4-6`      |
-| Messaging | Meta WhatsApp Cloud API                   |
-| Hosting   | Render.com                                |
-| Database  | Supabase (PostgreSQL) — patient CRM       |
-| Tests     | Vitest — 94 tests, 7 suites, 100% passing |
+See [TECH_STACK.md](./docs/reference/TECH_STACK.md) for the full stack and key constants.
 
 ---
 
@@ -102,42 +95,13 @@ See [PROJECT_FILES.md](./docs/PROJECT_FILES.md) for the full module reference an
 
 ## Conversation Flow
 
-```
-EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
-```
-
-| Phase          | Trigger                   | Action                               |
-|----------------|---------------------------|--------------------------------------|
-| `EXTRACTION`   | No name or aesthetic goal | AI extracts name + goal naturally    |
-| `HOOK`         | Name + goal both known    | Hardcoded consultation pitch         |
-| `DATA_CAPTURE` | Positive response to hook | Collects full name, email, reason    |
-| `PAYMENT`      | Data complete             | AI sends banking details for deposit |
-| `CLOSING`      | Payment instructions sent | Awaits receipt, confirms appointment |
-
-### Internal AI Signals
-
-The AI appends these signals to its responses — they are never shown to the patient:
-
-```
-NAME: [name]           → intent.js updates session.name
-GOAL: [goal]           → intent.js updates session.aesthetic_goal
-EXTRACTED: full_name: [...], email: [...], consultation_reason: [...]
-```
-
-`stripSignals()` in `flow.js` removes all signals before `sendMessage()`.
+See [BUSINESS_RULES.md](./docs/reference/BUSINESS_RULES.md) for the full flow, phase triggers, and message classification rules.
 
 ---
 
 ## Message Classification
 
-Four rules evaluated in priority order:
-
-| Priority | Condition                        | Action                         |
-|----------|----------------------------------|--------------------------------|
-| 1        | Group message                    | `IGNORE`                       |
-| 2        | Phone status = `IN_TREATMENT`    | `CURRENT_PATIENT`              |
-| 3        | Active session (phase ≠ `START`) | `ORGANIC_LEAD`                 |
-| 4        | Any new individual contact       | `WARM_LEAD` (`source: DIRECT`) |
+See [BUSINESS_RULES.md](./docs/reference/BUSINESS_RULES.md) for the classification rules.
 
 ---
 
@@ -173,6 +137,7 @@ NEQUI_NUMBER=...            # Nequi phone number
 DAVIVIENDA_ACCOUNT=...      # Davivienda savings account number
 SUPABASE_URL=...            # Supabase → Project Settings → API → Project URL
 SUPABASE_ANON_KEY=...       # Supabase → Project Settings → API → anon public key
+DEBUG_API_KEY=...            # Custom key for /debug/leads, /stats, /metrics protection
 ```
 
 > ⚠️ Banking credentials must live **only** in environment variables — never in source code, logs, or documentation.
@@ -201,14 +166,7 @@ SUPABASE_ANON_KEY=...       # Supabase → Project Settings → API → anon pub
 
 ## API Endpoints
 
-| Method | Endpoint         | Purpose                            | Auth               |
-|--------|------------------|------------------------------------|--------------------|
-| `GET`  | `/debug/`        | Health check                       | Public             |
-| `GET`  | `/webhook`       | Meta webhook verification          | Public             |
-| `POST` | `/webhook`       | Receive inbound WhatsApp messages  | Public             |
-| `GET`  | `/debug/leads`   | All persistent patients (Supabase) | x-api-key required |
-| `GET`  | `/debug/stats`   | Summary by source / status / phase | x-api-key required |
-| `GET`  | `/debug/metrics` | Funnel & response time analytics   |                    |
+See [ENDPOINTS.md](./docs/reference/ENDPOINTS.md) for all routes and auth requirements.
 
 ---
 
@@ -219,8 +177,7 @@ npm test            # run full suite once
 npm run test:watch  # watch mode during development
 ```
 
-95 tests across 7 suites — all passing. See [PROJECT_FILES.md § Test Suite](./docs/PROJECT_FILES.md#test-suite) for full
-coverage breakdown.
+See [PROJECT_FILES.md § Test Suite](./docs/PROJECT_FILES.md#test-suite) for full coverage breakdown.
 
 ---
 
@@ -245,6 +202,9 @@ See [SECURITY.md](./docs/SECURITY.md) for:
 | [CLAUDE.md](./CLAUDE.md)                    | Full project context for AI assistant handoff |
 | [SECURITY.md](./docs/SECURITY.md)           | Security policy and vulnerability reporting   |
 | [PROJECT_FILES.md](./docs/PROJECT_FILES.md) | Module reference and test inventory           |
+| [TECH_STACK.md](./docs/reference/TECH_STACK.md) | Canonical tech stack and constants          |
+| [BUSINESS_RULES.md](./docs/reference/BUSINESS_RULES.md) | Rules, flow, and classification     |
+| [ENDPOINTS.md](./docs/reference/ENDPOINTS.md) | All API routes and auth                     |
 
 ---
 

@@ -2,7 +2,7 @@
 
 This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri Quintero**.
 
-## 📊 Current Status: **Phase 2 (Final Stabilization)**
+## 📊 Current Status: **Phase 3 — Conversion**
 **Last Update:** May 12, 2026
 **Overall Progress:** ~40% to Production Launch
 
@@ -55,8 +55,15 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 ---
 
+## 🧰 Phase 6: Tooling & DX (Low Priority)
+*Goal: Improve operational visibility and team experience.*
+- **Lead Dashboard UI:** Build a lightweight frontend (vanilla HTML/JS or simple SPA) that consumes `/debug/leads`, `/debug/stats`, and `/debug/metrics` via `x-api-key` auth. Display funnel conversion rates, drop-off by phase, response times, and lead list in an intuitive dashboard with charts and filters.
+- **Real-time Notifications:** Push alerts to the clinic team when a lead reaches PAYMENT or CLOSING phase (via email, Slack webhook, or dashboard badge).
+- **Export to CSV:** Add a download button to export leads data for offline analysis or Google Sheets import.
+- **Session Inspector:** Admin panel to view individual conversation history, phase transitions, and re-engagement status per lead.
+
+---
+
 ## 🛠️ Tech Stack Reminder
-- **Runtime:** Node.js (ES Modules)
-- **AI:** Anthropic Claude 3.5 Sonnet
-- **Database:** Supabase (PostgreSQL)
-- **Infrastructure:** Render (Hosting) + Meta Cloud API (WhatsApp)
+
+See [TECH_STACK.md](./reference/TECH_STACK.md) for the full stack and constants.

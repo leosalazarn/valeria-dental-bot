@@ -24,10 +24,26 @@ valeria-dental-bot/
 ├── CLAUDE.md            ← context for AI assistants
 ├── GEMINI.md            ← context for AI assistants
 ├── README.md            ← entry point
+├── .github/             ← CI/CD automation
+│   └── workflows/
+│       └── ci.yml       ← GitHub Actions CI pipeline
 ├── docs/                ← project documentation
 │   ├── ROADMAP.md       ← status and future phases
 │   ├── PROJECT_FILES.md ← this file
-│   └── SECURITY.md      ← data policies & auth
+│   ├── SECURITY.md      ← data policies & auth
+│   ├── sdd/             ← Software Design Document
+│   │   └── README.md    ← architecture, data model, API design
+│   ├── adr/             ← Architecture Decision Records
+│   │   ├── README.md    ← ADR index + template
+│   │   └── 001-supabase-crm.md
+│   ├── api/             ← API documentation
+│   │   └── README.md    ← endpoint reference
+│   ├── guides/          ← developer guides
+│   │   └── README.md    ← index
+│   └── reference/       ← canonical DRY sources
+│       ├── TECH_STACK.md    ← stack + constants
+│       ├── BUSINESS_RULES.md ← rules + flow + classification
+│       └── ENDPOINTS.md     ← all API routes
 ├── scripts/             ← SQL database scripts (DDL/DCL)
 │   ├── 01_schema.sql    ← Table & Index definitions
 │   └── 02_security.sql  ← RLS Policies & Security
@@ -50,6 +66,16 @@ valeria-dental-bot/
     ├── whatsapp.js      ← Meta Cloud API integration
     ├── intent.js        ← signal parsing & CRM updates
     ├── flow.js          ← main orchestration logic
+    ├── db/              ← database abstraction
+    │   └── client.js    ← shared Supabase client singleton
+    ├── errors/          ← error handling layer
+    │   └── index.js     ← custom error classes
+    ├── middleware/       ← express middleware
+    │   └── auth.js      ← API key authentication
+    ├── validators/      ← input validation
+    │   └── index.js     ← sanitization helpers
+    ├── types/           ← JSDoc type definitions
+    │   └── index.js     ← shared type annotations
     ├── routes/
     │   ├── webhook.js   ← WhatsApp events & anti-flood
     │   └── debug.js     ← authenticated analytics

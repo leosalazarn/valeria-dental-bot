@@ -63,13 +63,13 @@ The Meta access token should be a **permanent token** generated via:
 
 ## Input Validation & Injection Prevention
 
-| Control                        | Implementation                                                                                                   |
-|--------------------------------|------------------------------------------------------------------------------------------------------------------|
-| Security Guardrails            | System prompt includes explicit instructions in Spanish to reject jailbreaks and off-topic requests.             |
-| Webhook challenge sanitization | `hub.challenge` validated against `/^\d+$/` before reflection — prevents XSS on verification endpoint            |
-| Non-text message rejection     | Only `type === 'text'` messages reach the AI pipeline.                                                           |
-| Anti-Flood Mechanism           | Debounce of 5s and a hard cap of 10 messages per burst to prevent token exhaustion and prompt clutter.           |
-| Signal stripping               | `NAME:`, `GOAL:`, `EXTRACTED:` signals removed from AI responses via `stripSignals()` before delivery to patient |
+| Control                        | Implementation                                                                                                                                                   |
+|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Security Guardrails            | System prompt includes explicit instructions in Spanish to reject jailbreaks and off-topic requests.                                                             |
+| Webhook challenge sanitization | `hub.challenge` validated against `/^\d+$/` before reflection — prevents XSS on verification endpoint                                                            |
+| Non-text message rejection     | Only `type === 'text'` messages reach the AI pipeline.                                                                                                           |
+| Anti-Flood Mechanism           | Debounce of 5s, hard cap of 5 messages before immediate processing, and an absolute max of 10 messages per burst to prevent token exhaustion and prompt clutter. |
+| Signal stripping               | `NAME:`, `GOAL:`, `EXTRACTED:` signals removed from AI responses via `stripSignals()` before delivery to patient                                                 |
 
 ---
 
