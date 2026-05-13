@@ -1,13 +1,14 @@
 # Tech Stack — Valeria WhatsApp Bot
 
-| Component | Solution                                           |
-|-----------|----------------------------------------------------|
-| WhatsApp  | Meta Cloud API (free up to 1k conversations/month) |
-| AI        | Anthropic Claude (model: `claude-sonnet-4-6`)      |
-| Server    | Node.js + Express (ES Modules)                     |
-| Hosting   | Render.com                                         |
-| Database  | Supabase (PostgreSQL) — patient CRM                |
-| Tests     | Vitest — 94 tests, 7 suites                        |
+| Component | Solution                                                                      |
+|-----------|-------------------------------------------------------------------------------|
+| WhatsApp  | Meta Cloud API (free up to 1k conversations/month)                            |
+| AI        | Anthropic Claude (model: `claude-sonnet-4-6`)                                 |
+| Server    | Node.js + Express (ES Modules)                                                |
+| Hosting   | Render.com                                                                    |
+| Database  | Supabase (PostgreSQL) — lead data & metrics                                   |
+| CRM       | DentalLink (planned — Phase 4) — patient records, scheduling, calendar access |
+| Tests     | Vitest — 94 tests, 7 suites                                                   |
 
 ## Key Constants
 

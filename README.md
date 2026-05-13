@@ -34,30 +34,32 @@ supplier detection.
 
 ## Features
 
-| Feature                    | Description                                                          |
-|----------------------------|----------------------------------------------------------------------|
-| 24/7 availability          | Responds instantly regardless of office hours                        |
-| Natural conversation       | Warm Colombian Spanish (`tú`), first person plural ("nosotros")      |
-| Multiphase conversion flow | Guides patient from first contact to deposit                         |
-| Silent data extraction     | Captures name and goal without interrupting flow                     |
-| Universal re-engagement    | 24h follow-up timer active in every phase (EXTRACTION→CLOSING)       |
-| Approximate price ranges   | Shares treatment ranges when patient insists — never exact prices    |
-| Intent tracking            | Logs objection type, phase, and outcome per patient                  |
-| Supabase CRM               | Patient data persisted in Supabase (survives server restarts)        |
-| Retry logic                | Exponential backoff on Claude API errors (529/503/500)               |
+| Feature                    | Description                                                                        |
+|----------------------------|------------------------------------------------------------------------------------|
+| 24/7 availability          | Responds instantly regardless of office hours                                      |
+| Natural conversation       | Warm Colombian Spanish (`tú`), first person plural ("nosotros")                    |
+| Multiphase conversion flow | Guides patient from first contact to deposit                                       |
+| Silent data extraction     | Captures name and goal without interrupting flow                                   |
+| Universal re-engagement    | 24h follow-up timer active in every phase (EXTRACTION→CLOSING)                     |
+| Approximate price ranges   | Shares treatment ranges when patient insists — never exact prices                  |
+| Intent tracking            | Logs objection type, phase, and outcome per patient                                |
+| Supabase persistence       | Leads, conversations, and metrics persisted in Supabase (survives server restarts) |
+| DentalLink (planned)       | Future CRM integration for patient records, scheduling, and calendar access        |
+| Retry logic                | Exponential backoff on Claude API errors (529/503/500)                             |
 
 ---
 
 ## Architecture
 
 ![Architecture](./assets/architecture.png)
+
 ```mermaid
 graph TD
     User((Patient)) -- WhatsApp --> Meta[Meta Cloud API]
     Meta -- Webhook --> Express[Express Server]
     Express -- Context --> Claude[Anthropic Claude]
     Claude -- AI Response --> Express
-    Express -- Signal Extraction --> CRM[Supabase CRM]
+    Express -- Signal Extraction --> DB[(Supabase)]
     Express -- Clean Message --> Meta
     Meta -- Response --> User
 ```
@@ -71,6 +73,15 @@ graph TD
 ---
 
 ## Tech Stack
+
+| Component | Solution                                                     |
+|-----------|--------------------------------------------------------------|
+| AI        | Anthropic Claude (`claude-sonnet-4-6`)                       |
+| Server    | Node.js + Express (ES Modules)                               |
+| Database  | Supabase (PostgreSQL) — lead data & metrics                  |
+| CRM       | DentalLink (planned) — patient records, scheduling, calendar |
+| WhatsApp  | Meta Cloud API                                               |
+| Hosting   | Render.com                                                   |
 
 See [TECH_STACK.md](./docs/reference/TECH_STACK.md) for the full stack and key constants.
 
@@ -95,7 +106,8 @@ See [PROJECT_FILES.md](./docs/PROJECT_FILES.md) for the full module reference an
 
 ## Conversation Flow
 
-See [BUSINESS_RULES.md](./docs/reference/BUSINESS_RULES.md) for the full flow, phase triggers, and message classification rules.
+See [BUSINESS_RULES.md](./docs/reference/BUSINESS_RULES.md) for the full flow, phase triggers, and message
+classification rules.
 
 ---
 
@@ -153,8 +165,8 @@ DEBUG_API_KEY=...            # Custom key for /debug/leads, /stats, /metrics pro
 2. Create a new **Web Service** on [Render.com](https://render.com)
 3. Connect the repository
 4. Configure:
-   - **Build command:** `npm install`
-   - **Start command:** `npm start`
+    - **Build command:** `npm install`
+    - **Start command:** `npm start`
 5. Add all environment variables in the Render dashboard
 6. Deploy — copy the production URL
 7. Set Meta webhook URL: `https://your-app.onrender.com/webhook`
@@ -196,15 +208,15 @@ See [SECURITY.md](./docs/SECURITY.md) for:
 
 ## Documentation
 
-| File                                        | Purpose                                       |
-|---------------------------------------------|-----------------------------------------------|
-| [README.md](./README.md)                    | Setup, architecture, deployment *(this file)* |
-| [CLAUDE.md](./CLAUDE.md)                    | Full project context for AI assistant handoff |
-| [SECURITY.md](./docs/SECURITY.md)           | Security policy and vulnerability reporting   |
-| [PROJECT_FILES.md](./docs/PROJECT_FILES.md) | Module reference and test inventory           |
-| [TECH_STACK.md](./docs/reference/TECH_STACK.md) | Canonical tech stack and constants          |
-| [BUSINESS_RULES.md](./docs/reference/BUSINESS_RULES.md) | Rules, flow, and classification     |
-| [ENDPOINTS.md](./docs/reference/ENDPOINTS.md) | All API routes and auth                     |
+| File                                                    | Purpose                                       |
+|---------------------------------------------------------|-----------------------------------------------|
+| [README.md](./README.md)                                | Setup, architecture, deployment *(this file)* |
+| [CLAUDE.md](./CLAUDE.md)                                | Full project context for AI assistant handoff |
+| [SECURITY.md](./docs/SECURITY.md)                       | Security policy and vulnerability reporting   |
+| [PROJECT_FILES.md](./docs/PROJECT_FILES.md)             | Module reference and test inventory           |
+| [TECH_STACK.md](./docs/reference/TECH_STACK.md)         | Canonical tech stack and constants            |
+| [BUSINESS_RULES.md](./docs/reference/BUSINESS_RULES.md) | Rules, flow, and classification               |
+| [ENDPOINTS.md](./docs/reference/ENDPOINTS.md)           | All API routes and auth                       |
 
 ---
 

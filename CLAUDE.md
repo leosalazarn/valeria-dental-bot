@@ -6,7 +6,8 @@
 > This file transfers the full project context to an AI assistant.  
 > Created 09/03/2026. Keep it updated with every significant change.
 
-→ See [README.md](./README.md) for setup and deployment · [ROADMAP.md](./docs/ROADMAP.md) for status · [SECURITY.md](./docs/SECURITY.md) for data
+→ See [README.md](./README.md) for setup and deployment · [ROADMAP.md](./docs/ROADMAP.md) for
+status · [SECURITY.md](./docs/SECURITY.md) for data
 policy · [PROJECT_FILES.md](./docs/PROJECT_FILES.md) for module reference
 
 ---
@@ -45,7 +46,7 @@ deposit to confirm a consultation appointment with the doctor.
 | AI        | Anthropic Claude (model: `claude-sonnet-4-6`)      |
 | Server    | Node.js + Express                                  |
 | Hosting   | Render.com                                         |
-| Database  | Supabase (PostgreSQL) — patient CRM                |
+| Database  | Supabase (PostgreSQL) — lead data & metrics        |
 
 ---
 
@@ -56,7 +57,7 @@ deposit to confirm a consultation appointment with the doctor.
 | GitHub Repo       | ✅      | github.com/leosalazarn/valeria-dental-bot (public)                 |
 | Render Deploy     | ✅      | https://valeria-dental-bot.onrender.com                            |
 | Anthropic API Key | ✅      | Set in Render env vars                                             |
-| Supabase          | ✅      | Patient CRM — credentials in Render env vars                       |
+| Supabase          | ✅      | Lead data & metrics — credentials in Render env vars               |
 | Meta App          | ✅      | "valeria-bot" (App ID in Render env vars)                          |
 | Webhook verified  | ✅      | Connected and active                                               |
 | Meta Token        | ⚠️     | Temporary (expires 24h) — permanent token pending                  |
@@ -89,7 +90,8 @@ DEBUG_API_KEY=...                      # Custom key for metrics protection
 
 See [PROJECT_FILES.md](./docs/PROJECT_FILES.md) for the full file tree and per-module descriptions.
 
-Key layout: `src/` (all modules), `tests/` (7 Vitest suites), `docs/` (roadmap, security, files), `.claude/` (settings + slash commands).
+Key layout: `src/` (all modules), `tests/` (7 Vitest suites), `docs/` (roadmap, security, files), `.claude/` (settings +
+slash commands).
 
 ---
 
@@ -142,7 +144,8 @@ See [ENDPOINTS.md](./docs/reference/ENDPOINTS.md) for all routes and auth requir
 
 ## 11. TECHNICAL DECISIONS
 
-- **Supabase for CRM:** Persistent storage for leads and sessions.
+- **Supabase for capture data:** Persistent storage for leads, conversations, and metrics (Dentalink CRM integration
+  pending).
 - **Dedicated WhatsApp line:** Simplifies lead routing.
 - **Price ranges:** Reduces drop-off by providing estimates without exact quotes.
 - **Universal reengagement:** Automated follow-ups after 24h of silence.

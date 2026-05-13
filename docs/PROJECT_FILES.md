@@ -88,22 +88,22 @@ valeria-dental-bot/
 
 ## Source Modules
 
-| File                | Responsibility                                                         |
-|---------------------|------------------------------------------------------------------------|
-| `server.js`         | Express entry point — mounts routes, starts server                     |
-| `config.js`         | Env vars, business constants, all user-facing message templates        |
-| `crm.js`            | Supabase patient store — persistent CRM                                |
-| `session.js`        | Supabase conversation store — persistent history & phase state         |
-| `classifier.js`     | 4-rule classifier: group → IN_TREATMENT → active session → new contact |
-| `prompt.js`         | Builds dynamic system prompt with Spanish security guardrails          |
-| `ai.js`             | Claude API wrapper — 3-retry exponential backoff (2s, 4s)              |
-| `whatsapp.js`       | Sends messages via Meta WhatsApp Cloud API                             |
-| `intent.js`         | Parses `NAME:` / `GOAL:` / `EXTRACTED:` signals from AI responses      |
-| `flow.js`           | Full pipeline: classify → conversion flow → AI → strip signals → send  |
-| `routes/webhook.js` | Meta verification + inbound messages + 5s debounce + 10-msg anti-flood |
-| `routes/debug.js`   | `/leads`, `/stats`, `/metrics` — protected by `DEBUG_API_KEY`          |
-| `utils/logger.js`   | Emoji-prefixed console logging — no sensitive data in output           |
-| `utils/time.js`     | Colombia timezone helper (`America/Bogota`)                            |
+| File                | Responsibility                                                                     |
+|---------------------|------------------------------------------------------------------------------------|
+| `server.js`         | Express entry point — mounts routes, starts server                                 |
+| `config.js`         | Env vars, business constants, all user-facing message templates                    |
+| `crm.js`            | Supabase patient store — persistent lead data (DentalLink CRM integration pending) |
+| `session.js`        | Supabase conversation store — persistent history & phase state                     |
+| `classifier.js`     | 4-rule classifier: group → IN_TREATMENT → active session → new contact             |
+| `prompt.js`         | Builds dynamic system prompt with Spanish security guardrails                      |
+| `ai.js`             | Claude API wrapper — 3-retry exponential backoff (2s, 4s)                          |
+| `whatsapp.js`       | Sends messages via Meta WhatsApp Cloud API                                         |
+| `intent.js`         | Parses `NAME:` / `GOAL:` / `EXTRACTED:` signals from AI responses                  |
+| `flow.js`           | Full pipeline: classify → conversion flow → AI → strip signals → send              |
+| `routes/webhook.js` | Meta verification + inbound messages + 5s debounce + 10-msg anti-flood             |
+| `routes/debug.js`   | `/leads`, `/stats`, `/metrics` — protected by `DEBUG_API_KEY`                      |
+| `utils/logger.js`   | Emoji-prefixed console logging — no sensitive data in output                       |
+| `utils/time.js`     | Colombia timezone helper (`America/Bogota`)                                        |
 
 ---
 

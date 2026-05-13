@@ -2,22 +2,27 @@
 
 ## Version History
 
-| Version | Date       | Author            | Changes                    |
-|---------|------------|-------------------|----------------------------|
-| 1.0     | 2026-05-12 | Leonardo Salazar  | Initial version            |
+| Version | Date       | Author           | Changes         |
+|---------|------------|------------------|-----------------|
+| 1.0     | 2026-05-12 | Leonardo Salazar | Initial version |
 
 ---
 
 ## 1. Introduction
 
 ### 1.1 Purpose
-Valeria is an AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practice. It captures leads from Meta ads, qualifies them, collects patient data, and guides deposit payment for consultation appointments.
+
+Valeria is an AI-powered WhatsApp bot for **Dra. Yuri Quintero's** aesthetic dentistry practice. It captures leads from
+Meta ads, qualifies them, collects patient data, and guides deposit payment for consultation appointments.
 
 ### 1.2 Scope
+
 - **In scope:** Lead qualification, data capture, payment guidance, re-engagement, analytics
 - **Out of scope:** Appointment scheduling (human receptionist), treatment pricing, clinical diagnosis
+- **Future integration:** DentalLink CRM — patient records, scheduling, calendar access (planned Phase 4)
 
 ### 1.3 Definitions
+
 | Term          | Definition                                                                            |
 |---------------|---------------------------------------------------------------------------------------|
 | Lead          | A person who messages the clinic's WhatsApp number                                    |
@@ -56,6 +61,7 @@ Patient → WhatsApp → Meta Cloud API → Webhook POST → Express Server
 | Dedicated WhatsApp line      | Every message is a potential patient — no trigger filtering needed    |
 | Phase-based flow             | Hardcoded hooks reduce AI hallucination at critical conversion points |
 | In-memory session + Supabase | Low-latency reads with persistence across restarts                    |
+| DentalLink (planned)         | Will replace manual scheduling with automated CRM integration         |
 | AI signal extraction         | Claude appends NAME:/GOAL: — avoids separate NER model                |
 | 3-line message limit         | WhatsApp best practice for engagement rates                           |
 
@@ -72,10 +78,10 @@ See [PROJECT_FILES.md](../PROJECT_FILES.md) for detailed module descriptions.
 | Routes      | `routes/debug.js`   | Health check, lead list, stats, funnel metrics  |
 | Business    | `flow.js`           | Main pipeline orchestration                     |
 | Business    | `classifier.js`     | 4-rule message classification                   |
-| Business    | `intent.js`         | Signal parsing + CRM upsert                     |
+| Business    | `intent.js`         | Signal parsing + Supabase upsert                |
 | AI          | `ai.js`             | Claude API wrapper with retry                   |
 | AI          | `prompt.js`         | Dynamic system prompt builder                   |
-| Data        | `crm.js`            | Supabase patient CRUD                           |
+| Data        | `crm.js`            | Supabase lead data persistence                  |
 | Data        | `session.js`        | Supabase conversation store                     |
 | Integration | `whatsapp.js`       | Meta Cloud API sender                           |
 | Utility     | `utils/logger.js`   | Emoji-prefixed logging                          |
@@ -86,6 +92,7 @@ See [PROJECT_FILES.md](../PROJECT_FILES.md) for detailed module descriptions.
 ## 4. Data Model
 
 ### 4.1 Patients Table
+
 | Column                                | Type    | Notes                                   |
 |---------------------------------------|---------|-----------------------------------------|
 | phone                                 | TEXT PK | WhatsApp number                         |
@@ -97,6 +104,7 @@ See [PROJECT_FILES.md](../PROJECT_FILES.md) for detailed module descriptions.
 | full_name, email, consultation_reason | TEXT    | Captured in DATA_CAPTURE phase          |
 
 ### 4.2 Conversations Table
+
 | Column  | Type    | Notes                                                        |
 |---------|---------|--------------------------------------------------------------|
 | phone   | TEXT PK | Foreign key-like relationship                                |
