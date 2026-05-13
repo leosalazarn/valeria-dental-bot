@@ -180,16 +180,21 @@ export async function recordFirstResponse(phone) {
     await saveSessionToDB(phone, session);
 }
 
-// Return all active sessions (for metrics endpoint)
-export function getAllSessions() {
-    return Array.from(sessions.entries()).map(([phone, session]) => ({
-        phone,
-        phase: session.phase,
-        source: session.source,
-        name: session.name,
-        aesthetic_goal: session.aesthetic_goal,
-        data_complete: session.data_complete,
-        last_interaction: session.last_interaction,
-        metrics: session.metrics,
-    }));
+// Return all persistent sessions from DB (for metrics endpoint)
+export async function getAllSessions() {
+    try {
+        const {data, error} = await supabase
+            .from('conversations')
+            .select('phone, phase, source, name, aesthetic_goal, data_complete, last_interaction, metrics');
+
+        if (error) {
+            log.error('getAllSessions', error);
+            return [];
+        }
+
+        return data;
+    } catch (err) {
+        log.error('getAllSessions', err);
+        return [];
+    }
 }

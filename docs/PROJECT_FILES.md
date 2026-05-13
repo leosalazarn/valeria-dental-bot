@@ -28,6 +28,9 @@ valeria-dental-bot/
 │   ├── ROADMAP.md       ← status and future phases
 │   ├── PROJECT_FILES.md ← this file
 │   └── SECURITY.md      ← data policies & auth
+├── scripts/             ← SQL database scripts (DDL/DCL)
+│   ├── 01_schema.sql    ← Table & Index definitions
+│   └── 02_security.sql  ← RLS Policies & Security
 ├── tests/               ← Vitest test suite
 │   ├── crm.test.js
 │   ├── session.test.js

@@ -39,8 +39,8 @@ router.get('/stats', auth, async (req, res) => {
 });
 
 // GET /metrics — conversion funnel (Protected)
-router.get('/metrics', auth, (req, res) => {
-    const sessions = getAllSessions();
+router.get('/metrics', auth, async (req, res) => {
+    const sessions = await getAllSessions();
     const total = sessions.length;
 
     if (total === 0) {
