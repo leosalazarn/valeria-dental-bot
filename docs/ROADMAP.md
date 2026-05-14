@@ -4,7 +4,7 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 ## 📊 Current Status: **Phase 3 — Conversion**
 
-**Last Update:** May 12, 2026
+**Last Update:** May 14, 2026
 **Overall Progress:** ~40% to Production Launch
 
 ---
@@ -38,7 +38,6 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 *Goal: Optimize the funnel from "Interested Lead" to "Paying Patient".*
 
-- **Pricing Logic:** Add specific ranges for different treatments (Resins, Lenses, etc.) in `config.js`.
 - **Enhanced Re-engagement:** Implement different strategies based on why the patient stopped talking (Price objection
   vs. Timing).
 - **Meta Verification:** Finalize App Review and switch to the permanent Production Number.
@@ -53,14 +52,19 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 - **DentalLink Integration:** Connect with the clinic's software to check real availability.
 - **Automated Scheduling:** Let Valeria book the actual slot in the calendar.
-- **Media Handling:** Process photos sent by patients via Meta Media API for preliminary visual assessment.
+- **Media Handling:** Photos/videos of real cases via Meta Media API.
+- **Emotionality in fast mode:** Fine-tune tone (point 4 pending).
+- **Point 2 pending:** Hardcoded messages (need a log).
+- **Point 5:** Still needs confirmation.
 
 ---
 
 ## 📈 Phase 5: Scale (Long Term)
 
-*Goal: Handle hundreds of daily conversations and multiple clinics.*
+*Only if >500 consultations/month or multiple clinics.*
 
+- **Evaluate Python/FastAPI** as the agent brain.
+- **Evaluate Java/Spring Boot** as the business backend.
 - **RAG System:** Move clinical knowledge to a Vector Database for more precise medical FAQs.
 - **Analytics Engine:** Deep sentiment analysis to detect "high-intent" patients automatically.
 - **Voice Messages:** Integrate STT (Speech-to-Text) to allow patients to send audio notes.
