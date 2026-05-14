@@ -52,6 +52,8 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 - **DentalLink Integration:** Connect with the clinic's software to check real availability.
 - **Automated Scheduling:** Let Valeria book the actual slot in the calendar.
+- **Human handoff signal:** Add `[HANDOFF_TO_HUMAN]` intent detection so Valeria gracefully routes patients to a human
+  when needed.
 - **Media Handling:** Photos/videos of real cases via Meta Media API.
 - **Emotionality in fast mode:** Fine-tune tone (point 4 pending).
 - **Point 2 pending:** Hardcoded messages (need a log).
