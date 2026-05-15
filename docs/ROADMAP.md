@@ -93,9 +93,8 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 ## ⏰ Maintenance Deadlines
 
 | Date             | Item                     | Status    | Action                                                                                                                                                                                                       |
-|------------------|--------------------------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Oct 30, 2026** | Supabase Data API grants | ⬜ Pending | Run `scripts/02_security.sql` (has GRANTs for anon/authenticated/service_role). Without it, supabase-js returns 42501 — all table access blocked. Can also switch to `service_role` key for better security.                                      |
-| **Recurring**    | Dependabot alerts        | 🔄 Active | 29 alerts (5H, 15M, 9L). npm update resolved lockfile to latest compatible (express 4.22.2, supabase-js 2.105.4, vitest 4.1.6). If alerts persist, major version bumps needed for @anthropic-ai/sdk (0.39→0.96) and dotenv (16→17). Run `npm audit` after each deploy. |
+|------------------|--------------------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Oct 30, 2026** | Supabase Data API grants | ⬜ Pending | Run `scripts/02_security.sql` (has GRANTs for anon/authenticated/service_role). Without it, supabase-js returns 42501 — all table access blocked. Can also switch to `service_role` key for better security. |
 
 ## 🛠️ Tech Stack Reminder
 
