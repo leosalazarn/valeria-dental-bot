@@ -4,7 +4,7 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 ## 📊 Current Status: **Phase 3 — Conversion**
 
-**Last Update:** May 15, 2026
+**Last Update:** May 15, 2026,
 **Overall Progress:** ~40% to Production Launch
 
 ---
@@ -55,6 +55,9 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 - **Human handoff signal:** Add `[HANDOFF_TO_HUMAN]` intent detection so Valeria gracefully routes patients to a human
   when needed.
 - **Media Handling:** Photos/videos of real cases via Meta Media API.
+- **Emotionality in fast mode:** Fine-tune tone (point 4 pending).
+- **Point 2 pending:** Hardcoded messages (need a log).
+- **Point 5:** Still needs confirmation.
 
 ---
 
