@@ -35,9 +35,11 @@ Only the latest version deployed on Render.com is actively maintained and receiv
 ### Rules
 
 - **No sensitive data in source code** — ever. All secrets via environment variables exclusively.
-- **No sensitive data in documentation** — `CLAUDE.md`, `README.md`, and all markdown files committed to the repository must contain only placeholder values.
+- **No sensitive data in documentation** — `CLAUDE.md`, `README.md`, and all markdown files committed to the repository
+  must contain only placeholder values.
 - **No sensitive data in logs** — `logger.js` logs only truncated message text and masked phone numbers.
-- **Banking details** are injected into the AI prompt at runtime from env vars and are never persisted to disk or version control.
+- **Banking details** are injected into the AI prompt at runtime from env vars and are never persisted to disk or
+  version control.
 - **Patient data persistence** is handled by Supabase with Row Level Security (RLS) or internal API access.
 
 ---
@@ -46,13 +48,15 @@ Only the latest version deployed on Render.com is actively maintained and receiv
 
 ### Storage
 
-All credentials are stored exclusively as **Render environment variables** (encrypted at rest, not visible in build logs).  
+All credentials are stored exclusively as **Render environment variables** (encrypted at rest, not visible in build
+logs).  
 The `.env` file is listed in `.gitignore` and must never be committed.  
 `.env.example` contains only placeholder keys (`...`) — no real values.
 
 ### Authentication
 
-Access to debug endpoints (`/debug/leads`, `/debug/stats`, `/debug/metrics`) requires an `x-api-key` header matching the `DEBUG_API_KEY` defined in the environment.
+Access to debug endpoints (`/debug/leads`, `/debug/stats`, `/debug/metrics`) requires an `x-api-key` header matching the
+`DEBUG_API_KEY` defined in the environment.
 
 ### Token Types
 
@@ -84,4 +88,5 @@ The Meta access token should be a **permanent token** generated via:
 
 ## Vulnerability Reporting
 
-If you discover a security vulnerability, please contact the repository owner directly via private message. Do not open public issues for security flaws.
+If you discover a security vulnerability, please contact the repository owner directly via private message. Do not open
+public issues for security flaws.

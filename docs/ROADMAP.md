@@ -91,8 +91,10 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 *Goal: Evolve from Node.js monolith to distributed Bridge Architecture (Java 21 + Python AI microservices).*
 
-- **Strangler Fig extraction:** Identify and extract one AI-heavy module (e.g., intent parsing or patient qualification) into a Python/FastAPI microservice.
-- **Python AI Microservice:** FastAPI + Pydantic v2 + LangGraph for LLM orchestration. Communicate with Node.js core via HTTP/gRPC.
+- **Strangler Fig extraction:** Identify and extract one AI-heavy module (e.g., intent parsing or patient qualification)
+  into a Python/FastAPI microservice.
+- **Python AI Microservice:** FastAPI + Pydantic v2 + LangGraph for LLM orchestration. Communicate with Node.js core via
+  HTTP/gRPC.
 - **Java 21 Backend:** Spring Boot 3.2+ for auth, persistence, transactions. Virtual Threads (Project Loom), ZGC/G1 GC.
 - **Kafka Event Bus:** Async communication between Bridge layers. Partition keys, offset management, headers.
 - **LangChain4j:** Java-side LLM integration for non-AI-heavy tasks (classification, extraction).
@@ -104,11 +106,15 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 *Goal: Production-grade AI infrastructure on AWS with Bedrock, RAG, and Knowledge Bases.*
 
-- **Amazon Bedrock Knowledge Base:** Create a document corpus in S3 (treatments, procedures, FAQs, pricing). Sync to Bedrock KB for RAG-powered retrieval.
-- **RAG Pipeline:** Python/FastAPI service queries Bedrock `retrieve_and_generate` for accurate, context-aware responses.
+- **Amazon Bedrock Knowledge Base:** Create a document corpus in S3 (treatments, procedures, FAQs, pricing). Sync to
+  Bedrock KB for RAG-powered retrieval.
+- **RAG Pipeline:** Python/FastAPI service queries Bedrock `retrieve_and_generate` for accurate, context-aware
+  responses.
 - **OpenSearch Serverless:** Vector store for embeddings — semantic search over the clinic's treatment portfolio.
-- **Knowledge Base docs:** Maintain canonical markdown files under `docs/knowledge-base/` as the single source of truth for all clinical and pricing data.
-- **Enterprise Observability:** CloudWatch, X-Ray tracing across the Bridge layers, custom metrics for latency and cost per query.
+- **Knowledge Base docs:** Maintain canonical markdown files under `docs/knowledge-base/` as the single source of truth
+  for all clinical and pricing data.
+- **Enterprise Observability:** CloudWatch, X-Ray tracing across the Bridge layers, custom metrics for latency and cost
+  per query.
 - **Cost Optimization:** Bedrock Provisioned Throughput vs. On-Demand analysis. Cache frequently accessed KB queries.
 
 ---
