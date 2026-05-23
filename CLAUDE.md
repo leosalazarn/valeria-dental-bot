@@ -29,7 +29,8 @@ deposit to confirm a consultation appointment with the doctor.
 - ❌ **NEVER give exact treatment prices** — only approximate ranges when patient insists (configured in
   `config.js TREATMENT_PRICES`)
 - ❌ **NEVER ask for ID or additional phone number** — phone is already known from WhatsApp
-- ❌ **NEVER confirm or schedule appointments** — only capture data (DentalLink integration pending)
+- ❌ **NEVER confirm or schedule appointments** — only capture data (appointment scheduling is handled manually by clinic
+  staff in Gestión Odontológica)
 - ✅ Dra. Yuri is a woman: always "la Dra. Yuri" or "la doctora"
 - ✅ Valeria always uses informal "tú" — natural, warm Colombian Spanish
 - ✅ Maximum 3 lines per message
@@ -144,8 +145,9 @@ See [ENDPOINTS.md](./docs/reference/ENDPOINTS.md) for all routes and auth requir
 
 ## 11. TECHNICAL DECISIONS
 
-- **Supabase for capture data:** Persistent storage for leads, conversations, and metrics (Dentalink CRM integration
-  pending).
+- **Supabase for capture data:** Persistent storage for leads, conversations, and metrics. Appointment data captured by
+  Valeria is handed off to clinic staff, who manage scheduling in Gestión Odontológica (the clinic's existing practice
+  management system).
 - **Dedicated WhatsApp line:** Simplifies lead routing.
 - **Price ranges:** Reduces drop-off by providing estimates without exact quotes.
 - **Universal reengagement:** Automated follow-ups after 24h of silence.

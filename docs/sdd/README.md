@@ -19,7 +19,10 @@ Meta ads, qualifies them, collects patient data, and guides deposit payment for 
 
 - **In scope:** Lead qualification, data capture, payment guidance, re-engagement, analytics
 - **Out of scope:** Appointment scheduling (human receptionist), treatment pricing, clinical diagnosis
-- **Future integration:** DentalLink CRM — patient records, scheduling, calendar access (planned Phase 4)
+- **Gestión Odontológica handoff (pending evaluation):** Valeria captures patient data; clinic staff completes
+  scheduling in their existing
+  practice management system. Whether an API or webhook exists is unconfirmed — no integration work planned until
+  evaluation is complete.
 
 ### 1.3 Definitions
 
@@ -56,14 +59,14 @@ Patient → WhatsApp → Meta Cloud API → Webhook POST → Express Server
 
 ### 2.2 Design Decisions
 
-| Decision                     | Rationale                                                             |
-|------------------------------|-----------------------------------------------------------------------|
-| Dedicated WhatsApp line      | Every message is a potential patient — no trigger filtering needed    |
-| Phase-based flow             | Hardcoded hooks reduce AI hallucination at critical conversion points |
-| In-memory session + Supabase | Low-latency reads with persistence across restarts                    |
-| DentalLink (planned)         | Will replace manual scheduling with automated CRM integration         |
-| AI signal extraction         | Claude appends NAME:/GOAL: — avoids separate NER model                |
-| 3-line message limit         | WhatsApp best practice for engagement rates                           |
+| Decision                                  | Rationale                                                                                                                                    |
+|-------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| Dedicated WhatsApp line                   | Every message is a potential patient — no trigger filtering needed                                                                           |
+| Phase-based flow                          | Hardcoded hooks reduce AI hallucination at critical conversion points                                                                        |
+| In-memory session + Supabase              | Low-latency reads with persistence across restarts                                                                                           |
+| Gestión Odontológica (pending evaluation) | Valeria captures patient data; clinic staff completes scheduling. API availability unconfirmed — no integration work planned until evaluated |
+| AI signal extraction                      | Claude appends NAME:/GOAL: — avoids separate NER model                                                                                       |
+| 3-line message limit                      | WhatsApp best practice for engagement rates                                                                                                  |
 
 ---
 

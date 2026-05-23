@@ -34,18 +34,18 @@ supplier detection.
 
 ## Features
 
-| Feature                    | Description                                                                        |
-|----------------------------|------------------------------------------------------------------------------------|
-| 24/7 availability          | Responds instantly regardless of office hours                                      |
-| Natural conversation       | Warm Colombian Spanish (`tú`), first person plural ("nosotros")                    |
-| Multiphase conversion flow | Guides patient from first contact to deposit                                       |
-| Silent data extraction     | Captures name and goal without interrupting flow                                   |
-| Universal re-engagement    | 24h follow-up timer active in every phase (EXTRACTION→CLOSING)                     |
-| Approximate price ranges   | Shares treatment ranges when patient insists — never exact prices                  |
-| Intent tracking            | Logs objection type, phase, and outcome per patient                                |
-| Supabase persistence       | Leads, conversations, and metrics persisted in Supabase (survives server restarts) |
-| DentalLink (planned)       | Future CRM integration for patient records, scheduling, and calendar access        |
-| Retry logic                | Exponential backoff on Claude API errors (529/503/500)                             |
+| Feature                      | Description                                                                                                                  |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| 24/7 availability            | Responds instantly regardless of office hours                                                                                |
+| Natural conversation         | Warm Colombian Spanish (`tú`), first person plural ("nosotros")                                                              |
+| Multiphase conversion flow   | Guides patient from first contact to deposit                                                                                 |
+| Silent data extraction       | Captures name and goal without interrupting flow                                                                             |
+| Universal re-engagement      | 24h follow-up timer active in every phase (EXTRACTION→CLOSING)                                                               |
+| Approximate price ranges     | Shares treatment ranges when patient insists — never exact prices                                                            |
+| Intent tracking              | Logs objection type, phase, and outcome per patient                                                                          |
+| Supabase persistence         | Leads, conversations, and metrics persisted in Supabase (survives server restarts)                                           |
+| Gestión Odontológica handoff | Appointment data captured by Valeria is handed off to clinic staff for scheduling in the existing practice management system |
+| Retry logic                  | Exponential backoff on Claude API errors (529/503/500)                                                                       |
 
 ---
 
@@ -74,14 +74,14 @@ graph TD
 
 ## Tech Stack
 
-| Component | Solution                                                     |
-|-----------|--------------------------------------------------------------|
-| AI        | Anthropic Claude (`claude-sonnet-4-6`)                       |
-| Server    | Node.js + Express (ES Modules)                               |
-| Database  | Supabase (PostgreSQL) — lead data & metrics                  |
-| CRM       | DentalLink (planned) — patient records, scheduling, calendar |
-| WhatsApp  | Meta Cloud API                                               |
-| Hosting   | Render.com                                                   |
+| Component  | Solution                                                                                                       |
+|------------|----------------------------------------------------------------------------------------------------------------|
+| AI         | Anthropic Claude (`claude-sonnet-4-6`)                                                                         |
+| Server     | Node.js + Express (ES Modules)                                                                                 |
+| Database   | Supabase (PostgreSQL) — lead data & metrics                                                                    |
+| Scheduling | Gestión Odontológica — clinic staff manages appointments manually in their existing practice management system |
+| WhatsApp   | Meta Cloud API                                                                                                 |
+| Hosting    | Render.com                                                                                                     |
 
 See [TECH_STACK.md](./docs/reference/TECH_STACK.md) for the full stack and key constants.
 

@@ -50,8 +50,10 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 *Goal: Remove manual steps from the doctor's team.*
 
-- **DentalLink Integration:** Connect with the clinic's software to check real availability.
-- **Automated Scheduling:** Let Valeria book the actual slot in the calendar.
+- **Gestión Odontológica — PENDING EVALUATION**  The clinic's existing practice management system (6+ years in use).
+  Before any integration work: evaluate whether the system exposes an API or webhook. If yes: design automated handoff
+  when `data_complete === true`. If no: manual handoff by clinic staff is the permanent behavior.
+  Status: not started — evaluation required first.
 - **Human handoff signal:** Add `[HANDOFF_TO_HUMAN]` intent detection so Valeria gracefully routes patients to a human
   when needed.
 - **Media Handling:** Photos/videos of real cases via Meta Media API.

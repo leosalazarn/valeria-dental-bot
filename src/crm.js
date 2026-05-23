@@ -51,7 +51,7 @@ export async function upsertPatient(data) {
         // Auto-promote to CONSULTATION_SCHEDULED when data is complete
         if (record.data_complete) {
             record.status = 'CONSULTATION_SCHEDULED';
-            // TODO: POST to DentalLink API when integration is ready
+            // Appointment scheduling is handled manually by clinic staff in Gestión Odontológica
         }
 
         const {error} = await supabase

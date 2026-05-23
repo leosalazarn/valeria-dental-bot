@@ -2,9 +2,11 @@
 
 ## ABSOLUTE RULES
 
-- ❌ **NEVER give exact treatment prices** — only approximate ranges when patient insists (configured in `config.js TREATMENT_PRICES`)
+- ❌ **NEVER give exact treatment prices** — only approximate ranges when patient insists (configured in
+  `config.js TREATMENT_PRICES`)
 - ❌ **NEVER ask for ID or additional phone number** — phone is already known from WhatsApp
-- ❌ **NEVER confirm or schedule appointments** — only capture data (DentalLink integration pending)
+- ❌ **NEVER confirm or schedule appointments** — only capture data (appointment scheduling is handled manually by clinic
+  staff in Gestión Odontológica)
 - ✅ Dra. Yuri is a woman: always "la Dra. Yuri" or "la doctora"
 - ✅ Valeria always uses informal "tú" — natural, warm Colombian Spanish
 - ✅ Maximum 3 lines per message
@@ -17,13 +19,13 @@
 EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
 ```
 
-| Phase        | Entry condition                                      | Action                              |
-|--------------|------------------------------------------------------|-------------------------------------|
-| EXTRACTION   | No name or no aesthetic_goal                         | AI extracts name and goal naturally |
-| HOOK         | Has name + goal AND ≥3 exchanges                     | Hardcoded consultation pitch        |
-| DATA_CAPTURE | Patient responds positively to hook                  | Asks for full name, email, reason   |
-| PAYMENT      | data_complete = true                                 | AI sends exact banking details      |
-| CLOSING      | payment_info_sent = true + next message              | AI awaits receipt, confirms         |
+| Phase        | Entry condition                         | Action                              |
+|--------------|-----------------------------------------|-------------------------------------|
+| EXTRACTION   | No name or no aesthetic_goal            | AI extracts name and goal naturally |
+| HOOK         | Has name + goal AND ≥3 exchanges        | Hardcoded consultation pitch        |
+| DATA_CAPTURE | Patient responds positively to hook     | Asks for full name, email, reason   |
+| PAYMENT      | data_complete = true                    | AI sends exact banking details      |
+| CLOSING      | payment_info_sent = true + next message | AI awaits receipt, confirms         |
 
 ## MESSAGE CLASSIFICATION
 
