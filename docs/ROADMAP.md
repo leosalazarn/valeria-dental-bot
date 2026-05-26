@@ -84,6 +84,9 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 - **Export to CSV:** Add a download button to export leads data for offline analysis or Google Sheets import.
 - **Session Inspector:** Admin panel to view individual conversation history, phase transitions, and re-engagement
   status per lead.
+- **LLM Rate Limiting:** Per-phone rate limiter on AI calls (separate from debounce buffer).
+  Prevents rapid-fire injection attempts that bypass the debounce window.
+  Defer until traffic justifies it (Phase 5+).
 
 ---
 

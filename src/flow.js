@@ -12,6 +12,7 @@ import {buildSystemPrompt, buildCurrentPatientPrompt} from './prompt.js';
 import {classifyMessage} from './classifier.js';
 import {callValeria} from './ai.js';
 import {sendMessage} from './whatsapp.js';
+import {auditOutput} from './guardrails/output.js';
 import {extractIntent} from './intent.js';
 import {
     REENGAGEMENT_DELAY_MINUTES,
@@ -101,11 +102,19 @@ export async function processMessage(phone, text, chatType) {
         // Strip internal signals before sending to patient
         const cleanResponse = stripSignals(aiResponse);
 
+        // Output guardrails — block bank data leaks outside PAYMENT phase
+        const audit = auditOutput(cleanResponse, session.phase);
+        if (!audit.safe) {
+            log.warn('BLOCKED_RESPONSE', `Reason: ${audit.reason} | Phone: ${phone}`);
+            await sendMessage(phone, audit.text);
+            return;
+        }
+
         // Reset reengagement timer on every outgoing message — covers all phases
         await resetReengagementTimer(phone, session);
         await recordFirstResponse(phone);
-        log.outgoing(phone, cleanResponse);
-        await sendMessage(phone, cleanResponse);
+        log.outgoing(phone, audit.text);
+        await sendMessage(phone, audit.text);
 
     } catch (error) {
         log.error('processMessage', error);

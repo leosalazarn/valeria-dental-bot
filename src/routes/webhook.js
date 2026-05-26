@@ -2,6 +2,7 @@
 import express from 'express';
 import {VERIFY_TOKEN, MSG_NON_TEXT, DEDUP_TTL_MS, MAX_BUFFER_SIZE, DEBOUNCE_MS} from '../config.js';
 import {processMessage} from '../flow.js';
+import {detectInjectionAttempt} from '../validators/index.js';
 import log from '../utils/logger.js';
 
 const router = express.Router();
@@ -116,8 +117,16 @@ router.post('/', async (req, res) => {
         }
 
         const phoneWA = message.from;
-        const text = message.text.body.trim();
+        const text = sanitizeInput(message.text.body);
         const chatType = value.contacts?.[0]?.profile?.name ? 'individual' : 'group';
+
+        // Injection detection — block jailbreak/prompt leak attempts before processing
+        if (detectInjectionAttempt(text)) {
+            log.warn('INJECTION_ATTEMPT', `Blocked from: ${phoneWA}`);
+            const { sendMessage } = await import('../whatsapp.js');
+            await sendMessage(phoneWA, 'No puedo ayudarte con eso 🦷 ¿Hay algo sobre nuestros tratamientos en lo que te pueda ayudar?');
+            return;
+        }
 
         // Debounce — wait 10s to group consecutive messages
         debounceMessage(phoneWA, text, chatType);
