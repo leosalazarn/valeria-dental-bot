@@ -13,9 +13,11 @@ const __dirname = dirname(__filename);
 const app = express();
 app.use(express.json());
 
-// Serve static dashboard and assets
-app.use(express.static(join(__dirname, 'public')));
+// Serve assets (logo) and dashboard on non-obvious route
 app.use('/assets', express.static(join(__dirname, 'assets')));
+app.get('/dashboard-valeria-statistics', (_req, res) => {
+    res.sendFile(join(__dirname, 'public', 'dashboard.html'));
+});
 
 // Mount routes
 app.use('/webhook', webhookRouter);
