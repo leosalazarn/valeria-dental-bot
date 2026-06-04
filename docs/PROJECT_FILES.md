@@ -97,25 +97,25 @@ valeria-dental-bot/
 
 ## Source Modules
 
-| File                | Responsibility                                                                              |
-|---------------------|---------------------------------------------------------------------------------------------|
-| `server.js`         | Express entry point — mounts routes, session middleware, dashboard login endpoints, starts server |
-| `config.js`         | Env vars, business constants, all user-facing message templates                             |
-| `crm.js`            | Supabase patient store — persistent lead data (appointment handoff to Gestión Odontológica) |
-| `session.js`        | Supabase conversation store — persistent history & phase state                              |
-| `classifier.js`     | 4-rule classifier: group → IN_TREATMENT → active session → new contact                      |
-| `prompt.js`         | Builds dynamic system prompt with Spanish security guardrails                               |
-| `ai.js`             | Claude API wrapper — 3-retry exponential backoff (2s, 4s)                                   |
-| `whatsapp.js`       | Sends messages via Meta WhatsApp Cloud API                                                  |
-| `intent.js`         | Parses `NAME:` / `GOAL:` / `EXTRACTED:` signals from AI responses                           |
-| `flow.js`           | Full pipeline: classify → conversion flow → AI → strip signals → send                       |
-| `routes/webhook.js` | Meta verification + inbound messages + 5s debounce + 10-msg anti-flood                      |
-| `guardrails/output.js` | Bank data leak detection — blocks account numbers, Nequi, Davivienda, CC outside PAYMENT phase |
-| `validators/index.js`  | Input sanitization + 10-pattern injection detection (ignore/forget, system prompt, DAN, jailbreak) |
-| `public/dashboard.html` | Lead Dashboard UI — single-file HTML, Tailwind CSS, Chart.js, CSP, ES/EN locales, session auth |
-| `routes/debug.js`   | `/leads`, `/stats`, `/metrics` — protected by session OR `x-api-key`                        |
-| `utils/logger.js`   | Emoji-prefixed console logging — no sensitive data in output                                |
-| `utils/time.js`     | Colombia timezone helper (`America/Bogota`)                                                 |
+| File                    | Responsibility                                                                                     |
+|-------------------------|----------------------------------------------------------------------------------------------------|
+| `server.js`             | Express entry point — mounts routes, session middleware, dashboard login endpoints, starts server  |
+| `config.js`             | Env vars, business constants, all user-facing message templates                                    |
+| `crm.js`                | Supabase patient store — persistent lead data (appointment handoff to Gestión Odontológica)        |
+| `session.js`            | Supabase conversation store — persistent history & phase state                                     |
+| `classifier.js`         | 4-rule classifier: group → IN_TREATMENT → active session → new contact                             |
+| `prompt.js`             | Builds dynamic system prompt with Spanish security guardrails                                      |
+| `ai.js`                 | Claude API wrapper — 3-retry exponential backoff (2s, 4s)                                          |
+| `whatsapp.js`           | Sends messages via Meta WhatsApp Cloud API                                                         |
+| `intent.js`             | Parses `NAME:` / `GOAL:` / `EXTRACTED:` signals from AI responses                                  |
+| `flow.js`               | Full pipeline: classify → conversion flow → AI → strip signals → send                              |
+| `routes/webhook.js`     | Meta verification + inbound messages + 5s debounce + 10-msg anti-flood                             |
+| `guardrails/output.js`  | Bank data leak detection — blocks account numbers, Nequi, Davivienda, CC outside PAYMENT phase     |
+| `validators/index.js`   | Input sanitization + 10-pattern injection detection (ignore/forget, system prompt, DAN, jailbreak) |
+| `public/dashboard.html` | Lead Dashboard UI — single-file HTML, Tailwind CSS, Chart.js, CSP, ES/EN locales, session auth     |
+| `routes/debug.js`       | `/leads`, `/stats`, `/metrics` — protected by session OR `x-api-key`                               |
+| `utils/logger.js`       | Emoji-prefixed console logging — no sensitive data in output                                       |
+| `utils/time.js`         | Colombia timezone helper (`America/Bogota`)                                                        |
 
 ---
 
@@ -130,15 +130,15 @@ npm test            # run once
 npm run test:watch  # watch mode
 ```
 
-| Suite                       | Tests  | What it covers                                                              |
-|-----------------------------|--------|-----------------------------------------------------------------------------|
-| `crm.test.js`               | 14     | Patient CRUD, defaults, merging, `data_complete` auto-promotion             |
-| `session.test.js`           | 13     | Lifecycle, `updateSession`, history sliding window, timers                  |
-| `classifier.test.js`        | 9      | All 4 classification rules                                                  |
-| `intent.test.js`            | 15     | NAME/GOAL extraction, all intent types, EXTRACTED parsing, CRM side effects |
-| `flow.test.js`              | 16     | `stripSignals`, `POSITIVE_RESPONSES`, full pipeline with mocked AI/WhatsApp |
-| `prompt.test.js`            | 20     | Prompt content, phase-specific sections, session context injection          |
-| `validators.test.js`        | 3      | Injection pattern detection (10 patterns)                                   |
-| `guardrails.output.test.js` | 5      | Bank data leak detection per phase, fallback messaging                      |
-| `utils/time.test.js`        | 7      | ISO output, Colombia timezone offset, edge cases                            |
-| **Total**                   | **102**|                                                                             |
+| Suite                       | Tests   | What it covers                                                              |
+|-----------------------------|---------|-----------------------------------------------------------------------------|
+| `crm.test.js`               | 14      | Patient CRUD, defaults, merging, `data_complete` auto-promotion             |
+| `session.test.js`           | 13      | Lifecycle, `updateSession`, history sliding window, timers                  |
+| `classifier.test.js`        | 9       | All 4 classification rules                                                  |
+| `intent.test.js`            | 15      | NAME/GOAL extraction, all intent types, EXTRACTED parsing, CRM side effects |
+| `flow.test.js`              | 16      | `stripSignals`, `POSITIVE_RESPONSES`, full pipeline with mocked AI/WhatsApp |
+| `prompt.test.js`            | 20      | Prompt content, phase-specific sections, session context injection          |
+| `validators.test.js`        | 3       | Injection pattern detection (10 patterns)                                   |
+| `guardrails.output.test.js` | 5       | Bank data leak detection per phase, fallback messaging                      |
+| `utils/time.test.js`        | 7       | ISO output, Colombia timezone offset, edge cases                            |
+| **Total**                   | **102** |                                                                             |

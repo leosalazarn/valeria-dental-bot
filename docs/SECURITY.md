@@ -56,6 +56,7 @@ The `.env` file is listed in `.gitignore` and must never be committed.
 ### Authentication
 
 Access to debug endpoints (`/debug/leads`, `/debug/stats`, `/debug/metrics`) requires one of:
+
 - **Session cookie** (recommended for dashboard): established by `POST /dashboard/login` with valid API key in body.
   Returns an HttpOnly, sameSite lax, 24-hour session — no API key stored on the client.
 - **`x-api-key` header** (for external/scripted access): matches `DEBUG_API_KEY` env var.

@@ -37,7 +37,8 @@ export const MSG_<NEW_PHASE> = (name) =>
 
 ### 4. Add re-engagement message (optional)
 
-If the new phase should have a custom re-engagement message, add a case in the `resetReengagementTimer` function in `src/flow.js`.
+If the new phase should have a custom re-engagement message, add a case in the `resetReengagementTimer` function in
+`src/flow.js`.
 
 ### 5. Update tests
 
