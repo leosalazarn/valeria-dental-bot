@@ -17,7 +17,7 @@ const app = express();
 app.use(express.json());
 
 // Server-side session — HttpOnly cookie, no API key stored on client
-const SESSION_SECRET = crypto.createHash('sha256').update(DEBUG_API_KEY).digest('hex');
+const SESSION_SECRET = crypto.randomBytes(32).toString('hex');
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
