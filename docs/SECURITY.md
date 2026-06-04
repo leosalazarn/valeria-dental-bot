@@ -59,11 +59,20 @@ Access to debug endpoints (`/debug/leads`, `/debug/stats`, `/debug/metrics`) req
 
 - **Session cookie** (recommended for dashboard): established by `POST /dashboard/login` with valid API key in body.
   Returns an HttpOnly, sameSite lax, 24-hour session — no API key stored on the client.
+  Cookie uses `secure: true` in production (`NODE_ENV === 'production'`), `false` locally for HTTP dev.
+  Server trusts first proxy (`app.set('trust proxy', 1)`) for Render HTTPS termination.
 - **`x-api-key` header** (for external/scripted access): matches `DEBUG_API_KEY` env var.
 
 The dashboard (`/dashboard-valeria-statistics`) uses the session-based flow exclusively: API key is posted once,
 validated server-side, and never persisted in `sessionStorage` or `localStorage`. It is also rate-limited to 30
 requests per 15 minutes per IP.
+
+### CSRF Protection
+
+All state-changing requests under `/dashboard/*` are protected by `lusca.csrf()` middleware (scoped via
+`app.use('/dashboard', lusca.csrf())`). The client must send a valid `x-csrf-token` header on POST requests,
+fetched from `GET /dashboard/csrf-token` at page load. This protects against cross-site request forgery
+(CWE-352, CodeQL `js/missing-token-validation`).
 
 ### Token Types
 

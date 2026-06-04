@@ -4,7 +4,7 @@
 |------------|----------------------------------------------------------------------------------------------------------------|
 | WhatsApp   | Meta Cloud API (free up to 1k conversations/month)                                                             |
 | AI         | Anthropic Claude (model: `claude-sonnet-4-6`)                                                                  |
-| Server     | Node.js + Express (ES Modules) + express-session + express-rate-limit                                          |
+| Server     | Node.js + Express (ES Modules) + express-session + express-rate-limit + lusca (CSRF)                           |
 | Hosting    | Render.com                                                                                                     |
 | Database   | Supabase (PostgreSQL) — lead data & metrics                                                                    |
 | Scheduling | Gestión Odontológica — clinic staff manages appointments manually in their existing practice management system |

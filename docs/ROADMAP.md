@@ -4,8 +4,8 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 ## 📊 Current Status: **Phase 3 — Conversion**
 
-**Last Update:** June 4, 2026,
-**Overall Progress:** ~45% to Production Launch
+**Last Update:** June 4, 2026
+**Overall Progress:** ~48% to Production Launch
 
 ---
 
@@ -44,6 +44,8 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 - [x] **Dashboard Security Hardening:** CSP meta tag (`, `frame-ancestors 'none'`), rate limiting (30 req/15 min via
   `express-rate-limit`), non-obvious route (`/dashboard-valeria-statistics`), server-side sessions (`express-session`
   with HttpOnly cookie) instead of `sessionStorage` for API key storage.
+- [x] **CSRF Protection:** `lusca.csrf()` scoped to `/dashboard/*` — validates POST via `x-csrf-token` header.
+- [x] **Secure Session Cookie:** `secure: true` in production (`NODE_ENV` check) + `trust proxy` for Render HTTPS.
 - **Enhanced Re-engagement:** Implement different strategies based on why the patient stopped talking (Price objection
   vs. Timing).
 - **Meta Verification:** Finalize App Review and switch to the permanent Production Number.
