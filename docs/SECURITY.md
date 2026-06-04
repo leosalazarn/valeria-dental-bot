@@ -55,8 +55,14 @@ The `.env` file is listed in `.gitignore` and must never be committed.
 
 ### Authentication
 
-Access to debug endpoints (`/debug/leads`, `/debug/stats`, `/debug/metrics`) requires an `x-api-key` header matching the
-`DEBUG_API_KEY` defined in the environment.
+Access to debug endpoints (`/debug/leads`, `/debug/stats`, `/debug/metrics`) requires one of:
+- **Session cookie** (recommended for dashboard): established by `POST /dashboard/login` with valid API key in body.
+  Returns an HttpOnly, sameSite lax, 24-hour session — no API key stored on the client.
+- **`x-api-key` header** (for external/scripted access): matches `DEBUG_API_KEY` env var.
+
+The dashboard (`/dashboard-valeria-statistics`) uses the session-based flow exclusively: API key is posted once,
+validated server-side, and never persisted in `sessionStorage` or `localStorage`. It is also rate-limited to 30
+requests per 15 minutes per IP.
 
 ### Token Types
 

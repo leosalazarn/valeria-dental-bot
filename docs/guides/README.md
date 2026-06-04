@@ -12,6 +12,6 @@
 ```bash
 npm install        # Install dependencies
 npm run dev        # Start with hot-reload
-npm test           # Run all tests (94 across 7 suites)
+npm test           # Run all tests (102 across 9 suites)
 npm run test:watch # Watch mode
 ```

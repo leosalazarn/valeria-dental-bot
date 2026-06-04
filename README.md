@@ -92,10 +92,15 @@ See [TECH_STACK.md](./docs/reference/TECH_STACK.md) for the full stack and key c
 ```
 valeria-dental-bot/
 ├── server.js          ← Express entry point
-├── src/               ← Application modules (config, crm, ai, flow, …)
+├── src/               ← Application modules (config, crm, ai, flow, guardrails, validators)
 │   ├── routes/        ← webhook.js, debug.js
+│   ├── guardrails/    ← AI output safety (bank data leak detection)
+│   ├── validators/    ← Input sanitization + injection detection
 │   └── utils/         ← logger.js, time.js
-├── tests/             ← Vitest test suites (7 suites, 95 tests)
+├── public/            ← Client-facing static files
+│   └── dashboard.html ← Lead Dashboard UI
+├── assets/            ← Static assets (logo-dra.png)
+├── tests/             ← Vitest test suites (9 suites, 102 tests)
 ├── .claude/           ← Claude Code settings and slash commands
 └── *.md               ← Documentation (README, CLAUDE, SECURITY, PROJECT_FILES)
 ```

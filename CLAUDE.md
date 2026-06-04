@@ -1,6 +1,7 @@
 # CLAUDE.md — Valeria WhatsApp Bot · Dra. Yuri Quintero
 
 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![Tests](https://img.shields.io/badge/tests-102%20passed-brightgreen)
 ![Status](https://img.shields.io/badge/status-phase--3--conversion-brightgreen)
 
 > This file transfers the full project context to an AI assistant.  
@@ -45,7 +46,7 @@ deposit to confirm a consultation appointment with the doctor.
 |-----------|----------------------------------------------------|
 | WhatsApp  | Meta Cloud API (free up to 1k conversations/month) |
 | AI        | Anthropic Claude (model: `claude-sonnet-4-6`)      |
-| Server    | Node.js + Express                                  |
+| Server    | Node.js + Express + express-session + express-rate-limit |
 | Hosting   | Render.com                                         |
 | Database  | Supabase (PostgreSQL) — lead data & metrics        |
 
@@ -91,8 +92,8 @@ DEBUG_API_KEY=...                      # Custom key for metrics protection
 
 See [PROJECT_FILES.md](./docs/PROJECT_FILES.md) for the full file tree and per-module descriptions.
 
-Key layout: `src/` (all modules), `tests/` (7 Vitest suites), `docs/` (roadmap, security, files), `.claude/` (settings +
-slash commands).
+Key layout: `src/` (all modules), `tests/` (9 Vitest suites, 102 tests), `public/` (dashboard.html), `docs/` (roadmap,
+security, files), `.claude/` (settings + slash commands).
 
 ---
 
@@ -139,7 +140,19 @@ EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
 
 ## 10. ENDPOINTS
 
-See [ENDPOINTS.md](./docs/reference/ENDPOINTS.md) for all routes and auth requirements.
+| Method | Route                         | Purpose                              | Auth                           |
+|--------|-------------------------------|--------------------------------------|--------------------------------|
+| GET    | /debug/                       | Health check                         | Public                         |
+| GET    | /webhook                      | Meta verification                    | Public                         |
+| POST   | /webhook                      | Receive WhatsApp messages            | Public                         |
+| GET    | /debug/leads                  | All patients (Supabase)              | x-api-key or session           |
+| GET    | /debug/stats                  | Summary by source/status             | x-api-key or session           |
+| GET    | /debug/metrics                | Funnel & response time analytics     | x-api-key or session           |
+| GET    | /dashboard-valeria-statistics | Lead Dashboard UI                    | Rate-limited (30/15 min)       |
+| POST   | /dashboard/login              | Validate API key, create session     | Public (validates key inside)  |
+| GET    | /dashboard/check-session      | Check active session                 | Session cookie                 |
+
+Dashboard session cookies are HttpOnly, sameSite lax, 24h expiry.
 
 ---
 

@@ -4,8 +4,8 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 ## 📊 Current Status: **Phase 3 — Conversion**
 
-**Last Update:** May 15, 2026,
-**Overall Progress:** ~40% to Production Launch
+**Last Update:** June 4, 2026,
+**Overall Progress:** ~45% to Production Launch
 
 ---
 
@@ -38,11 +38,16 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 *Goal: Optimize the funnel from "Interested Lead" to "Paying Patient".*
 
+- [x] **Lead Dashboard UI:** Deployed at `/dashboard-valeria-statistics` — single-file HTML dashboard with Tailwind CSS
+  and Chart.js. Features: 4 KPI cards, horizontal funnel bar chart, response time/reengagement cards, leads table with
+  expandable rows, CSV export, auto-refresh toggle, ES/EN locales via `localStorage`.
+- [x] **Dashboard Security Hardening:** CSP meta tag (`, `frame-ancestors 'none'`), rate limiting (30 req/15 min via
+  `express-rate-limit`), non-obvious route (`/dashboard-valeria-statistics`), server-side sessions (`express-session`
+  with HttpOnly cookie) instead of `sessionStorage` for API key storage.
 - **Enhanced Re-engagement:** Implement different strategies based on why the patient stopped talking (Price objection
   vs. Timing).
 - **Meta Verification:** Finalize App Review and switch to the permanent Production Number.
 - **Render Upgrade:** Move to a $7/mo instance to prevent "cold starts" and ensure 24/7 responsiveness.
-- **Lead Dashboard:** Create a simpler view or Google Sheets export for the human team to follow up.
 
 ---
 
@@ -76,12 +81,12 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 *Goal: Improve operational visibility and team experience.*
 
-- **Lead Dashboard UI:** Build a lightweight frontend (vanilla HTML/JS or simple SPA) that consumes `/debug/leads`,
-  `/debug/stats`, and `/debug/metrics` via `x-api-key` auth. Display funnel conversion rates, drop-off by phase,
-  response times, and lead list in an intuitive dashboard with charts and filters.
+- [x] **Lead Dashboard UI:** Built and deployed — single-file HTML dashboard consuming `/debug/leads`, `/debug/stats`,
+  and `/debug/metrics`. Funnel chart, KPI cards, response times, leads table with CSV export. ES/EN locales. Route:
+  `/dashboard-valeria-statistics`.
+- [x] **Export to CSV:** Built into the dashboard header.
 - **Real-time Notifications:** Push alerts to the clinic team when a lead reaches PAYMENT or CLOSING phase (via email,
   Slack webhook, or dashboard badge).
-- **Export to CSV:** Add a download button to export leads data for offline analysis or Google Sheets import.
 - **Session Inspector:** Admin panel to view individual conversation history, phase transitions, and re-engagement
   status per lead.
 - **LLM Rate Limiting:** Per-phone rate limiter on AI calls (separate from debounce buffer).
