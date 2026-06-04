@@ -17,7 +17,10 @@ const __dirname = dirname(__filename);
 const app = express();
 app.use(express.json());
 
-// Server-side session — HttpOnly cookie, no API key stored on client
+// Trust first proxy (Render HTTPS termination)
+app.set('trust proxy', 1);
+
+// Server-side session — HttpOnly + Secure cookie, no API key stored on client
 const SESSION_SECRET = crypto.randomBytes(32).toString('hex');
 app.use(session({
     secret: SESSION_SECRET,
@@ -25,6 +28,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
+        secure: true,
         sameSite: 'lax',
         maxAge: 24 * 60 * 60 * 1000,
     },
