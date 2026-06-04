@@ -27,6 +27,6 @@
   "license": "LICENSED",
   "devDependencies": {
     "husky": "^9.1.7",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   }
 }
