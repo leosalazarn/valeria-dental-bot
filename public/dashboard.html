@@ -214,6 +214,7 @@ let currentLocale = localStorage.getItem('valeria_locale') || 'es';
 function t(key) { return locales[currentLocale][key] || key; }
 
 let apiKey = '';
+let csrfToken = '';
 let autoRefreshInterval = null;
 let funnelChartInstance = null;
 
@@ -508,7 +509,7 @@ async function connect() {
   try {
     const res = await fetch('/dashboard/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ apiKey: key }),
     });
     if (!res.ok) throw new Error('Invalid API key');
@@ -547,14 +548,19 @@ document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
 (async function init() {
   applyLocale();
   try {
-    const res = await fetch('/dashboard/check-session');
-    const data = await res.json();
-    if (data.authenticated) {
+    const [sessionRes, csrfRes] = await Promise.all([
+      fetch('/dashboard/check-session'),
+      fetch('/dashboard/csrf-token'),
+    ]);
+    const sessionData = await sessionRes.json();
+    const csrfData = await csrfRes.json();
+    csrfToken = csrfData.csrfToken || '';
+    if (sessionData.authenticated) {
       setConnected(true);
       loadAll();
     }
   } catch (_) {
-    // Session check failed, user must connect manually
+    // Init failed, user must connect manually
   }
 })();
 </script>

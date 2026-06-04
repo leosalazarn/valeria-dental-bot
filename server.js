@@ -2,6 +2,7 @@
 import crypto from 'crypto';
 import express from 'express';
 import session from 'express-session';
+import lusca from 'lusca';
 import rateLimit from 'express-rate-limit';
 import {fileURLToPath} from 'url';
 import {dirname, join} from 'path';
@@ -28,6 +29,14 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000,
     },
 }));
+
+// ── CSRF protection (lusca.csrf scoped to /dashboard/* — validates POST via x-csrf-token header)
+app.use('/dashboard', lusca.csrf());
+
+// Dashboard — CSRF token endpoint (public with session, no auth needed — token is tied to session)
+app.get('/dashboard/csrf-token', (req, res) => {
+    res.json({csrfToken: req.csrfToken()});
+});
 
 // Dashboard login — validates API key and establishes server-side session
 app.post('/dashboard/login', (req, res) => {
