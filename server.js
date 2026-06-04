@@ -1,11 +1,13 @@
 // Entry point — Express server initialization
+import crypto from 'crypto';
 import express from 'express';
+import session from 'express-session';
 import rateLimit from 'express-rate-limit';
 import {fileURLToPath} from 'url';
 import {dirname, join} from 'path';
 import webhookRouter from './src/routes/webhook.js';
 import debugRouter from './src/routes/debug.js';
-import {PORT} from './src/config.js';
+import {PORT, DEBUG_API_KEY} from './src/config.js';
 import {formatColombiaTime} from './src/utils/time.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,6 +15,33 @@ const __dirname = dirname(__filename);
 
 const app = express();
 app.use(express.json());
+
+// Server-side session — HttpOnly cookie, no API key stored on client
+const SESSION_SECRET = crypto.createHash('sha256').update(DEBUG_API_KEY).digest('hex');
+app.use(session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000,
+    },
+}));
+
+// Dashboard login — validates API key and establishes server-side session
+app.post('/dashboard/login', (req, res) => {
+    if (req.body?.apiKey === DEBUG_API_KEY) {
+        req.session.authenticated = true;
+        return res.json({success: true});
+    }
+    return res.status(401).json({success: false, error: 'Invalid API key'});
+});
+
+// Dashboard session check — confirms existing session without exposing the key
+app.get('/dashboard/check-session', (req, res) => {
+    res.json({authenticated: !!req.session?.authenticated});
+});
 
 // Rate limit: 30 requests per 15 min per IP for dashboard and debug endpoints
 const getLimiter = rateLimit({

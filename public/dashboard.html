@@ -157,6 +157,7 @@ const locales = {
     fullName: 'Nombre completo:',
     email: 'Email:',
     reason: 'Motivo:',
+    invalidKey: 'API Key inválida',
   },
   en: {
     title: 'Lead Dashboard',
@@ -192,6 +193,7 @@ const locales = {
     fullName: 'Full name:',
     email: 'Email:',
     reason: 'Reason:',
+    invalidKey: 'Invalid API Key',
   },
 };
 
@@ -211,7 +213,7 @@ const PHASE_COLORS = {
 let currentLocale = localStorage.getItem('valeria_locale') || 'es';
 function t(key) { return locales[currentLocale][key] || key; }
 
-let apiKey = sessionStorage.getItem('valeria_api_key') || '';
+let apiKey = '';
 let autoRefreshInterval = null;
 let funnelChartInstance = null;
 
@@ -252,8 +254,9 @@ function setConnected(connected) {
 
 // ===== API fetch helper =====
 async function apiFetch(endpoint) {
-  if (!apiKey) throw new Error('No API key');
-  const res = await fetch(endpoint, { headers: { 'x-api-key': apiKey } });
+  const headers = {};
+  if (apiKey) headers['x-api-key'] = apiKey;
+  const res = await fetch(endpoint, { headers });
   if (res.status === 401) {
     setConnected(false);
     throw new Error('Unauthorized');
@@ -492,19 +495,28 @@ async function loadAll() {
     }
     setConnected(true);
   } catch (err) {
-    if (err.message === 'Unauthorized' || err.message === 'No API key') {
+    if (err.message === 'Unauthorized') {
       setConnected(false);
     }
   }
 }
 
 // ===== Connect handler =====
-function connect() {
+async function connect() {
   const key = apiKeyInput.value.trim();
   if (!key) return;
-  apiKey = key;
-  sessionStorage.setItem('valeria_api_key', key);
-  loadAll();
+  try {
+    const res = await fetch('/dashboard/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: key }),
+    });
+    if (!res.ok) throw new Error('Invalid API key');
+    apiKey = key;
+    loadAll();
+  } catch (_) {
+    setConnected(false);
+  }
 }
 
 // ===== Language switcher =====
@@ -532,11 +544,19 @@ apiKeyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') connect(
 document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
 
 // ===== Init =====
-applyLocale();
-if (apiKey) {
-  apiKeyInput.value = apiKey;
-  loadAll();
-}
+(async function init() {
+  applyLocale();
+  try {
+    const res = await fetch('/dashboard/check-session');
+    const data = await res.json();
+    if (data.authenticated) {
+      setConnected(true);
+      loadAll();
+    }
+  } catch (_) {
+    // Session check failed, user must connect manually
+  }
+})();
 </script>
 </body>
 </html>

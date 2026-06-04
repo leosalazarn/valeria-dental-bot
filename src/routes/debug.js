@@ -7,8 +7,11 @@ import {PRACTICE_NAME, PRACTICE_LOCATION, DEBUG_API_KEY, CONVERSION_PHASES} from
 
 const router = express.Router();
 
-// ── Auth Middleware — check x-api-key header
+// ── Auth Middleware — check server session first, then x-api-key header fallback
 const auth = (req, res, next) => {
+    if (req.session?.authenticated) {
+        return next();
+    }
     const apiKey = req.headers['x-api-key'];
     if (apiKey === DEBUG_API_KEY) {
         next();
