@@ -4,7 +4,7 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 ## 📊 Current Status: **Phase 3 — Conversion**
 
-**Last Update:** June 4, 2026
+**Last Update:** June 5, 2026,
 **Overall Progress:** ~48% to Production Launch
 
 ---
@@ -46,6 +46,12 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
   with HttpOnly cookie) instead of `sessionStorage` for API key storage.
 - [x] **CSRF Protection:** `lusca.csrf()` scoped to `/dashboard/*` — validates POST via `x-csrf-token` header.
 - [x] **Secure Session Cookie:** `secure: true` in production (`NODE_ENV` check) + `trust proxy` for Render HTTPS.
+- **[CRITICAL] Price Hallucination Regression:** When a patient asks about a specific treatment
+  (e.g. "lentes cerámicos"), Valeria incorrectly presents the general price range as if it were
+  specific to that treatment (e.g. "lentes cerámicos go from $2.7M to $24M"). Fix: patch
+  `src/prompt.js` so price responses are always treatment-agnostic. Correct response:
+  "Nuestros tratamientos parten desde $2.700.000 en adelante — el precio exacto depende del
+  diagnóstico." Add regression test to prevent recurrence.
 - **Enhanced Re-engagement:** Implement different strategies based on why the patient stopped talking (Price objection
   vs. Timing).
 - **Meta Verification:** Finalize App Review and switch to the permanent Production Number.
@@ -64,9 +70,19 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 - **Human handoff signal:** Add `[HANDOFF_TO_HUMAN]` intent detection so Valeria gracefully routes patients to a human
   when needed.
 - **Media Handling:** Photos/videos of real cases via Meta Media API.
-- **Emotionality in fast mode:** Fine-tune tone (point 4 pending).
-- **Point 2 pending:** Hardcoded messages (need a log).
-- **Point 5:** Still needs confirmation.
+- **Tone Calibration:** Valeria's responses are occasionally over-the-top effusive.
+  Requires a `prompt.js` tone pass — warm and professional, not excessive.
+  Status: blocked on stakeholder review cycle. Low priority, non-blocking.
+
+- **Hardcoded Messages Not Delivering:** HOOK, DATA_CAPTURE, and PAYMENT block messages
+  may not reach patients in all scenarios.
+  Status: blocked on Render log capture — no evidence provided yet. Do not implement until
+  a log showing the failure is available.
+
+- **Unconfirmed Stakeholder Point:** A fifth feedback item was raised in an early review
+  session but was never documented or confirmed by stakeholders.
+  Status: blocked on stakeholder confirmation. Keeping as placeholder until resolved or
+  explicitly dropped.
 
 ---
 
@@ -83,10 +99,6 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 *Goal: Improve operational visibility and team experience.*
 
-- [x] **Lead Dashboard UI:** Built and deployed — single-file HTML dashboard consuming `/debug/leads`, `/debug/stats`,
-  and `/debug/metrics`. Funnel chart, KPI cards, response times, leads table with CSV export. ES/EN locales. Route:
-  `/dashboard-valeria-statistics`.
-- [x] **Export to CSV:** Built into the dashboard header.
 - **Real-time Notifications:** Push alerts to the clinic team when a lead reaches PAYMENT or CLOSING phase (via email,
   Slack webhook, or dashboard badge).
 - **Session Inspector:** Admin panel to view individual conversation history, phase transitions, and re-engagement
