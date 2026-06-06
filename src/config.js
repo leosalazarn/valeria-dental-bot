@@ -27,11 +27,11 @@ export const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 export const DEBUG_API_KEY = process.env.DEBUG_API_KEY;
 
 // ── Claude Configuration
-export const CLAUDE_MODEL = 'claude-sonnet-4-6';
-export const MAX_TOKENS = 1000;
+export const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
+export const MAX_TOKENS = 500;
 
 // ── Session Configuration
-export const MAX_HISTORY = 20;
+export const MAX_HISTORY = 10;
 export const SESSION_EXPIRY_HOURS = 72;  // Keep sessions alive longer to handle re-engagement responses
 export const CLEANUP_INTERVAL_MINUTES = 60;
 export const REENGAGEMENT_DELAY_HOURS = 24;  // Send re-engagement after 24h of silence
