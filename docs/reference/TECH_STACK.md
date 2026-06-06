@@ -12,18 +12,20 @@
 
 ## LLM Routing (`src/model-router.js`)
 
-| Feature               | Details                                                                  |
-|-----------------------|--------------------------------------------------------------------------|
-| Classification        | LLM-as-a-judge via Haiku — classifies messages as `SIMPLE` or `COMPLEX`  |
-| Fallback              | Silently defaults to `SIMPLE` on invalid JSON or API error               |
-| Test coverage         | 6 tests (classifyMessage + routeMessage + fallback + error paths)        |
+| Feature        | Details                                                                 |
+|----------------|-------------------------------------------------------------------------|
+| Classification | LLM-as-a-judge via Haiku — classifies messages as `SIMPLE` or `COMPLEX` |
+| Fallback       | Silently defaults to `SIMPLE` on invalid JSON or API error              |
+| Test coverage  | 6 tests (classifyMessage + routeMessage + fallback + error paths)       |
 
 ## Key Constants
 
 | Constant                | Value                       |
 |-------------------------|-----------------------------|
 | `CLAUDE_MODEL`          | `claude-haiku-4-5-20251001` |
+| `COMPLEX_MODEL`         | `claude-3-7-sonnet-latest`  |
 | `MAX_TOKENS`            | 500                         |
+| `CLASSIFIER_MAX_TOKENS` | 50                          |
 | `CONSULTATION_DURATION` | 30 min                      |
 | `REENGAGEMENT_DELAY`    | 24 hours                    |
 | `SESSION_EXPIRY`        | 72 hours                    |

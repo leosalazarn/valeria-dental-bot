@@ -2,11 +2,11 @@
 
 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![Modules](https://img.shields.io/badge/modules-16-lightgrey)
-![Tests](https://img.shields.io/badge/tests-102%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-108%20passed-brightgreen)
 
 **Project:** Valeria — AI Assistant · Dra. Yuri Quintero's clinic
 **Repository:** [github.com/leosalazarn/valeria-dental-bot](https://github.com/leosalazarn/valeria-dental-bot)  
-**Last updated:** June 4, 2026
+**Last updated:** June 6, 2026
 
 → See [README.md](../README.md) for setup and deployment · [SECURITY.md](../docs/SECURITY.md) for data
 policy · [CLAUDE.md](../CLAUDE.md) for full project context
@@ -59,9 +59,10 @@ valeria-dental-bot/
 │   ├── intent.test.js
 │   ├── flow.test.js
 │   ├── prompt.test.js
-│   ├── validators.test.js
-│   ├── guardrails.output.test.js
-│   └── utils/
+    │   ├── validators.test.js
+    │   ├── guardrails.output.test.js
+    │   ├── model-router.test.js
+    │   └── utils/
 │       └── time.test.js
 └── src/                 ← source code
     ├── config.js        ← constants & env validation
@@ -79,6 +80,7 @@ valeria-dental-bot/
     │   └── index.js     ← custom error classes
     ├── guardrails/      ← AI output safety
     │   └── output.js    ← bank data leak detection per phase
+    ├── model-router.js  ← LLM routing — SIMPLE/COMPLEX classification via Haiku
     ├── middleware/       ← express middleware
     │   └── auth.js      ← API key authentication
     ├── validators/      ← input validation
@@ -114,6 +116,7 @@ valeria-dental-bot/
 | `validators/index.js`   | Input sanitization + 10-pattern injection detection (ignore/forget, system prompt, DAN, jailbreak) |
 | `public/dashboard.html` | Lead Dashboard UI — single-file HTML, Tailwind CSS, Chart.js, CSP, ES/EN locales, session auth     |
 | `routes/debug.js`       | `/leads`, `/stats`, `/metrics` — protected by session OR `x-api-key`                               |
+| `model-router.js`       | LLM-as-a-judge via Haiku — classifies messages as SIMPLE/COMPLEX, fallback to SIMPLE on error      |
 | `utils/logger.js`       | Emoji-prefixed console logging — no sensitive data in output                                       |
 | `utils/time.js`         | Colombia timezone helper (`America/Bogota`)                                                        |
 
@@ -121,8 +124,8 @@ valeria-dental-bot/
 
 ## Test Suite
 
-![Tests](https://img.shields.io/badge/tests-102%20passed-brightgreen)
-![Coverage](https://img.shields.io/badge/suites-9-blue)
+![Tests](https://img.shields.io/badge/tests-108%20passed-brightgreen)
+![Coverage](https://img.shields.io/badge/suites-10-blue)
 ![Framework](https://img.shields.io/badge/framework-Vitest-yellow)
 
 ```bash
@@ -140,5 +143,6 @@ npm run test:watch  # watch mode
 | `prompt.test.js`            | 20      | Prompt content, phase-specific sections, session context injection          |
 | `validators.test.js`        | 3       | Injection pattern detection (10 patterns)                                   |
 | `guardrails.output.test.js` | 5       | Bank data leak detection per phase, fallback messaging                      |
+| `model-router.test.js`      | 6       | SIMPLE/COMPLEX classification, invalid JSON fallback, API error fallback    |
 | `utils/time.test.js`        | 7       | ISO output, Colombia timezone offset, edge cases                            |
-| **Total**                   | **102** |                                                                             |
+| **Total**                   | **108** |                                                                             |

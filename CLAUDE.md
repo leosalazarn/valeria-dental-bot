@@ -1,7 +1,7 @@
 # CLAUDE.md — Valeria WhatsApp Bot · Dra. Yuri Quintero
 
 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
-![Tests](https://img.shields.io/badge/tests-102%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-108%20passed-brightgreen)
 ![Status](https://img.shields.io/badge/status-phase--3--conversion-brightgreen)
 
 > This file transfers the full project context to an AI assistant.  
@@ -42,13 +42,13 @@ deposit to confirm a consultation appointment with the doctor.
 
 ## 3. TECH STACK
 
-| Component | Solution                                                                |
-|-----------|-------------------------------------------------------------------------|
-| WhatsApp  | Meta Cloud API (free up to 1k conversations/month)                      |
-| AI        | Anthropic Claude (model: `claude-sonnet-4-6`)                           |
-| Server    | Node.js + Express + express-session + express-rate-limit + lusca (CSRF) |
-| Hosting   | Render.com                                                              |
-| Database  | Supabase (PostgreSQL) — lead data & metrics                             |
+| Component | Solution                                                                                                                                 |
+|-----------|------------------------------------------------------------------------------------------------------------------------------------------|
+| WhatsApp  | Meta Cloud API (free up to 1k conversations/month)                                                                                       |
+| AI        | Anthropic Claude — Haiku (`claude-haiku-4-5-20251001`) default, Sonnet (`claude-3-7-sonnet-latest`) for complex queries via model-router |
+| Server    | Node.js + Express + express-session + express-rate-limit + lusca (CSRF)                                                                  |
+| Hosting   | Render.com                                                                                                                               |
+| Database  | Supabase (PostgreSQL) — lead data & metrics                                                                                              |
 
 ---
 
@@ -92,16 +92,18 @@ DEBUG_API_KEY=...                      # Custom key for metrics protection
 
 See [PROJECT_FILES.md](./docs/PROJECT_FILES.md) for the full file tree and per-module descriptions.
 
-Key layout: `src/` (all modules), `tests/` (9 Vitest suites, 102 tests), `public/` (dashboard.html), `docs/` (roadmap,
-security, files), `.claude/` (settings + slash commands).
+Key layout: `src/` (all modules), `tests/` (10 Vitest suites, 108 tests), `public/` (dashboard.html), `docs/` (roadmap,
+security, files).
 
 ---
 
 ## 7. KEY CONSTANTS (config.js)
 
 ```js
-CLAUDE_MODEL = 'claude-sonnet-4-6'
-MAX_TOKENS = 1000
+CLAUDE_MODEL = 'claude-haiku-4-5-20251001'   // default (SIMPLE messages)
+COMPLEX_MODEL = 'claude-3-7-sonnet-latest'   // complex queries via model-router
+MAX_TOKENS = 500                             // response token limit
+CLASSIFIER_MAX_TOKENS = 50                   // classification token limit (model-router)
 CONSULTATION_PRICE = ...              // set in config.js
 BOOK_PRICE = ...                      // set in config.js
 MIN_RANGE_PRICE = 2_700_000          // lowest treatment range (COP)
@@ -136,22 +138,33 @@ EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
 3. Active session (phase !== `START`) → **ORGANIC_LEAD**
 4. Any new individual contact → **WARM_LEAD**
 
+## 9b. LLM ROUTING (model-router.js)
+
+Classifies messages as **SIMPLE** or **COMPLEX** via Haiku (LLM-as-a-judge):
+
+| Route   | Model used                  | Use case                                            |
+|---------|-----------------------------|-----------------------------------------------------|
+| SIMPLE  | `claude-haiku-4-5-20251001` | Greetings, FAQs, basic scheduling steps             |
+| COMPLEX | `claude-3-7-sonnet-latest`  | Detailed medical queries, multi-intent, deep triage |
+
+Fallback: on API error or invalid JSON → SIMPLE (Haiku). 6 tests.
+
 ---
 
 ## 10. ENDPOINTS
 
-| Method | Route                         | Purpose                          | Auth                         |
-|--------|-------------------------------|----------------------------------|------------------------------|
-| GET    | /debug/                       | Health check                     | Public                       |
-| GET    | /webhook                      | Meta verification                | Public                       |
-| POST   | /webhook                      | Receive WhatsApp messages        | Public                       |
-| GET    | /debug/leads                  | All patients (Supabase)          | x-api-key or session         |
-| GET    | /debug/stats                  | Summary by source/status         | x-api-key or session         |
-| GET    | /debug/metrics                | Funnel & response time analytics | x-api-key or session         |
-| GET    | /dashboard-valeria-statistics | Lead Dashboard UI                | Rate-limited (30/15 min)     |
-| POST   | /dashboard/login              | Validate API key, create session | CSRF token + API key in body |
-| GET    | /dashboard/csrf-token         | Get CSRF token for session       | Session cookie               |
-| GET    | /dashboard/check-session      | Check active session             | Session cookie               |
+| Method | Route                         | Purpose                          | Auth                           |
+|--------|-------------------------------|----------------------------------|--------------------------------|
+| GET    | /debug/                       | Health check                     | Public                         |
+| GET    | /webhook                      | Meta verification                | Public                         |
+| POST   | /webhook                      | Receive WhatsApp messages        | Public                         |
+| GET    | /debug/leads                  | All patients (Supabase)          | x-api-key or session           |
+| GET    | /debug/stats                  | Summary by source/status         | x-api-key or session           |
+| GET    | /debug/metrics                | Funnel & response time analytics | x-api-key or session           |
+| GET    | /dashboard-valeria-statistics | Lead Dashboard UI                | Rate-limited (30/15 min)       |
+| POST   | /dashboard/login              | Validate API key, create session | x-csrf-token + API key in body |
+| GET    | /dashboard/csrf-token         | Get CSRF token for POST          | Session cookie                 |
+| GET    | /dashboard/check-session      | Check if session is active       | Session cookie                 |
 
 Dashboard session cookies are HttpOnly, sameSite lax, 24h expiry. `secure: true` in production
 (`NODE_ENV === 'production'`), `false` locally. CSRF via `lusca.csrf()` on `/dashboard/*` POST routes.
@@ -166,6 +179,10 @@ Dashboard session cookies are HttpOnly, sameSite lax, 24h expiry. `secure: true`
 - **Dedicated WhatsApp line:** Simplifies lead routing.
 - **Price ranges:** Reduces drop-off by providing estimates without exact quotes.
 - **Universal reengagement:** Automated follow-ups after 24h of silence.
+- **LLM-as-a-judge routing:** Haiku classifies message complexity first — saves Sonnet tokens on FAQs.
+- **Output guardrail:** Filters AI responses for bank data before sending; PAYMENT phase exempt.
+- **Input injection detection:** 10 regex patterns catch prompt injection before reaching LLM.
+- **Dashboard dual auth:** Session cookie (primary) + x-api-key fallback for debug endpoints.
 
 ---
 

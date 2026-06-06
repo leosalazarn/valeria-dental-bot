@@ -2,9 +2,10 @@
 
 ## Version History
 
-| Version | Date       | Author           | Changes         |
-|---------|------------|------------------|-----------------|
-| 1.0     | 2026-05-12 | Leonardo Salazar | Initial version |
+| Version | Date       | Author           | Changes                             |
+|---------|------------|------------------|-------------------------------------|
+| 1.0     | 2026-05-12 | Leonardo Salazar | Initial version                     |
+| 1.1     | 2026-06-06 | Leonardo Salazar | Added model-router, mermaid diagram |
 
 ---
 
@@ -39,22 +40,37 @@ Meta ads, qualifies them, collects patient data, and guides deposit payment for 
 
 ### 2.1 High-Level Design
 
-```
-Patient → WhatsApp → Meta Cloud API → Webhook POST → Express Server
-                                                          │
-                                              ┌───────────┼───────────┐
-                                              │           │           │
-                                              ▼           ▼           ▼
-                                         classifier    flow.js    session.js
-                                              │           │           │
-                                              ▼           ▼           ▼
-                                                       ai.js ────→ Claude API
-                                                         │
-                                                         ▼
-                                                     intent.js ──→ Supabase CRM
-                                                         │
-                                                         ▼
-                                                    whatsapp.js ──→ Patient
+```mermaid
+flowchart TD
+    P[Patient] --> WA[WhatsApp]
+    WA --> M[Meta Cloud API]
+    M -->|Webhook POST| S[Express Server]
+
+    S --> classifier
+    S --> flow
+    S --> session
+
+    classifier --> flow
+
+    flow --> model_router[model-router.js]
+    model_router -- SIMPLE --> ai_haiku[ai.js · Haiku]
+    model_router -- COMPLEX --> ai_sonnet[ai.js · Sonnet]
+
+    ai_haiku --> Claude
+    ai_sonnet --> Claude
+
+    flow --> intent[intent.js]
+    intent --> crm[Supabase CRM]
+
+    flow --> whatsapp[whatsapp.js]
+    whatsapp --> P
+
+    subgraph "Express Server"
+        S
+        classifier[classifier.js]
+        flow[flow.js]
+        session[session.js]
+    end
 ```
 
 ### 2.2 Design Decisions
@@ -67,6 +83,9 @@ Patient → WhatsApp → Meta Cloud API → Webhook POST → Express Server
 | Gestión Odontológica (pending evaluation) | Valeria captures patient data; clinic staff completes scheduling. API availability unconfirmed — no integration work planned until evaluated |
 | AI signal extraction                      | Claude appends NAME:/GOAL: — avoids separate NER model                                                                                       |
 | 3-line message limit                      | WhatsApp best practice for engagement rates                                                                                                  |
+| LLM-as-a-judge routing                    | Haiku classifies message as SIMPLE/COMPLEX before main AI call — saves Sonnet tokens on FAQs, dedicates depth to complex queries             |
+| Spanish classifier prompt                 | Classification system prompt in Spanish to match bot language — strict JSON-only instruction to avoid parsing errors                         |
+| Fail-safe fallback                        | Any API error or invalid JSON silently defaults to SIMPLE (Haiku) — protects uptime and cost                                                 |
 
 ---
 
@@ -74,21 +93,22 @@ Patient → WhatsApp → Meta Cloud API → Webhook POST → Express Server
 
 See [PROJECT_FILES.md](../PROJECT_FILES.md) for detailed module descriptions.
 
-| Layer       | Module              | Responsibility                                  |
-|-------------|---------------------|-------------------------------------------------|
-| Entry       | `server.js`         | Express init, route mounting                    |
-| Routes      | `routes/webhook.js` | Meta verification + inbound messages + debounce |
-| Routes      | `routes/debug.js`   | Health check, lead list, stats, funnel metrics  |
-| Business    | `flow.js`           | Main pipeline orchestration                     |
-| Business    | `classifier.js`     | 4-rule message classification                   |
-| Business    | `intent.js`         | Signal parsing + Supabase upsert                |
-| AI          | `ai.js`             | Claude API wrapper with retry                   |
-| AI          | `prompt.js`         | Dynamic system prompt builder                   |
-| Data        | `crm.js`            | Supabase lead data persistence                  |
-| Data        | `session.js`        | Supabase conversation store                     |
-| Integration | `whatsapp.js`       | Meta Cloud API sender                           |
-| Utility     | `utils/logger.js`   | Emoji-prefixed logging                          |
-| Utility     | `utils/time.js`     | Colombia timezone helpers                       |
+| Layer       | Module              | Responsibility                                            |
+|-------------|---------------------|-----------------------------------------------------------|
+| Entry       | `server.js`         | Express init, route mounting                              |
+| Routes      | `routes/webhook.js` | Meta verification + inbound messages + debounce           |
+| Routes      | `routes/debug.js`   | Health check, lead list, stats, funnel metrics            |
+| Business    | `flow.js`           | Main pipeline orchestration                               |
+| Business    | `classifier.js`     | 4-rule message classification                             |
+| Business    | `intent.js`         | Signal parsing + Supabase upsert                          |
+| Business    | `model-router.js`   | LLM-as-a-judge — routes SIMPLE/COMPLEX to Haiku or Sonnet |
+| AI          | `ai.js`             | Claude API wrapper with retry                             |
+| AI          | `prompt.js`         | Dynamic system prompt builder                             |
+| Data        | `crm.js`            | Supabase lead data persistence                            |
+| Data        | `session.js`        | Supabase conversation store                               |
+| Integration | `whatsapp.js`       | Meta Cloud API sender                                     |
+| Utility     | `utils/logger.js`   | Emoji-prefixed logging                                    |
+| Utility     | `utils/time.js`     | Colombia timezone helpers                                 |
 
 ---
 
@@ -119,14 +139,17 @@ See [PROJECT_FILES.md](../PROJECT_FILES.md) for detailed module descriptions.
 
 ## 5. API Design
 
-| Method | Route            | Auth           | Purpose                         |
-|--------|------------------|----------------|---------------------------------|
-| GET    | `/webhook`       | None           | Meta webhook verification       |
-| POST   | `/webhook`       | Meta signature | Receive WhatsApp messages       |
-| GET    | `/debug/`        | None           | Health check                    |
-| GET    | `/debug/leads`   | x-api-key      | All patients                    |
-| GET    | `/debug/stats`   | x-api-key      | Summary by source/status/intent |
-| GET    | `/debug/metrics` | x-api-key      | Funnel analytics                |
+| Method | Route                      | Auth                       | Purpose                                |
+|--------|----------------------------|----------------------------|----------------------------------------|
+| GET    | `/webhook`                 | None                       | Meta webhook verification              |
+| POST   | `/webhook`                 | Meta signature             | Receive WhatsApp messages              |
+| GET    | `/debug/`                  | None                       | Health check                           |
+| GET    | `/debug/leads`             | session OR x-api-key       | All patients                           |
+| GET    | `/debug/stats`             | session OR x-api-key       | Summary by source/status/intent        |
+| GET    | `/debug/metrics`           | session OR x-api-key       | Funnel analytics                       |
+| GET    | `/dashboard/csrf-token`    | None (CSRF token endpoint) | Returns CSRF token for dashboard POST  |
+| POST   | `/dashboard/login`         | x-csrf-token               | Authenticate via API key, sets session |
+| GET    | `/dashboard/check-session` | session cookie             | Check if session is authenticated      |
 
 ---
 
@@ -138,6 +161,12 @@ See [PROJECT_FILES.md](../PROJECT_FILES.md) for detailed module descriptions.
 - **Signal stripping** removes internal annotations before delivery
 - **Webhook challenge** sanitized to numeric-only before reflection
 - **Non-text rejection** blocks media, locations, contacts from AI pipeline
+- **Output guardrail** (`guardrails/output.js`) detects bank data leaks outside PAYMENT phase
+- **Input injection detection** (`validators/index.js`) catches 10 patterns (ignore/forget, system prompt, DAN,
+  jailbreak)
+- **Session-based auth** for dashboard — API key POSTed once, stored in JS variable (not sessionStorage)
+- **CSRF protection** via lusca on all `/dashboard/*` POST routes
+- **Rate limiting** 30 requests / 15 min per IP on dashboard route
 
 ---
 

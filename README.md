@@ -46,6 +46,9 @@ supplier detection.
 | Supabase persistence         | Leads, conversations, and metrics persisted in Supabase (survives server restarts)                                           |
 | Gestión Odontológica handoff | Appointment data captured by Valeria is handed off to clinic staff for scheduling in the existing practice management system |
 | Retry logic                  | Exponential backoff on Claude API errors (529/503/500)                                                                       |
+| LLM routing                  | Haiku classifies messages as SIMPLE/COMPLEX — routes FAQs to Haiku (fast/cheap), depth to Sonnet                             |
+| Input injection defense      | 10 regex patterns detect prompt injection before reaching the LLM                                                            |
+| Output guardrails            | Bank data leak detection — blocks account numbers outside PAYMENT phase                                                      |
 
 ---
 
@@ -54,11 +57,14 @@ supplier detection.
 ![Architecture](./assets/architecture.png)
 
 ```mermaid
-graph TD
+flowchart TD
     User((Patient)) -- WhatsApp --> Meta[Meta Cloud API]
     Meta -- Webhook --> Express[Express Server]
-    Express -- Context --> Claude[Anthropic Claude]
-    Claude -- AI Response --> Express
+    Express --> Router[model-router.js]
+    Router -- SIMPLE --> Haiku[Claude Haiku]
+    Router -- COMPLEX --> Sonnet[Claude Sonnet]
+    Haiku --> Express
+    Sonnet --> Express
     Express -- Signal Extraction --> DB[(Supabase)]
     Express -- Clean Message --> Meta
     Meta -- Response --> User
@@ -74,14 +80,14 @@ graph TD
 
 ## Tech Stack
 
-| Component  | Solution                                                                                                       |
-|------------|----------------------------------------------------------------------------------------------------------------|
-| AI         | Anthropic Claude (`claude-sonnet-4-6`)                                                                         |
-| Server     | Node.js + Express (ES Modules)                                                                                 |
-| Database   | Supabase (PostgreSQL) — lead data & metrics                                                                    |
-| Scheduling | Gestión Odontológica — clinic staff manages appointments manually in their existing practice management system |
-| WhatsApp   | Meta Cloud API                                                                                                 |
-| Hosting    | Render.com                                                                                                     |
+| Component  | Solution                                                                                                                                 |
+|------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| AI         | Anthropic Claude — Haiku (`claude-haiku-4-5-20251001`) default, Sonnet (`claude-3-7-sonnet-latest`) for complex queries via model-router |
+| Server     | Node.js + Express (ES Modules)                                                                                                           |
+| Database   | Supabase (PostgreSQL) — lead data & metrics                                                                                              |
+| Scheduling | Gestión Odontológica — clinic staff manages appointments manually in their existing practice management system                           |
+| WhatsApp   | Meta Cloud API                                                                                                                           |
+| Hosting    | Render.com                                                                                                                               |
 
 See [TECH_STACK.md](./docs/reference/TECH_STACK.md) for the full stack and key constants.
 
@@ -92,16 +98,16 @@ See [TECH_STACK.md](./docs/reference/TECH_STACK.md) for the full stack and key c
 ```
 valeria-dental-bot/
 ├── server.js          ← Express entry point
-├── src/               ← Application modules (config, crm, ai, flow, guardrails, validators)
+├── src/               ← Application modules (config, crm, ai, flow, model-router, guardrails, validators)
 │   ├── routes/        ← webhook.js, debug.js
 │   ├── guardrails/    ← AI output safety (bank data leak detection)
 │   ├── validators/    ← Input sanitization + injection detection
+│   ├── model-router.js ← LLM routing (SIMPLE/COMPLEX classification)
 │   └── utils/         ← logger.js, time.js
 ├── public/            ← Client-facing static files
 │   └── dashboard.html ← Lead Dashboard UI
 ├── assets/            ← Static assets (logo-dra.png)
-├── tests/             ← Vitest test suites (9 suites, 102 tests)
-├── .claude/           ← Claude Code settings and slash commands
+├── tests/             ← Vitest test suites (10 suites, 108 tests)
 └── *.md               ← Documentation (README, CLAUDE, SECURITY, PROJECT_FILES)
 ```
 
