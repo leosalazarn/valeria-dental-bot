@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { ANTHROPIC_API_KEY, CLAUDE_MODEL, MAX_TOKENS } from './config.js';
+import { ANTHROPIC_API_KEY, CLAUDE_MODEL, COMPLEX_MODEL, MAX_TOKENS, CLASSIFIER_MAX_TOKENS } from './config.js';
 import log from './utils/logger.js';
 
 const ai = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
@@ -31,7 +31,7 @@ export async function classifyMessage(userMessage) {
     try {
         const response = await ai.messages.create({
             model: CLAUDE_MODEL,
-            max_tokens: 50,
+            max_tokens: CLASSIFIER_MAX_TOKENS,
             system: CLASSIFIER_SYSTEM,
             messages: [{ role: 'user', content: userMessage }],
         });
@@ -54,7 +54,7 @@ export function routeMessage(userMessage) {
         if (route === 'COMPLEX') {
             return {
                 route: 'COMPLEX',
-                model: 'claude-3-7-sonnet-latest',
+                model: COMPLEX_MODEL,
                 maxTokens: MAX_TOKENS,
             };
         }

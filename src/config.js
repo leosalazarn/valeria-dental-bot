@@ -28,7 +28,9 @@ export const DEBUG_API_KEY = process.env.DEBUG_API_KEY;
 
 // ── Claude Configuration
 export const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
+export const COMPLEX_MODEL = 'claude-3-7-sonnet-latest';
 export const MAX_TOKENS = 500;
+export const CLASSIFIER_MAX_TOKENS = 50;
 
 // ── Session Configuration
 export const MAX_HISTORY = 10;
