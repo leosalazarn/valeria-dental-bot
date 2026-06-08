@@ -11,6 +11,7 @@ import {
 import {buildSystemPrompt, buildCurrentPatientPrompt} from './prompt.js';
 import {classifyMessage} from './classifier.js';
 import {callValeria} from './ai.js';
+import {routeMessage} from './model-router.js';
 import {sendMessage} from './whatsapp.js';
 import {auditOutput} from './guardrails/output.js';
 import {extractIntent} from './intent.js';
@@ -80,8 +81,9 @@ export async function processMessage(phone, text, chatType) {
             systemPrompt = buildSystemPrompt(session);
         }
 
-        // Call Claude
-        const aiResponse = await callValeria(session.history, systemPrompt);
+        // Route to appropriate model then call Claude
+        const {model, maxTokens} = await routeMessage(text, session.phase, session);
+        const aiResponse = await callValeria(session.history, systemPrompt, model, maxTokens);
 
         // Add AI response to history
         await addMessageToHistory(phone, 'assistant', aiResponse);

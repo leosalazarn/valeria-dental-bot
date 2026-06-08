@@ -2,11 +2,11 @@
 
 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![Modules](https://img.shields.io/badge/modules-16-lightgrey)
-![Tests](https://img.shields.io/badge/tests-108%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-117%20passed-brightgreen)
 
 **Project:** Valeria — AI Assistant · Dra. Yuri Quintero's clinic
 **Repository:** [github.com/leosalazarn/valeria-dental-bot](https://github.com/leosalazarn/valeria-dental-bot)  
-**Last updated:** June 6, 2026
+**Last updated:** June 8, 2026
 
 → See [README.md](../README.md) for setup and deployment · [SECURITY.md](../docs/SECURITY.md) for data
 policy · [CLAUDE.md](../CLAUDE.md) for full project context
@@ -80,7 +80,7 @@ valeria-dental-bot/
     │   └── index.js     ← custom error classes
     ├── guardrails/      ← AI output safety
     │   └── output.js    ← bank data leak detection per phase
-    ├── model-router.js  ← LLM routing — SIMPLE/COMPLEX classification via Haiku
+    ├── model-router.js  ← multi-layer router — phase/keyword/length/LLM → SIMPLE/COMPLEX
     ├── middleware/       ← express middleware
     │   └── auth.js      ← API key authentication
     ├── validators/      ← input validation
@@ -116,7 +116,7 @@ valeria-dental-bot/
 | `validators/index.js`   | Input sanitization + 10-pattern injection detection (ignore/forget, system prompt, DAN, jailbreak) |
 | `public/dashboard.html` | Lead Dashboard UI — single-file HTML, Tailwind CSS, Chart.js, CSP, ES/EN locales, session auth     |
 | `routes/debug.js`       | `/leads`, `/stats`, `/metrics` — protected by session OR `x-api-key`                               |
-| `model-router.js`       | LLM-as-a-judge via Haiku — classifies messages as SIMPLE/COMPLEX, fallback to SIMPLE on error      |
+| `model-router.js`       | Multi-layer classifier: phase → keyword → length → LLM-as-judge — SIMPLE/COMPLEX, fallback SIMPLE  |
 | `utils/logger.js`       | Emoji-prefixed console logging — no sensitive data in output                                       |
 | `utils/time.js`         | Colombia timezone helper (`America/Bogota`)                                                        |
 
@@ -124,7 +124,7 @@ valeria-dental-bot/
 
 ## Test Suite
 
-![Tests](https://img.shields.io/badge/tests-108%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-117%20passed-brightgreen)
 ![Coverage](https://img.shields.io/badge/suites-10-blue)
 ![Framework](https://img.shields.io/badge/framework-Vitest-yellow)
 
@@ -133,16 +133,16 @@ npm test            # run once
 npm run test:watch  # watch mode
 ```
 
-| Suite                       | Tests   | What it covers                                                              |
-|-----------------------------|---------|-----------------------------------------------------------------------------|
-| `crm.test.js`               | 14      | Patient CRUD, defaults, merging, `data_complete` auto-promotion             |
-| `session.test.js`           | 13      | Lifecycle, `updateSession`, history sliding window, timers                  |
-| `classifier.test.js`        | 9       | All 4 classification rules                                                  |
-| `intent.test.js`            | 15      | NAME/GOAL extraction, all intent types, EXTRACTED parsing, CRM side effects |
-| `flow.test.js`              | 16      | `stripSignals`, `POSITIVE_RESPONSES`, full pipeline with mocked AI/WhatsApp |
-| `prompt.test.js`            | 20      | Prompt content, phase-specific sections, session context injection          |
-| `validators.test.js`        | 3       | Injection pattern detection (10 patterns)                                   |
-| `guardrails.output.test.js` | 5       | Bank data leak detection per phase, fallback messaging                      |
-| `model-router.test.js`      | 6       | SIMPLE/COMPLEX classification, invalid JSON fallback, API error fallback    |
-| `utils/time.test.js`        | 7       | ISO output, Colombia timezone offset, edge cases                            |
-| **Total**                   | **108** |                                                                             |
+| Suite                       | Tests   | What it covers                                                                    |
+|-----------------------------|---------|-----------------------------------------------------------------------------------|
+| `crm.test.js`               | 14      | Patient CRUD, defaults, merging, `data_complete` auto-promotion                   |
+| `session.test.js`           | 13      | Lifecycle, `updateSession`, history sliding window, timers                        |
+| `classifier.test.js`        | 9       | All 4 classification rules                                                        |
+| `intent.test.js`            | 15      | NAME/GOAL extraction, all intent types, EXTRACTED parsing, CRM side effects       |
+| `flow.test.js`              | 16      | `stripSignals`, `POSITIVE_RESPONSES`, full pipeline with mocked AI/WhatsApp       |
+| `prompt.test.js`            | 20      | Prompt content, phase-specific sections, session context injection                |
+| `validators.test.js`        | 3       | Injection pattern detection (10 patterns)                                         |
+| `guardrails.output.test.js` | 5       | Bank data leak detection per phase, fallback messaging                            |
+| `model-router.test.js`      | 15      | Multi-layer (phase/keyword/length/LLM), routeMessage, invalid JSON + API fallback |
+| `utils/time.test.js`        | 7       | ISO output, Colombia timezone offset, edge cases                                  |
+| **Total**                   | **117** |                                                                                   |

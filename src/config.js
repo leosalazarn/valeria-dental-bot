@@ -27,9 +27,6 @@ export const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 export const DEBUG_API_KEY = process.env.DEBUG_API_KEY;
 
 // ── Claude Configuration
-export const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
-export const COMPLEX_MODEL = 'claude-3-7-sonnet-latest';
-export const MAX_TOKENS = 500;
 export const CLASSIFIER_MAX_TOKENS = 50;
 
 // ── Session Configuration
@@ -63,6 +60,20 @@ export const BANK_HOLDER_CC = process.env.BANK_HOLDER_CC;
 export const BANCOLOMBIA_ACCOUNT = process.env.BANCOLOMBIA_ACCOUNT;
 export const NEQUI_NUMBER = process.env.NEQUI_NUMBER;
 export const DAVIVIENDA_ACCOUNT = process.env.DAVIVIENDA_ACCOUNT;
+
+// ── Model Router Configuration
+export const MODEL_SIMPLE = 'claude-haiku-4-5-20251001';
+export const MODEL_COMPLEX = 'claude-sonnet-4-6';
+export const TOKENS_SIMPLE = 400;
+export const TOKENS_COMPLEX = 700;
+export const CLASSIFIER_LENGTH_THRESHOLD = 120;
+export const COMPLEX_SIGNALS = [
+    'duele', 'dolor', 'sangra', 'miedo', 'nervios',
+    'precio', 'costo', 'cuánto', 'vale', 'cobran',
+    'no puedo', 'no tengo', 'esperar', 'después',
+    'seguro', 'garantía', 'qué pasa si',
+    'otro', 'comparar', 'vi que',
+];
 
 // ── Flow & Safety Configuration
 export const POSITIVE_RESPONSES = [

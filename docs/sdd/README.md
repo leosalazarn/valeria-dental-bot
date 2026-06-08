@@ -2,10 +2,11 @@
 
 ## Version History
 
-| Version | Date       | Author           | Changes                             |
-|---------|------------|------------------|-------------------------------------|
-| 1.0     | 2026-05-12 | Leonardo Salazar | Initial version                     |
-| 1.1     | 2026-06-06 | Leonardo Salazar | Added model-router, mermaid diagram |
+| Version | Date       | Author           | Changes                                                            |
+|---------|------------|------------------|--------------------------------------------------------------------|
+| 1.0     | 2026-05-12 | Leonardo Salazar | Initial version                                                    |
+| 1.1     | 2026-06-06 | Leonardo Salazar | Added model-router, mermaid diagram                                |
+| 1.2     | 2026-06-08 | Leonardo Salazar | Multi-layer routing (phase/keyword/length/LLM), wired into flow.js |
 
 ---
 
@@ -75,17 +76,17 @@ flowchart TD
 
 ### 2.2 Design Decisions
 
-| Decision                                  | Rationale                                                                                                                                    |
-|-------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| Dedicated WhatsApp line                   | Every message is a potential patient — no trigger filtering needed                                                                           |
-| Phase-based flow                          | Hardcoded hooks reduce AI hallucination at critical conversion points                                                                        |
-| In-memory session + Supabase              | Low-latency reads with persistence across restarts                                                                                           |
-| Gestión Odontológica (pending evaluation) | Valeria captures patient data; clinic staff completes scheduling. API availability unconfirmed — no integration work planned until evaluated |
-| AI signal extraction                      | Claude appends NAME:/GOAL: — avoids separate NER model                                                                                       |
-| 3-line message limit                      | WhatsApp best practice for engagement rates                                                                                                  |
-| LLM-as-a-judge routing                    | Haiku classifies message as SIMPLE/COMPLEX before main AI call — saves Sonnet tokens on FAQs, dedicates depth to complex queries             |
-| Spanish classifier prompt                 | Classification system prompt in Spanish to match bot language — strict JSON-only instruction to avoid parsing errors                         |
-| Fail-safe fallback                        | Any API error or invalid JSON silently defaults to SIMPLE (Haiku) — protects uptime and cost                                                 |
+| Decision                                  | Rationale                                                                                                                                                                |
+|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Dedicated WhatsApp line                   | Every message is a potential patient — no trigger filtering needed                                                                                                       |
+| Phase-based flow                          | Hardcoded hooks reduce AI hallucination at critical conversion points                                                                                                    |
+| In-memory session + Supabase              | Low-latency reads with persistence across restarts                                                                                                                       |
+| Gestión Odontológica (pending evaluation) | Valeria captures patient data; clinic staff completes scheduling. API availability unconfirmed — no integration work planned until evaluated                             |
+| AI signal extraction                      | Claude appends NAME:/GOAL: — avoids separate NER model                                                                                                                   |
+| 3-line message limit                      | WhatsApp best practice for engagement rates                                                                                                                              |
+| Multi-layer routing                       | Phase override (PAYMENT/CLOSING→COMPLEX) → keyword scan → length heuristic (>120 chars) → LLM-as-judge — saves Sonnet tokens on FAQs, dedicates depth to complex queries |
+| Spanish classifier prompt                 | Classification system prompt in Spanish to match bot language — strict JSON-only instruction to avoid parsing errors                                                     |
+| Fail-safe fallback                        | Any API error or invalid JSON silently defaults to SIMPLE (Haiku) — protects uptime and cost                                                                             |
 
 ---
 
@@ -93,22 +94,22 @@ flowchart TD
 
 See [PROJECT_FILES.md](../PROJECT_FILES.md) for detailed module descriptions.
 
-| Layer       | Module              | Responsibility                                            |
-|-------------|---------------------|-----------------------------------------------------------|
-| Entry       | `server.js`         | Express init, route mounting                              |
-| Routes      | `routes/webhook.js` | Meta verification + inbound messages + debounce           |
-| Routes      | `routes/debug.js`   | Health check, lead list, stats, funnel metrics            |
-| Business    | `flow.js`           | Main pipeline orchestration                               |
-| Business    | `classifier.js`     | 4-rule message classification                             |
-| Business    | `intent.js`         | Signal parsing + Supabase upsert                          |
-| Business    | `model-router.js`   | LLM-as-a-judge — routes SIMPLE/COMPLEX to Haiku or Sonnet |
-| AI          | `ai.js`             | Claude API wrapper with retry                             |
-| AI          | `prompt.js`         | Dynamic system prompt builder                             |
-| Data        | `crm.js`            | Supabase lead data persistence                            |
-| Data        | `session.js`        | Supabase conversation store                               |
-| Integration | `whatsapp.js`       | Meta Cloud API sender                                     |
-| Utility     | `utils/logger.js`   | Emoji-prefixed logging                                    |
-| Utility     | `utils/time.js`     | Colombia timezone helpers                                 |
+| Layer       | Module              | Responsibility                                                                     |
+|-------------|---------------------|------------------------------------------------------------------------------------|
+| Entry       | `server.js`         | Express init, route mounting                                                       |
+| Routes      | `routes/webhook.js` | Meta verification + inbound messages + debounce                                    |
+| Routes      | `routes/debug.js`   | Health check, lead list, stats, funnel metrics                                     |
+| Business    | `flow.js`           | Main pipeline orchestration                                                        |
+| Business    | `classifier.js`     | 4-rule message classification                                                      |
+| Business    | `intent.js`         | Signal parsing + Supabase upsert                                                   |
+| Business    | `model-router.js`   | Multi-layer router — phase/keyword/length/LLM → SIMPLE (Haiku) or COMPLEX (Sonnet) |
+| AI          | `ai.js`             | Claude API wrapper with retry                                                      |
+| AI          | `prompt.js`         | Dynamic system prompt builder                                                      |
+| Data        | `crm.js`            | Supabase lead data persistence                                                     |
+| Data        | `session.js`        | Supabase conversation store                                                        |
+| Integration | `whatsapp.js`       | Meta Cloud API sender                                                              |
+| Utility     | `utils/logger.js`   | Emoji-prefixed logging                                                             |
+| Utility     | `utils/time.js`     | Colombia timezone helpers                                                          |
 
 ---
 

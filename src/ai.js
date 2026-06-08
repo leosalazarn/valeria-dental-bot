@@ -1,6 +1,6 @@
 // AI module — Claude API integration with retry logic
 import Anthropic from '@anthropic-ai/sdk';
-import {ANTHROPIC_API_KEY, CLAUDE_MODEL, MAX_TOKENS} from './config.js';
+import {ANTHROPIC_API_KEY, MODEL_SIMPLE, TOKENS_SIMPLE} from './config.js';
 import log from './utils/logger.js';
 
 const ai = new Anthropic({apiKey: ANTHROPIC_API_KEY});
@@ -10,14 +10,14 @@ const RETRY_DELAY_MS = 2000; // 2s between retries
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function callValeria(history, systemPrompt) {
+export async function callValeria(history, systemPrompt, model = MODEL_SIMPLE, maxTokens = TOKENS_SIMPLE) {
     let lastError;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
             const response = await ai.messages.create({
-                model: CLAUDE_MODEL,
-                max_tokens: MAX_TOKENS,
+                model,
+                max_tokens: maxTokens,
                 system: systemPrompt,
                 messages: history,
             });

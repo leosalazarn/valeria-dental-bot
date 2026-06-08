@@ -8,28 +8,33 @@
 | Hosting    | Render.com                                                                                                     |
 | Database   | Supabase (PostgreSQL) — lead data & metrics                                                                    |
 | Scheduling | Gestión Odontológica — clinic staff manages appointments manually in their existing practice management system |
-| Tests      | Vitest — 108 tests, 10 suites                                                                                  |
+| Tests      | Vitest — 117 tests, 10 suites                                                                                  |
 
-## LLM Routing (`src/model-router.js`)
+## Model Router (`src/model-router.js`)
 
-| Feature        | Details                                                                 |
-|----------------|-------------------------------------------------------------------------|
-| Classification | LLM-as-a-judge via Haiku — classifies messages as `SIMPLE` or `COMPLEX` |
-| Fallback       | Silently defaults to `SIMPLE` on invalid JSON or API error              |
-| Test coverage  | 6 tests (classifyMessage + routeMessage + fallback + error paths)       |
+| Feature        | Details                                                        |
+|----------------|----------------------------------------------------------------|
+| Layers         | Phase → keyword → length (>120 chars) → LLM-as-judge (Haiku)   |
+| Classification | SIMPLE (Haiku) or COMPLEX (Sonnet) based on message complexity |
+| Fallback       | Silently defaults to `SIMPLE` on invalid JSON or API error     |
+| Test coverage  | 15 tests (4 phase, 3 keyword, 1 length, 4 LLM, 3 routeMessage) |
 
 ## Key Constants
 
-| Constant                | Value                       |
-|-------------------------|-----------------------------|
-| `CLAUDE_MODEL`          | `claude-haiku-4-5-20251001` |
-| `COMPLEX_MODEL`         | `claude-3-7-sonnet-latest`  |
-| `MAX_TOKENS`            | 500                         |
-| `CLASSIFIER_MAX_TOKENS` | 50                          |
-| `CONSULTATION_DURATION` | 30 min                      |
-| `REENGAGEMENT_DELAY`    | 24 hours                    |
-| `SESSION_EXPIRY`        | 72 hours                    |
-| `MAX_HISTORY`           | 10 messages                 |
-| `DEBOUNCE_MS`           | 5000ms                      |
-| `BUFFER_HARD_CAP`       | 5 messages                  |
-| `MAX_BUFFER_SIZE`       | 10 messages                 |
+| Constant                      | Value                       |
+|-------------------------------|-----------------------------|
+| `CLAUDE_MODEL`                | `claude-haiku-4-5-20251001` |
+| `MODEL_SIMPLE`                | `claude-haiku-4-5-20251001` |
+| `MODEL_COMPLEX`               | `claude-3-7-sonnet-latest`  |
+| `MAX_TOKENS`                  | 500                         |
+| `TOKENS_SIMPLE`               | 500                         |
+| `TOKENS_COMPLEX`              | 1024                        |
+| `CLASSIFIER_MAX_TOKENS`       | 50                          |
+| `CLASSIFIER_LENGTH_THRESHOLD` | 120                         |
+| `CONSULTATION_DURATION`       | 30 min                      |
+| `REENGAGEMENT_DELAY`          | 24 hours                    |
+| `SESSION_EXPIRY`              | 72 hours                    |
+| `MAX_HISTORY`                 | 10 messages                 |
+| `DEBOUNCE_MS`                 | 5000ms                      |
+| `BUFFER_HARD_CAP`             | 5 messages                  |
+| `MAX_BUFFER_SIZE`             | 10 messages                 |

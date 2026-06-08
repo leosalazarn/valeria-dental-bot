@@ -9,32 +9,94 @@ vi.mock('@anthropic-ai/sdk', () => ({
 }));
 
 import { classifyMessage, routeMessage } from '../src/model-router.js';
-import { CLAUDE_MODEL, MAX_TOKENS } from '../src/config.js';
+import { MODEL_SIMPLE, MODEL_COMPLEX, TOKENS_SIMPLE, TOKENS_COMPLEX } from '../src/config.js';
 
 beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 });
 
-describe('classifyMessage', () => {
-    it('returns SIMPLE for a greeting message', async () => {
+describe('classifyMessage — Layer 1: phase check', () => {
+    it('returns COMPLEX for PAYMENT phase regardless of message', async () => {
+        const result = await classifyMessage('hola', 'PAYMENT');
+        expect(result).toBe('COMPLEX');
+        expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('returns COMPLEX for CLOSING phase regardless of message', async () => {
+        const result = await classifyMessage('ok', 'CLOSING');
+        expect(result).toBe('COMPLEX');
+        expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('returns COMPLEX for HOOK phase with positive response', async () => {
+        const result = await classifyMessage('sí quiero agendar', 'HOOK');
+        expect(result).toBe('COMPLEX');
+        expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('does not return COMPLEX for HOOK phase with negative response (continues to next layer)', async () => {
         mockCreate.mockResolvedValueOnce({
             content: [{ text: '{"route": "SIMPLE"}' }],
         });
 
-        const result = await classifyMessage('Hola, ¿cuándo abren?');
+        const result = await classifyMessage('no gracias', 'HOOK');
 
         expect(result).toBe('SIMPLE');
         expect(mockCreate).toHaveBeenCalledOnce();
-        expect(mockCreate.mock.calls[0][0].model).toBe(CLAUDE_MODEL);
+    });
+});
+
+describe('classifyMessage — Layer 2: keyword scan', () => {
+    it('returns COMPLEX when message contains "duele"', async () => {
+        const result = await classifyMessage('me duele una muela', 'EXTRACTION');
+        expect(result).toBe('COMPLEX');
+        expect(mockCreate).not.toHaveBeenCalled();
     });
 
-    it('returns COMPLEX for a multi-intent message', async () => {
+    it('returns COMPLEX when message contains "precio"', async () => {
+        const result = await classifyMessage('cuánto cuesta el blanqueamiento', 'EXTRACTION');
+        expect(result).toBe('COMPLEX');
+        expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('returns COMPLEX when message contains "no puedo"', async () => {
+        const result = await classifyMessage('no puedo ir esta semana', 'EXTRACTION');
+        expect(result).toBe('COMPLEX');
+        expect(mockCreate).not.toHaveBeenCalled();
+    });
+});
+
+describe('classifyMessage — Layer 3: length heuristic', () => {
+    it('returns COMPLEX for messages over 120 chars with no keywords', async () => {
+        const longText = 'Hola, quería preguntarles algo sobre los tratamientos que ofrecen. Me interesa mejorar mi sonrisa pero tengo algunas dudas sobre el proceso y los materiales que usan.';
+        expect(longText.length).toBeGreaterThan(120);
+
+        const result = await classifyMessage(longText, 'EXTRACTION');
+        expect(result).toBe('COMPLEX');
+        expect(mockCreate).not.toHaveBeenCalled();
+    });
+});
+
+describe('classifyMessage — Layer 4: LLM-as-judge', () => {
+    it('returns SIMPLE for a greeting via LLM', async () => {
+        mockCreate.mockResolvedValueOnce({
+            content: [{ text: '{"route": "SIMPLE"}' }],
+        });
+
+        const result = await classifyMessage('Hola, ¿cuándo abren?', 'EXTRACTION');
+
+        expect(result).toBe('SIMPLE');
+        expect(mockCreate).toHaveBeenCalledOnce();
+    });
+
+    it('returns COMPLEX for a multi-intent message via LLM', async () => {
         mockCreate.mockResolvedValueOnce({
             content: [{ text: '{"route": "COMPLEX"}' }],
         });
 
         const result = await classifyMessage(
-            'Me duele una muela pero también quiero saber cuánto cuesta el blanqueamiento y si tienen financiación'
+            'Quisiera información sobre los diferentes tratamientos estéticos que ofrecen y cuál me recomendarían para mejorar mi sonrisa',
+            'EXTRACTION'
         );
 
         expect(result).toBe('COMPLEX');
@@ -45,7 +107,7 @@ describe('classifyMessage', () => {
             content: [{ text: 'Claro, aquí tienes la información...' }],
         });
 
-        const result = await classifyMessage('Hola');
+        const result = await classifyMessage('Hola', 'EXTRACTION');
 
         expect(result).toBe('SIMPLE');
     });
@@ -53,7 +115,7 @@ describe('classifyMessage', () => {
     it('falls back to SIMPLE when the API throws', async () => {
         mockCreate.mockRejectedValueOnce(new Error('API timeout'));
 
-        const result = await classifyMessage('Hola');
+        const result = await classifyMessage('Hola', 'EXTRACTION');
 
         expect(result).toBe('SIMPLE');
     });
@@ -65,26 +127,34 @@ describe('routeMessage', () => {
             content: [{ text: '{"route": "SIMPLE"}' }],
         });
 
-        const config = await routeMessage('Hola');
+        const config = await routeMessage('Hola', 'EXTRACTION');
 
         expect(config).toEqual({
             route: 'SIMPLE',
-            model: CLAUDE_MODEL,
-            maxTokens: MAX_TOKENS,
+            model: MODEL_SIMPLE,
+            maxTokens: TOKENS_SIMPLE,
         });
     });
 
-    it('returns Sonnet config for COMPLEX classification', async () => {
-        mockCreate.mockResolvedValueOnce({
-            content: [{ text: '{"route": "COMPLEX"}' }],
-        });
-
-        const config = await routeMessage('Me duele una muela...');
+    it('returns Sonnet config for COMPLEX classification via phase', async () => {
+        const config = await routeMessage('hola', 'PAYMENT');
 
         expect(config).toEqual({
             route: 'COMPLEX',
-            model: 'claude-3-7-sonnet-latest',
-            maxTokens: MAX_TOKENS,
+            model: MODEL_COMPLEX,
+            maxTokens: TOKENS_COMPLEX,
         });
+        expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('returns Sonnet config for COMPLEX classification via keyword', async () => {
+        const config = await routeMessage('me duele', 'EXTRACTION');
+
+        expect(config).toEqual({
+            route: 'COMPLEX',
+            model: MODEL_COMPLEX,
+            maxTokens: TOKENS_COMPLEX,
+        });
+        expect(mockCreate).not.toHaveBeenCalled();
     });
 });
