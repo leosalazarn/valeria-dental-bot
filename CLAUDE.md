@@ -42,13 +42,13 @@ deposit to confirm a consultation appointment with the doctor.
 
 ## 3. TECH STACK
 
-| Component | Solution                                                                                                                                 |
-|-----------|------------------------------------------------------------------------------------------------------------------------------------------|
-| WhatsApp  | Meta Cloud API (free up to 1k conversations/month)                                                                                       |
-| AI        | Anthropic Claude — Haiku (`claude-haiku-4-5-20251001`) default, Sonnet (`claude-3-7-sonnet-latest`) for complex queries via model-router |
-| Server    | Node.js + Express + express-session + express-rate-limit + lusca (CSRF)                                                                  |
-| Hosting   | Render.com                                                                                                                               |
-| Database  | Supabase (PostgreSQL) — lead data & metrics                                                                                              |
+| Component | Solution                                                                                                                          |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------------|
+| WhatsApp  | Meta Cloud API (free up to 1k conversations/month)                                                                                |
+| AI        | Anthropic Claude — Haiku (`claude-haiku-4-5-20251001`) default, Sonnet (`claude-sonnet-4-6`) for complex queries via model-router |
+| Server    | Node.js + Express + express-session + express-rate-limit + lusca (CSRF)                                                           |
+| Hosting   | Render.com                                                                                                                        |
+| Database  | Supabase (PostgreSQL) — lead data & metrics                                                                                       |
 
 ---
 
@@ -92,7 +92,7 @@ DEBUG_API_KEY=...                      # Custom key for metrics protection
 
 See [PROJECT_FILES.md](./docs/PROJECT_FILES.md) for the full file tree and per-module descriptions.
 
-Key layout: `src/` (all modules), `tests/` (10 Vitest suites, 108 tests), `public/` (dashboard.html), `docs/` (roadmap,
+Key layout: `src/` (all modules), `tests/` (10 Vitest suites, 117 tests), `public/` (dashboard.html), `docs/` (roadmap,
 security, files).
 
 ---
@@ -100,10 +100,11 @@ security, files).
 ## 7. KEY CONSTANTS (config.js)
 
 ```js
-CLAUDE_MODEL = 'claude-haiku-4-5-20251001'   // default (SIMPLE messages)
-COMPLEX_MODEL = 'claude-3-7-sonnet-latest'   // complex queries via model-router
-MAX_TOKENS = 500                             // response token limit
-CLASSIFIER_MAX_TOKENS = 50                   // classification token limit (model-router)
+MODEL_SIMPLE = 'claude-haiku-4-5-20251001'  // SIMPLE messages (greetings, FAQs)
+MODEL_COMPLEX = 'claude-sonnet-4-6'         // COMPLEX messages (objections, multi-intent)
+TOKENS_SIMPLE = 400                         // response token limit for SIMPLE
+TOKENS_COMPLEX = 700                        // response token limit for COMPLEX
+CLASSIFIER_MAX_TOKENS = 50                  // classification token limit (model-router)
 CONSULTATION_PRICE = ...              // set in config.js
 BOOK_PRICE = ...                      // set in config.js
 MIN_RANGE_PRICE = 2_700_000          // lowest treatment range (COP)
@@ -138,16 +139,23 @@ EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING
 3. Active session (phase !== `START`) → **ORGANIC_LEAD**
 4. Any new individual contact → **WARM_LEAD**
 
-## 9b. LLM ROUTING (model-router.js)
+## 9b. MODEL ROUTER (model-router.js)
 
-Classifies messages as **SIMPLE** or **COMPLEX** via Haiku (LLM-as-a-judge):
+Multi-layer classification: **phase → keyword → length → LLM-as-judge**:
 
-| Route   | Model used                  | Use case                                            |
-|---------|-----------------------------|-----------------------------------------------------|
-| SIMPLE  | `claude-haiku-4-5-20251001` | Greetings, FAQs, basic scheduling steps             |
-| COMPLEX | `claude-3-7-sonnet-latest`  | Detailed medical queries, multi-intent, deep triage |
+| Layer            | Condition                                     | Route          |
+|------------------|-----------------------------------------------|----------------|
+| Phase override   | PAYMENT, CLOSING, or HOOK+positive            | COMPLEX        |
+| Keyword scan     | Matches COMPLEX_SIGNALS (duele, precio, etc.) | COMPLEX        |
+| Length heuristic | text.length > 120 chars                       | COMPLEX        |
+| LLM-as-judge     | Ambiguous cases classified by Haiku           | SIMPLE/COMPLEX |
 
-Fallback: on API error or invalid JSON → SIMPLE (Haiku). 6 tests.
+| Route   | Model                       | Max tokens | Use case                                |
+|---------|-----------------------------|------------|-----------------------------------------|
+| SIMPLE  | `claude-haiku-4-5-20251001` | 400        | Greetings, FAQs, basic scheduling steps |
+| COMPLEX | `claude-sonnet-4-6`         | 700        | Objections, multi-intent, deep triage   |
+
+Fallback: on API error or invalid JSON → SIMPLE (Haiku). 15 tests.
 
 ---
 
@@ -179,7 +187,8 @@ Dashboard session cookies are HttpOnly, sameSite lax, 24h expiry. `secure: true`
 - **Dedicated WhatsApp line:** Simplifies lead routing.
 - **Price ranges:** Reduces drop-off by providing estimates without exact quotes.
 - **Universal reengagement:** Automated follow-ups after 24h of silence.
-- **LLM-as-a-judge routing:** Haiku classifies message complexity first — saves Sonnet tokens on FAQs.
+- **Multi-layer routing:** Phase override → keyword scan → length heuristic → LLM-as-judge. Free layers catch ~70% of
+  cases; paid classifier only for ambiguity.
 - **Output guardrail:** Filters AI responses for bank data before sending; PAYMENT phase exempt.
 - **Input injection detection:** 10 regex patterns catch prompt injection before reaching LLM.
 - **Dashboard dual auth:** Session cookie (primary) + x-api-key fallback for debug endpoints.

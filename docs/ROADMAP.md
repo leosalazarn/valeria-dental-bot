@@ -46,9 +46,9 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
   with HttpOnly cookie) instead of `sessionStorage` for API key storage.
 - [x] **CSRF Protection:** `lusca.csrf()` scoped to `/dashboard/*` — validates POST via `x-csrf-token` header.
 - [x] **Secure Session Cookie:** `secure: true` in production (`NODE_ENV` check) + `trust proxy` for Render HTTPS.
-- [x] **LLM Routing (model-router.js):** Haiku classifies messages as SIMPLE/COMPLEX via LLM-as-a-judge. SIMPLE →
-  Haiku (fast/cheap), COMPLEX → Sonnet (deep reasoning). Fallback to SIMPLE on API error or invalid JSON. 6 tests. All
-  routing constants centralized in `config.js`.
+- [x] **Model Router (model-router.js):** Multi-layer classification (phase → keyword → length → LLM-as-judge). Free
+  layers catch ~70% of cases without API cost. SIMPLE → Haiku (400 tokens), COMPLEX → Sonnet (700 tokens). Fallback to
+  SIMPLE on API error or invalid JSON. 15 tests. All routing constants centralized in `config.js`.
 - **[CRITICAL] Price Hallucination Regression:** When a patient asks about a specific treatment
   (e.g. "lentes cerámicos"), Valeria incorrectly presents the general price range as if it were
   specific to that treatment (e.g. "lentes cerámicos go from $2.7M to $24M"). Fix: patch

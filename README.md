@@ -46,7 +46,7 @@ supplier detection.
 | Supabase persistence         | Leads, conversations, and metrics persisted in Supabase (survives server restarts)                                           |
 | Gestión Odontológica handoff | Appointment data captured by Valeria is handed off to clinic staff for scheduling in the existing practice management system |
 | Retry logic                  | Exponential backoff on Claude API errors (529/503/500)                                                                       |
-| LLM routing                  | Haiku classifies messages as SIMPLE/COMPLEX — routes FAQs to Haiku (fast/cheap), depth to Sonnet                             |
+| Multi-layer model routing    | Phase override → keyword scan → length heuristic → LLM-as-judge — routes FAQs to Haiku (fast/cheap), depth to Sonnet         |
 | Input injection defense      | 10 regex patterns detect prompt injection before reaching the LLM                                                            |
 | Output guardrails            | Bank data leak detection — blocks account numbers outside PAYMENT phase                                                      |
 
@@ -80,14 +80,14 @@ flowchart TD
 
 ## Tech Stack
 
-| Component  | Solution                                                                                                                                 |
-|------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| AI         | Anthropic Claude — Haiku (`claude-haiku-4-5-20251001`) default, Sonnet (`claude-3-7-sonnet-latest`) for complex queries via model-router |
-| Server     | Node.js + Express (ES Modules)                                                                                                           |
-| Database   | Supabase (PostgreSQL) — lead data & metrics                                                                                              |
-| Scheduling | Gestión Odontológica — clinic staff manages appointments manually in their existing practice management system                           |
-| WhatsApp   | Meta Cloud API                                                                                                                           |
-| Hosting    | Render.com                                                                                                                               |
+| Component  | Solution                                                                                                                          |
+|------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| AI         | Anthropic Claude — Haiku (`claude-haiku-4-5-20251001`) default, Sonnet (`claude-sonnet-4-6`) for complex queries via model-router |
+| Server     | Node.js + Express (ES Modules)                                                                                                    |
+| Database   | Supabase (PostgreSQL) — lead data & metrics                                                                                       |
+| Scheduling | Gestión Odontológica — clinic staff manages appointments manually in their existing practice management system                    |
+| WhatsApp   | Meta Cloud API                                                                                                                    |
+| Hosting    | Render.com                                                                                                                        |
 
 See [TECH_STACK.md](./docs/reference/TECH_STACK.md) for the full stack and key constants.
 
@@ -102,7 +102,7 @@ valeria-dental-bot/
 │   ├── routes/        ← webhook.js, debug.js
 │   ├── guardrails/    ← AI output safety (bank data leak detection)
 │   ├── validators/    ← Input sanitization + injection detection
-│   ├── model-router.js ← LLM routing (SIMPLE/COMPLEX classification)
+│   ├── model-router.js ← multi-layer routing (phase/keyword/length/LLM → SIMPLE/COMPLEX)
 │   └── utils/         ← logger.js, time.js
 ├── public/            ← Client-facing static files
 │   └── dashboard.html ← Lead Dashboard UI
