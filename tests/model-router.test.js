@@ -18,19 +18,19 @@ beforeEach(() => {
 describe('classifyMessage — Layer 1: phase check', () => {
     it('returns COMPLEX for PAYMENT phase regardless of message', async () => {
         const result = await classifyMessage('hola', 'PAYMENT');
-        expect(result).toBe('COMPLEX');
+        expect(result).toEqual({ route: 'COMPLEX', layer: 'phase' });
         expect(mockCreate).not.toHaveBeenCalled();
     });
 
     it('returns COMPLEX for CLOSING phase regardless of message', async () => {
         const result = await classifyMessage('ok', 'CLOSING');
-        expect(result).toBe('COMPLEX');
+        expect(result).toEqual({ route: 'COMPLEX', layer: 'phase' });
         expect(mockCreate).not.toHaveBeenCalled();
     });
 
     it('returns COMPLEX for HOOK phase with positive response', async () => {
         const result = await classifyMessage('sí quiero agendar', 'HOOK');
-        expect(result).toBe('COMPLEX');
+        expect(result).toEqual({ route: 'COMPLEX', layer: 'phase' });
         expect(mockCreate).not.toHaveBeenCalled();
     });
 
@@ -41,7 +41,7 @@ describe('classifyMessage — Layer 1: phase check', () => {
 
         const result = await classifyMessage('no gracias', 'HOOK');
 
-        expect(result).toBe('SIMPLE');
+        expect(result).toEqual({ route: 'SIMPLE', layer: 'llm' });
         expect(mockCreate).toHaveBeenCalledOnce();
     });
 });
@@ -49,19 +49,19 @@ describe('classifyMessage — Layer 1: phase check', () => {
 describe('classifyMessage — Layer 2: keyword scan', () => {
     it('returns COMPLEX when message contains "duele"', async () => {
         const result = await classifyMessage('me duele una muela', 'EXTRACTION');
-        expect(result).toBe('COMPLEX');
+        expect(result).toEqual({ route: 'COMPLEX', layer: 'keyword' });
         expect(mockCreate).not.toHaveBeenCalled();
     });
 
     it('returns COMPLEX when message contains "precio"', async () => {
         const result = await classifyMessage('cuánto cuesta el blanqueamiento', 'EXTRACTION');
-        expect(result).toBe('COMPLEX');
+        expect(result).toEqual({ route: 'COMPLEX', layer: 'keyword' });
         expect(mockCreate).not.toHaveBeenCalled();
     });
 
     it('returns COMPLEX when message contains "no puedo"', async () => {
         const result = await classifyMessage('no puedo ir esta semana', 'EXTRACTION');
-        expect(result).toBe('COMPLEX');
+        expect(result).toEqual({ route: 'COMPLEX', layer: 'keyword' });
         expect(mockCreate).not.toHaveBeenCalled();
     });
 });
@@ -72,7 +72,7 @@ describe('classifyMessage — Layer 3: length heuristic', () => {
         expect(longText.length).toBeGreaterThan(120);
 
         const result = await classifyMessage(longText, 'EXTRACTION');
-        expect(result).toBe('COMPLEX');
+        expect(result).toEqual({ route: 'COMPLEX', layer: 'length' });
         expect(mockCreate).not.toHaveBeenCalled();
     });
 });
@@ -85,7 +85,7 @@ describe('classifyMessage — Layer 4: LLM-as-judge', () => {
 
         const result = await classifyMessage('Hola, ¿cuándo abren?', 'EXTRACTION');
 
-        expect(result).toBe('SIMPLE');
+        expect(result).toEqual({ route: 'SIMPLE', layer: 'llm' });
         expect(mockCreate).toHaveBeenCalledOnce();
     });
 
@@ -95,11 +95,11 @@ describe('classifyMessage — Layer 4: LLM-as-judge', () => {
         });
 
         const result = await classifyMessage(
-            'Quisiera información sobre los diferentes tratamientos estéticos que ofrecen y cuál me recomendarían para mejorar mi sonrisa',
+            '¿Qué tratamiento me recomiendan para la sonrisa?',
             'EXTRACTION'
         );
 
-        expect(result).toBe('COMPLEX');
+        expect(result).toEqual({ route: 'COMPLEX', layer: 'llm' });
     });
 
     it('falls back to SIMPLE when the API returns invalid JSON', async () => {
@@ -109,7 +109,7 @@ describe('classifyMessage — Layer 4: LLM-as-judge', () => {
 
         const result = await classifyMessage('Hola', 'EXTRACTION');
 
-        expect(result).toBe('SIMPLE');
+        expect(result).toEqual({ route: 'SIMPLE', layer: 'llm' });
     });
 
     it('falls back to SIMPLE when the API throws', async () => {
@@ -117,7 +117,7 @@ describe('classifyMessage — Layer 4: LLM-as-judge', () => {
 
         const result = await classifyMessage('Hola', 'EXTRACTION');
 
-        expect(result).toBe('SIMPLE');
+        expect(result).toEqual({ route: 'SIMPLE', layer: 'llm' });
     });
 });
 
@@ -131,6 +131,7 @@ describe('routeMessage', () => {
 
         expect(config).toEqual({
             route: 'SIMPLE',
+            layer: 'llm',
             model: MODEL_SIMPLE,
             maxTokens: TOKENS_SIMPLE,
         });
@@ -141,6 +142,7 @@ describe('routeMessage', () => {
 
         expect(config).toEqual({
             route: 'COMPLEX',
+            layer: 'phase',
             model: MODEL_COMPLEX,
             maxTokens: TOKENS_COMPLEX,
         });
@@ -152,6 +154,7 @@ describe('routeMessage', () => {
 
         expect(config).toEqual({
             route: 'COMPLEX',
+            layer: 'keyword',
             model: MODEL_COMPLEX,
             maxTokens: TOKENS_COMPLEX,
         });

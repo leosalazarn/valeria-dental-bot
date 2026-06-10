@@ -61,38 +61,39 @@ export async function classifyMessage(userMessage, phase = 'START', session = {}
     // Layer 1 — Phase check (free, deterministic)
     if (phase === 'PAYMENT' || phase === 'CLOSING') {
         log.info('ROUTE', { phone, phase, layer: 'phase', route: 'COMPLEX' });
-        return 'COMPLEX';
+        return { route: 'COMPLEX', layer: 'phase' };
     }
 
     if (phase === 'HOOK' && isPositive(userMessage)) {
         log.info('ROUTE', { phone, phase, layer: 'phase', route: 'COMPLEX' });
-        return 'COMPLEX';
+        return { route: 'COMPLEX', layer: 'phase' };
     }
 
     // Layer 2 — Keyword scan (free)
     if (findComplexSignal(userMessage)) {
         log.info('ROUTE', { phone, phase, layer: 'keyword', route: 'COMPLEX' });
-        return 'COMPLEX';
+        return { route: 'COMPLEX', layer: 'keyword' };
     }
 
     // Layer 3 — Length heuristic (free)
     if (userMessage.length > CLASSIFIER_LENGTH_THRESHOLD) {
         log.info('ROUTE', { phone, phase, layer: 'length', route: 'COMPLEX' });
-        return 'COMPLEX';
+        return { route: 'COMPLEX', layer: 'length' };
     }
 
     // Layer 4 — LLM-as-judge (only for remaining ambiguous)
     const llmRoute = await classifyWithLLM(userMessage);
     log.info('ROUTE', { phone, phase, layer: 'llm', route: llmRoute });
-    return llmRoute;
+    return { route: llmRoute, layer: 'llm' };
 }
 
 export async function routeMessage(userMessage, phase = 'START', session = {}) {
-    const route = await classifyMessage(userMessage, phase, session);
+    const { route, layer } = await classifyMessage(userMessage, phase, session);
 
     if (route === 'COMPLEX') {
         return {
             route: 'COMPLEX',
+            layer,
             model: MODEL_COMPLEX,
             maxTokens: TOKENS_COMPLEX,
         };
@@ -100,6 +101,7 @@ export async function routeMessage(userMessage, phase = 'START', session = {}) {
 
     return {
         route: 'SIMPLE',
+        layer,
         model: MODEL_SIMPLE,
         maxTokens: TOKENS_SIMPLE,
     };

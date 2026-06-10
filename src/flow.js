@@ -7,6 +7,7 @@ import {
     clearReengagementTimer,
     recordPhase,
     recordFirstResponse,
+    recordRouting,
 } from './session.js';
 import {buildSystemPrompt, buildCurrentPatientPrompt} from './prompt.js';
 import {classifyMessage} from './classifier.js';
@@ -82,11 +83,14 @@ export async function processMessage(phone, text, chatType) {
         }
 
         // Route to appropriate model then call Claude
-        const {model, maxTokens} = await routeMessage(text, session.phase, session);
-        const aiResponse = await callValeria(session.history, systemPrompt, model, maxTokens);
+        const {model, maxTokens, route, layer} = await routeMessage(text, session.phase, session);
+        const {text: aiResponse, input_tokens, output_tokens} = await callValeria(session.history, systemPrompt, model, maxTokens);
 
         // Add AI response to history
         await addMessageToHistory(phone, 'assistant', aiResponse);
+
+        const modelKey = route === 'COMPLEX' ? 'sonnet' : 'haiku';
+        await recordRouting(phone, { layer, route, modelKey, input_tokens, output_tokens });
 
         // Extract intent and update CRM
         const intent = extractIntent(phone, aiResponse, session, classification);

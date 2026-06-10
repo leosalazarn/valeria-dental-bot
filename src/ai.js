@@ -22,7 +22,11 @@ export async function callValeria(history, systemPrompt, model = MODEL_SIMPLE, m
                 messages: history,
             });
 
-            return response.content[0].text;
+            return {
+                text: response.content[0].text,
+                input_tokens: response.usage.input_tokens,
+                output_tokens: response.usage.output_tokens,
+            };
 
         } catch (error) {
             lastError = error;

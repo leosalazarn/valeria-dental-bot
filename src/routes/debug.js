@@ -103,6 +103,41 @@ router.get('/metrics', auth, async (req, res) => {
         return acc;
     }, {});
 
+    // ── Router telemetry
+    const routerAgg = sessions.reduce((acc, s) => {
+        const r = s.metrics?.router;
+        if (!r) return acc;
+        for (const [layer, count] of Object.entries(r.by_layer || {})) {
+            acc.by_layer[layer] = (acc.by_layer[layer] || 0) + count;
+        }
+        for (const [model, count] of Object.entries(r.by_model || {})) {
+            acc.by_model[model] = (acc.by_model[model] || 0) + count;
+        }
+        for (const [key, val] of Object.entries(r.tokens || {})) {
+            acc.tokens[key] = (acc.tokens[key] || 0) + val;
+        }
+        acc.total_calls += r.total_calls || 0;
+        if (r.last_model) {
+            acc.last_model_counts[r.last_model] = (acc.last_model_counts[r.last_model] || 0) + 1;
+        }
+        return acc;
+    }, { by_layer: {}, by_model: {}, tokens: {}, total_calls: 0, last_model_counts: {} });
+
+    const totalRouted = routerAgg.total_calls;
+    const llmCalls = routerAgg.by_layer.llm || 0;
+    const haikuCalls = routerAgg.by_model.haiku || 0;
+    const sonnetCalls = routerAgg.by_model.sonnet || 0;
+    const haikuInput = routerAgg.tokens.haiku_input || 0;
+    const haikuOutput = routerAgg.tokens.haiku_output || 0;
+    const sonnetInput = routerAgg.tokens.sonnet_input || 0;
+    const sonnetOutput = routerAgg.tokens.sonnet_output || 0;
+
+    // Rough cost: Sonnet $3/M in, $15/M out; Haiku $0.25/M in, $1.25/M out
+    const currentCost = (sonnetInput / 1e6 * 3) + (sonnetOutput / 1e6 * 15)
+        + (haikuInput / 1e6 * 0.25) + (haikuOutput / 1e6 * 1.25);
+    const allSonnetCost = ((sonnetInput + haikuInput) / 1e6 * 3)
+        + ((sonnetOutput + haikuOutput) / 1e6 * 15);
+
     res.json({
         generated_at: formatColombiaTime(),
         total_sessions: total,
@@ -123,6 +158,26 @@ router.get('/metrics', auth, async (req, res) => {
             recovery_rate: reengagementSent > 0
                 ? `${((reengagementRecovered / reengagementSent) * 100).toFixed(1)}%`
                 : '0%',
+        },
+        router: {
+            total_calls: totalRouted,
+            by_layer: routerAgg.by_layer,
+            by_model: routerAgg.by_model,
+            llm_percent: totalRouted > 0 ? `${((llmCalls / totalRouted) * 100).toFixed(1)}%` : '0%',
+            sonnet_percent: totalRouted > 0 ? `${((sonnetCalls / totalRouted) * 100).toFixed(1)}%` : '0%',
+            haiku_percent: totalRouted > 0 ? `${((haikuCalls / totalRouted) * 100).toFixed(1)}%` : '0%',
+            last_session_model: routerAgg.last_model_counts,
+            total_tokens: {
+                haiku_input: haikuInput,
+                haiku_output: haikuOutput,
+                sonnet_input: sonnetInput,
+                sonnet_output: sonnetOutput,
+            },
+            estimated_cost_usd: {
+                current: parseFloat(currentCost.toFixed(4)),
+                all_sonnet_baseline: parseFloat(allSonnetCost.toFixed(4)),
+                savings: parseFloat((allSonnetCost - currentCost).toFixed(4)),
+            },
         },
         by_source: bySource,
     });

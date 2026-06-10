@@ -177,6 +177,32 @@ export async function recordFirstResponse(phone) {
     await saveSessionToDB(phone, session);
 }
 
+// Record router telemetry for this interaction
+export async function recordRouting(phone, { layer, route, modelKey, input_tokens, output_tokens }) {
+    const session = await getSession(phone);
+    if (!session?.metrics) return;
+
+    if (!session.metrics.router) {
+        session.metrics.router = {
+            by_layer: { phase: 0, keyword: 0, length: 0, llm: 0 },
+            by_model: { haiku: 0, sonnet: 0 },
+            tokens: { haiku_input: 0, haiku_output: 0, sonnet_input: 0, sonnet_output: 0 },
+            last_model: null,
+            total_calls: 0,
+        };
+    }
+
+    const r = session.metrics.router;
+    r.by_layer[layer] += 1;
+    r.by_model[modelKey] += 1;
+    r.tokens[`${modelKey}_input`] += input_tokens || 0;
+    r.tokens[`${modelKey}_output`] += output_tokens || 0;
+    r.last_model = modelKey;
+    r.total_calls += 1;
+
+    await saveSessionToDB(phone, session);
+}
+
 // Return all persistent sessions from DB (for metrics endpoint)
 export async function getAllSessions() {
     try {

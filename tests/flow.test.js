@@ -18,7 +18,7 @@ vi.mock('@supabase/supabase-js', () => ({
 }));
 
 vi.mock('../src/ai.js', () => ({
-    callValeria: vi.fn().mockResolvedValue('Hola! ¿Cómo te llamas?\nNAME: test'),
+    callValeria: vi.fn().mockResolvedValue({ text: 'Hola! ¿Cómo te llamas?\nNAME: test', input_tokens: 50, output_tokens: 100 }),
 }));
 
 vi.mock('../src/whatsapp.js', () => ({
@@ -111,7 +111,7 @@ describe('processMessage — EXTRACTION phase (warm lead)', () => {
 
     it('strips signals before sending to patient', async () => {
         const p = phone('f-05');
-        callValeria.mockResolvedValueOnce('¿Cómo te llamas?\nNAME: Sofía\nGOAL: blanqueamiento');
+        callValeria.mockResolvedValueOnce({ text: '¿Cómo te llamas?\nNAME: Sofía\nGOAL: blanqueamiento', input_tokens: 50, output_tokens: 100 });
         await processMessage(p, 'Quiero información', 'individual');
         const sentText = vi.mocked(sendMessage).mock.calls[0][1];
         expect(sentText).not.toContain('NAME:');
@@ -169,7 +169,7 @@ describe('processMessage — DATA_CAPTURE phase', () => {
 
     it('does NOT trigger DATA_CAPTURE on negative/neutral response', async () => {
         const p = phone('f-10');
-        callValeria.mockResolvedValueOnce('Entiendo, sin problema. ¿Hay algo más?');
+        callValeria.mockResolvedValueOnce({ text: 'Entiendo, sin problema. ¿Hay algo más?', input_tokens: 50, output_tokens: 100 });
         await updateSession(p, { name: 'Tania', aesthetic_goal: 'blanqueamiento', phase: 'HOOK', source: 'DIRECT' });
         await processMessage(p, 'Ahora no puedo', 'individual');
         expect(callValeria).toHaveBeenCalledOnce();
