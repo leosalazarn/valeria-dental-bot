@@ -1,7 +1,7 @@
 # CLAUDE.md — Valeria WhatsApp Bot · Dra. Yuri Quintero
 
 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
-![Tests](https://img.shields.io/badge/tests-108%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-117%20passed-brightgreen)
 ![Status](https://img.shields.io/badge/status-phase--3--conversion-brightgreen)
 
 > This file transfers the full project context to an AI assistant.  
@@ -105,6 +105,7 @@ MODEL_COMPLEX = 'claude-sonnet-4-6'         // COMPLEX messages (objections, mul
 TOKENS_SIMPLE = 400                         // response token limit for SIMPLE
 TOKENS_COMPLEX = 700                        // response token limit for COMPLEX
 CLASSIFIER_MAX_TOKENS = 50                  // classification token limit (model-router)
+CLASSIFIER_LENGTH_THRESHOLD = 120           // char threshold for length heuristic
 CONSULTATION_PRICE = ...              // set in config.js
 BOOK_PRICE = ...                      // set in config.js
 MIN_RANGE_PRICE = 2_700_000          // lowest treatment range (COP)
@@ -156,6 +157,10 @@ Multi-layer classification: **phase → keyword → length → LLM-as-judge**:
 | COMPLEX | `claude-sonnet-4-6`         | 700        | Objections, multi-intent, deep triage   |
 
 Fallback: on API error or invalid JSON → SIMPLE (Haiku). 15 tests.
+
+**Telemetry:** Each routing decision is persisted to `session.metrics.router` — tracks `by_layer`, `by_model`,
+accumulated tokens (`haiku_input`, `haiku_output`, `sonnet_input`, `sonnet_output`), and `last_model` per session.
+Aggregated in `GET /metrics` as `router` section with cost estimates vs. all-Sonnet baseline.
 
 ---
 

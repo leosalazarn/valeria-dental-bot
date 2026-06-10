@@ -4,7 +4,7 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 
 ## 📊 Current Status: **Phase 3 — Conversion**
 
-**Last Update:** June 6, 2026,
+**Last Update:** June 10, 2026,
 **Overall Progress:** ~50% to Production Launch
 
 ---
@@ -49,6 +49,10 @@ This document tracks the evolution of Valeria, the AI Assistant for **Dra. Yuri 
 - [x] **Model Router (model-router.js):** Multi-layer classification (phase → keyword → length → LLM-as-judge). Free
   layers catch ~70% of cases without API cost. SIMPLE → Haiku (400 tokens), COMPLEX → Sonnet (700 tokens). Fallback to
   SIMPLE on API error or invalid JSON. 15 tests. All routing constants centralized in `config.js`.
+- [x] **Router Telemetry:** Per-session tracking of layer distribution, model usage, and accumulated tokens.
+  Stored in `session.metrics.router` (Supabase JSONB). Aggregated and exposed in `GET /metrics` with cost
+  estimates vs. all-Sonnet baseline. `callValeria` now returns `{ text, input_tokens, output_tokens }`.
+  `classifyMessage` returns `{ route, layer }` per-layer identification. `recordRouting()` persist function.
 - **[CRITICAL] Price Hallucination Regression:** When a patient asks about a specific treatment
   (e.g. "lentes cerámicos"), Valeria incorrectly presents the general price range as if it were
   specific to that treatment (e.g. "lentes cerámicos go from $2.7M to $24M"). Fix: patch

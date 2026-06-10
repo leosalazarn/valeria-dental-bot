@@ -7,6 +7,7 @@
 | 1.0     | 2026-05-12 | Leonardo Salazar | Initial version                                                    |
 | 1.1     | 2026-06-06 | Leonardo Salazar | Added model-router, mermaid diagram                                |
 | 1.2     | 2026-06-08 | Leonardo Salazar | Multi-layer routing (phase/keyword/length/LLM), wired into flow.js |
+| 1.3     | 2026-06-10 | Leonardo Salazar | Router telemetry instrumentation — layer/token/ cost per session   |
 
 ---
 
@@ -85,6 +86,7 @@ flowchart TD
 | AI signal extraction                      | Claude appends NAME:/GOAL: — avoids separate NER model                                                                                                                   |
 | 3-line message limit                      | WhatsApp best practice for engagement rates                                                                                                                              |
 | Multi-layer routing                       | Phase override (PAYMENT/CLOSING→COMPLEX) → keyword scan → length heuristic (>120 chars) → LLM-as-judge — saves Sonnet tokens on FAQs, dedicates depth to complex queries |
+| Router telemetry                          | Per-session `session.metrics.router` tracks by_layer, by_model, accumulated tokens — enables data-driven threshold calibration after 2-3 weeks of production traffic     |
 | Spanish classifier prompt                 | Classification system prompt in Spanish to match bot language — strict JSON-only instruction to avoid parsing errors                                                     |
 | Fail-safe fallback                        | Any API error or invalid JSON silently defaults to SIMPLE (Haiku) — protects uptime and cost                                                                             |
 
@@ -129,28 +131,28 @@ See [PROJECT_FILES.md](../PROJECT_FILES.md) for detailed module descriptions.
 
 ### 4.2 Conversations Table
 
-| Column  | Type    | Notes                                                        |
-|---------|---------|--------------------------------------------------------------|
-| phone   | TEXT PK | Foreign key-like relationship                                |
-| phase   | TEXT    | START → EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING |
-| history | JSONB   | Sliding window of 20 messages                                |
-| metrics | JSONB   | Timestamps, response times, re-engagement tracking           |
+| Column  | Type    | Notes                                                                                                         |
+|---------|---------|---------------------------------------------------------------------------------------------------------------|
+| phone   | TEXT PK | Foreign key-like relationship                                                                                 |
+| phase   | TEXT    | START → EXTRACTION → HOOK → DATA_CAPTURE → PAYMENT → CLOSING                                                  |
+| history | JSONB   | Sliding window of 20 messages                                                                                 |
+| metrics | JSONB   | Timestamps, response times, re-engagement tracking, router telemetry (by_layer, by_model, tokens, last_model) |
 
 ---
 
 ## 5. API Design
 
-| Method | Route                      | Auth                       | Purpose                                |
-|--------|----------------------------|----------------------------|----------------------------------------|
-| GET    | `/webhook`                 | None                       | Meta webhook verification              |
-| POST   | `/webhook`                 | Meta signature             | Receive WhatsApp messages              |
-| GET    | `/debug/`                  | None                       | Health check                           |
-| GET    | `/debug/leads`             | session OR x-api-key       | All patients                           |
-| GET    | `/debug/stats`             | session OR x-api-key       | Summary by source/status/intent        |
-| GET    | `/debug/metrics`           | session OR x-api-key       | Funnel analytics                       |
-| GET    | `/dashboard/csrf-token`    | None (CSRF token endpoint) | Returns CSRF token for dashboard POST  |
-| POST   | `/dashboard/login`         | x-csrf-token               | Authenticate via API key, sets session |
-| GET    | `/dashboard/check-session` | session cookie             | Check if session is authenticated      |
+| Method | Route                      | Auth                       | Purpose                                              |
+|--------|----------------------------|----------------------------|------------------------------------------------------|
+| GET    | `/webhook`                 | None                       | Meta webhook verification                            |
+| POST   | `/webhook`                 | Meta signature             | Receive WhatsApp messages                            |
+| GET    | `/debug/`                  | None                       | Health check                                         |
+| GET    | `/debug/leads`             | session OR x-api-key       | All patients                                         |
+| GET    | `/debug/stats`             | session OR x-api-key       | Summary by source/status/intent                      |
+| GET    | `/debug/metrics`           | session OR x-api-key       | Funnel analytics + router telemetry + cost estimates |
+| GET    | `/dashboard/csrf-token`    | None (CSRF token endpoint) | Returns CSRF token for dashboard POST                |
+| POST   | `/dashboard/login`         | x-csrf-token               | Authenticate via API key, sets session               |
+| GET    | `/dashboard/check-session` | session cookie             | Check if session is authenticated                    |
 
 ---
 

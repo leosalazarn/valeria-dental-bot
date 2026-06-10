@@ -6,7 +6,7 @@
 
 **Project:** Valeria — AI Assistant · Dra. Yuri Quintero's clinic
 **Repository:** [github.com/leosalazarn/valeria-dental-bot](https://github.com/leosalazarn/valeria-dental-bot)  
-**Last updated:** June 8, 2026
+**Last updated:** June 10, 2026
 
 → See [README.md](../README.md) for setup and deployment · [SECURITY.md](../docs/SECURITY.md) for data
 policy · [CLAUDE.md](../CLAUDE.md) for full project context
@@ -99,26 +99,26 @@ valeria-dental-bot/
 
 ## Source Modules
 
-| File                    | Responsibility                                                                                     |
-|-------------------------|----------------------------------------------------------------------------------------------------|
-| `server.js`             | Express entry point — mounts routes, session middleware, dashboard login endpoints, starts server  |
-| `config.js`             | Env vars, business constants, all user-facing message templates                                    |
-| `crm.js`                | Supabase patient store — persistent lead data (appointment handoff to Gestión Odontológica)        |
-| `session.js`            | Supabase conversation store — persistent history & phase state                                     |
-| `classifier.js`         | 4-rule classifier: group → IN_TREATMENT → active session → new contact                             |
-| `prompt.js`             | Builds dynamic system prompt with Spanish security guardrails                                      |
-| `ai.js`                 | Claude API wrapper — 3-retry exponential backoff (2s, 4s)                                          |
-| `whatsapp.js`           | Sends messages via Meta WhatsApp Cloud API                                                         |
-| `intent.js`             | Parses `NAME:` / `GOAL:` / `EXTRACTED:` signals from AI responses                                  |
-| `flow.js`               | Full pipeline: classify → conversion flow → AI → strip signals → send                              |
-| `routes/webhook.js`     | Meta verification + inbound messages + 5s debounce + 10-msg anti-flood                             |
-| `guardrails/output.js`  | Bank data leak detection — blocks account numbers, Nequi, Davivienda, CC outside PAYMENT phase     |
-| `validators/index.js`   | Input sanitization + 10-pattern injection detection (ignore/forget, system prompt, DAN, jailbreak) |
-| `public/dashboard.html` | Lead Dashboard UI — single-file HTML, Tailwind CSS, Chart.js, CSP, ES/EN locales, session auth     |
-| `routes/debug.js`       | `/leads`, `/stats`, `/metrics` — protected by session OR `x-api-key`                               |
-| `model-router.js`       | Multi-layer classifier: phase → keyword → length → LLM-as-judge — SIMPLE/COMPLEX, fallback SIMPLE  |
-| `utils/logger.js`       | Emoji-prefixed console logging — no sensitive data in output                                       |
-| `utils/time.js`         | Colombia timezone helper (`America/Bogota`)                                                        |
+| File                    | Responsibility                                                                                                                         |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `server.js`             | Express entry point — mounts routes, session middleware, dashboard login endpoints, starts server                                      |
+| `config.js`             | Env vars, business constants, all user-facing message templates                                                                        |
+| `crm.js`                | Supabase patient store — persistent lead data (appointment handoff to Gestión Odontológica)                                            |
+| `session.js`            | Supabase conversation store — persistent history & phase state                                                                         |
+| `classifier.js`         | 4-rule classifier: group → IN_TREATMENT → active session → new contact                                                                 |
+| `prompt.js`             | Builds dynamic system prompt with Spanish security guardrails                                                                          |
+| `ai.js`                 | Claude API wrapper — 3-retry exponential backoff (2s, 4s) — returns `{ text, input_tokens, output_tokens }`                            |
+| `whatsapp.js`           | Sends messages via Meta WhatsApp Cloud API                                                                                             |
+| `intent.js`             | Parses `NAME:` / `GOAL:` / `EXTRACTED:` signals from AI responses                                                                      |
+| `flow.js`               | Full pipeline: classify → conversion flow → AI → strip signals → send                                                                  |
+| `routes/webhook.js`     | Meta verification + inbound messages + 5s debounce + 10-msg anti-flood                                                                 |
+| `guardrails/output.js`  | Bank data leak detection — blocks account numbers, Nequi, Davivienda, CC outside PAYMENT phase                                         |
+| `validators/index.js`   | Input sanitization + 10-pattern injection detection (ignore/forget, system prompt, DAN, jailbreak)                                     |
+| `public/dashboard.html` | Lead Dashboard UI — single-file HTML, Tailwind CSS, Chart.js, CSP, ES/EN locales, session auth                                         |
+| `routes/debug.js`       | `/leads`, `/stats`, `/metrics` (funnel + router telemetry + cost estimates) — protected by session OR `x-api-key`                      |
+| `model-router.js`       | Multi-layer classifier: phase → keyword → length → LLM-as-judge; returns `{ route, layer }`; telemetry persisted via `recordRouting()` |
+| `utils/logger.js`       | Emoji-prefixed console logging — no sensitive data in output                                                                           |
+| `utils/time.js`         | Colombia timezone helper (`America/Bogota`)                                                                                            |
 
 ---
 

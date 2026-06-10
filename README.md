@@ -47,6 +47,7 @@ supplier detection.
 | Gestión Odontológica handoff | Appointment data captured by Valeria is handed off to clinic staff for scheduling in the existing practice management system |
 | Retry logic                  | Exponential backoff on Claude API errors (529/503/500)                                                                       |
 | Multi-layer model routing    | Phase override → keyword scan → length heuristic → LLM-as-judge — routes FAQs to Haiku (fast/cheap), depth to Sonnet         |
+| Router telemetry             | Per-session layer/model/token tracking persisted in Supabase; cost estimates in `/metrics`                                   |
 | Input injection defense      | 10 regex patterns detect prompt injection before reaching the LLM                                                            |
 | Output guardrails            | Bank data leak detection — blocks account numbers outside PAYMENT phase                                                      |
 
@@ -66,6 +67,7 @@ flowchart TD
     Haiku --> Express
     Sonnet --> Express
     Express -- Signal Extraction --> DB[(Supabase)]
+    Router -- Telemetry --> DB
     Express -- Clean Message --> Meta
     Meta -- Response --> User
 ```
@@ -74,7 +76,8 @@ flowchart TD
 
 - **Volume:** 200+ qualified patient conversations handled autonomously.
 - **Conversion:** 40% conversion rate from first contact to data capture/deposit phase.
-- **Tracking:** Real-time funnel analysis, drop-off rates, and response times available via the `/metrics` endpoint.
+- **Tracking:** Real-time funnel analysis, drop-off rates, response times, and model-router telemetry (layer
+  distribution, cost estimates) available via the `/metrics` endpoint.
 
 ---
 
@@ -107,7 +110,7 @@ valeria-dental-bot/
 ├── public/            ← Client-facing static files
 │   └── dashboard.html ← Lead Dashboard UI
 ├── assets/            ← Static assets (logo-dra.png)
-├── tests/             ← Vitest test suites (10 suites, 108 tests)
+├── tests/             ← Vitest test suites (10 suites, 117 tests)
 └── *.md               ← Documentation (README, CLAUDE, SECURITY, PROJECT_FILES)
 ```
 
